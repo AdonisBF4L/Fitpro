@@ -529,7 +529,7 @@ function switchTab(n) {
   document.querySelectorAll('#page-detail .tab-content').forEach(function(t){t.classList.remove('active');});
   var m={profil:0,antrenament:1,dieta:2,masuratori:3,progres:4,note:5};
   document.querySelectorAll('#page-detail .tab')[m[n]].classList.add('active');
-  document.getElementById('tab-'+n).classList.add('active');
+  document.getElementById('tab-'+n).classList.add('active'); 
   renderTab(n);
 }
 
