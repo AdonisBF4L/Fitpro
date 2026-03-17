@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitPro</title>
+<script>
+// Incarca Supabase
+(function(){
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js';
+  document.head.appendChild(s);
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--card:#16161f;--border:#252535;--accent:#c8f135;--accent2:#35f1c8;--accent3:#f13565;--text:#e8e8f0;--muted:#6b6b85;--warning:#f1a535;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;}
+.loading-logo{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--accent);letter-spacing:4px;}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#auth-screen{display:none;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.auth-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:420px;}
+.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:3px;color:var(--accent);text-align:center;}
+.auth-sub{font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:28px;}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;}
+.auth-tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;}
+.auth-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.auth-err{background:rgba(241,53,101,.1);border:1px solid rgba(241,53,101,.3);border-radius:8px;padding:10px;font-size:13px;color:var(--accent3);margin-bottom:14px;display:none;}
+.auth-ok{background:rgba(200,241,53,.1);border:1px solid rgba(200,241,53,.3);border-radius:8px;padding:10px;font-size:13px;color:var(--accent);margin-bottom:14px;display:none;}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.fg label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.fg input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
+.fg input:focus{border-color:var(--accent);}
+.btn{padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+.btn-primary{background:var(--accent);color:#0a0a0f;width:100%;}
+.btn-primary:hover{background:#d4ff3d;}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+#app{display:none;}
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;}
+.logo{padding:24px;border-bottom:1px solid var(--border);}
+.logo-text{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--accent);}
+.logo-email{font-size:11px;color:var(--accent2);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.nav{flex:1;padding:16px 0;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--muted);font-size:14px;font-weight:500;transition:all .2s;border-left:3px solid transparent;}
+.nav-item:hover{color:var(--text);background:rgba(200,241,53,.05);}
+.nav-item.active{color:var(--accent);background:rgba(200,241,53,.08);border-left-color:var(--accent);}
+.sidebar-bottom{padding:16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;}
+.btn-sec{background:var(--card);color:var(--text);border:1px solid var(--border);padding:9px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+.btn-sec:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{background:transparent;color:var(--accent3);border:1px solid var(--accent3);padding:8px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+.btn-danger:hover{background:var(--accent3);color:#fff;}
+.main{margin-left:240px;flex:1;padding:28px;}
+.page{display:none;}.page.active{display:block;}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.pt{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;}
+.pt span{color:var(--accent);}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);}
+.stat-card.c2::before{background:var(--accent2);}
+.stat-card.c3::before{background:var(--accent3);}
+.stat-card.cw::before{background:var(--warning);}
+.stat-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:32px;}
+.tw{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;overflow-x:auto;}
+.th2{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.search{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
+.search:focus{border-color:var(--accent);}
+table{width:100%;border-collapse:collapse;}
+th{padding:11px 14px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+td{padding:12px 14px;border-bottom:1px solid rgba(37,37,53,.5);font-size:13px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(200,241,53,.02);}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.ba{background:rgba(200,241,53,.15);color:var(--accent);}
+.be{background:rgba(241,165,53,.15);color:var(--warning);}
+.bx{background:rgba(241,53,101,.15);color:var(--accent3);}
+.dok{color:var(--accent);font-family:monospace;font-size:12px;font-weight:700;}
+.dwn{color:var(--warning);font-family:monospace;font-size:12px;font-weight:700;}
+.dbd{color:var(--accent3);font-family:monospace;font-size:12px;font-weight:700;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:680px;padding:28px;position:relative;margin:auto;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:20px;}
+.modal-close{position:absolute;top:18px;right:18px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;width:30px;height:30px;border-radius:6px;}
+.modal-close:hover{background:var(--border);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.form-group input,.form-group select,.form-group textarea{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
+.form-group textarea{resize:vertical;min-height:90px;}
+.form-group select option{background:var(--card);}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto;}
+.tab{padding:9px 16px;cursor:pointer;font-size:13px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-content{display:none;}.tab-content.active{display:block;}
+.ds{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.ds-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.ir{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(37,37,53,.5);}
+.ir:last-child{border-bottom:none;}
+.ik{font-size:13px;color:var(--muted);}
+.iv{font-size:13px;font-weight:500;}
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+.ml{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.mv{font-family:monospace;font-size:20px;font-weight:700;color:var(--accent);}
+.mu{font-size:10px;color:var(--muted);}
+.pb{background:var(--border);border-radius:4px;height:5px;overflow:hidden;margin-top:4px;}
+.pf{height:100%;border-radius:4px;background:var(--accent);}
+.pf.pw{background:var(--warning);}
+.pf.px{background:var(--accent3);}
+.back-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:6px;}
+.back-btn:hover{color:var(--accent);}
+.empty{text-align:center;padding:40px;color:var(--muted);}
+.ei{font-size:40px;margin-bottom:12px;}
+.notif{background:rgba(241,165,53,.1);border:1px solid rgba(241,165,53,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;display:flex;align-items:center;gap:10px;}
+.cal-day{background:var(--card);border:1px solid var(--border);border-radius:10px;min-height:140px;overflow:hidden;}
+.cal-day.today{border-color:rgba(200,241,53,.4);}
+.cal-hdr{padding:8px;border-bottom:1px solid var(--border);text-align:center;cursor:pointer;}
+.cal-sc{margin:4px 6px;border-radius:6px;padding:5px 7px;cursor:pointer;}
+.btn-sm{padding:5px 11px!important;font-size:12px!important;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;padding:16px;}
+  .mobile-bar{display:flex!important;}
+  .stats-grid{grid-template-columns:1fr 1fr!important;}
+  .detail-grid{grid-template-columns:1fr!important;}
+  .form-grid{grid-template-columns:1fr!important;}
+  .form-group.full{grid-column:1!important;}
+  .ph{flex-direction:column;align-items:flex-start;gap:10px;}
+}
+.mobile-bar{display:none;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:99;}
+.hamburger{background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:98;}
+.overlay.open{display:block;}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="loading-logo">FITPRO</div><div class="spinner"></div></div>
+
+<div id="auth-screen" style="display:none;">
+  <div class="auth-box">
+    <div class="auth-logo">FITPRO</div>
+    <div class="auth-sub">Trainer Dashboard</div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login-btn" onclick="switchAuthTab('login')">Autentificare</div>
+      <div class="auth-tab" id="tab-reg-btn" onclick="switchAuthTab('register')">Cont nou</div>
+    </div>
+    <div class="auth-err" id="auth-err"></div>
+    <div class="auth-ok" id="auth-ok"></div>
+    <div id="login-form">
+      <div class="fg"><label>Email</label><input id="login-email" type="email" placeholder="email@example.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="fg"><label>Parolă</label><input id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn btn-primary" onclick="doLogin()" id="btn-login">Intră în cont</button>
+    </div>
+    <div id="reg-form" style="display:none;">
+      <div class="fg"><label>Numele tău</label><input id="reg-name" placeholder="Ion Popescu"></div>
+      <div class="fg"><label>Email</label><input id="reg-email" type="email" placeholder="email@example.com"></div>
+      <div class="fg"><label>Parolă (min 6 caractere)</label><input id="reg-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="doRegister()" id="btn-reg">Creează cont</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="mobile-bar">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);">FITPRO</span>
+    <div style="width:32px;"></div>
+  </div>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">
+        <div class="logo-text">FitPro</div>
+        <div class="logo-email" id="user-email"></div>
+      </div>
+      <nav class="nav">
+        <div class="nav-item active" onclick="showPage('dashboard');closeSidebar()"><span>📊</span> Dashboard</div>
+        <div class="nav-item" onclick="showPage('clients');closeSidebar()"><span>👥</span> Clienți</div>
+        <div class="nav-item" onclick="showPage('expiring');closeSidebar()"><span>⏰</span> Abonamente</div>
+        <div class="nav-item" onclick="showPage('calendar');closeSidebar()"><span>📅</span> Calendar</div>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="btn-sec" onclick="openModal('modal-backup')">💾 Backup</button>
+        <button class="btn-danger" onclick="doLogout()">🚪 Deconectare</button>
+      </div>
+    </aside>
+    <main class="main">
+
+      <div id="page-dashboard" class="page active">
+        <div class="ph"><div class="pt">BUNĂ ZIUA, <span>TRAINER</span> 💪</div></div>
+        <div id="notif-zone"></div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Total Clienți</div><div class="stat-value" id="s-total">0</div></div>
+          <div class="stat-card c2"><div class="stat-label">Activi</div><div class="stat-value" id="s-active">0</div></div>
+          <div class="stat-card cw"><div class="stat-label">Expiră 7 zile</div><div class="stat-value" id="s-exp">0</div></div>
+          <div class="stat-card c3"><div class="stat-label">Expirate</div><div class="stat-value" id="s-xp">0</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="tw"><div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">⚠️ Expiră curând</div><div id="d-expiring"></div></div>
+          <div class="tw"><div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">🆕 Adăugați recent</div><div id="d-recent"></div></div>
+        </div>
+      </div>
+
+      <div id="page-clients" class="page">
+        <div class="ph"><div class="pt">CLIENȚI</div><button class="btn btn-primary" style="width:auto;" onclick="openAddClient()">+ Adaugă</button></div>
+        <div class="tw">
+          <div class="th2"><input class="search" placeholder="🔍 Caută..." oninput="filterClients(this.value)"></div>
+          <table><thead><tr><th>Nume</th><th>Telefon</th><th>Obiectiv</th><th>Status</th><th>Zile</th><th>Acțiuni</th></tr></thead>
+          <tbody id="clients-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <div id="page-expiring" class="page">
+        <div class="ph"><div class="pt">ABONAMENTE</div></div>
+        <div class="tw"><table><thead><tr><th>Nume</th><th>Telefon</th><th>Start</th><th>Expirare</th><th>Status</th><th>Zile</th></tr></thead>
+        <tbody id="exp-tbody"></tbody></table></div>
+      </div>
+
+      <div id="page-calendar" class="page">
+        <div class="ph"><div class="pt">CALENDAR</div><button class="btn btn-primary" style="width:auto;" onclick="openAddSession(null)">+ Sesiune</button></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="btn-sec btn-sm" id="cv-week" onclick="setCalView('week')">Săpt.</button>
+          <button class="btn-sec btn-sm" id="cv-list" onclick="setCalView('list')">Listă</button>
+          <button class="btn-sec btn-sm" onclick="calNav(-1)">‹</button>
+          <span id="cal-label" style="font-family:'Bebas Neue',sans-serif;font-size:16px;min-width:160px;text-align:center;"></span>
+          <button class="btn-sec btn-sm" onclick="calNav(1)">›</button>
+          <button class="btn-sec btn-sm" onclick="calOffset=0;renderCalendar()">Azi</button>
+          <select id="cal-filter" onchange="renderCalendar()" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:13px;outline:none;"><option value="">Toți</option></select>
+        </div>
+        <div id="cal-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;"></div>
+        <div id="cal-week"></div>
+        <div id="cal-list" style="display:none;"></div>
+      </div>
+
+      <div id="page-detail" class="page">
+        <button class="back-btn" onclick="showPage('clients')">← Înapoi</button>
+        <div class="ph" style="margin-bottom:14px;">
+          <div class="pt" id="detail-name">CLIENT</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-sec btn-sm" onclick="openEditClient(currentClientId)">✏️ Editează</button>
+            <button class="btn-danger btn-sm" onclick="deleteCurrentClient()">🗑</button>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('profil')">👤 Profil</div>
+          <div class="tab" onclick="switchTab('antrenament')">🏋️ Antrenament</div>
+          <div class="tab" onclick="switchTab('dieta')">🥗 Dietă</div>
+          <div class="tab" onclick="switchTab('masuratori')">📏 Măsurători</div>
+          <div class="tab" onclick="switchTab('progres')">📈 Progres</div>
+          <div class="tab" onclick="switchTab('note')">📝 Note</div>
+        </div>
+        <div id="tab-profil" class="tab-content active"></div>
+        <div id="tab-antrenament" class="tab-content"></div>
+        <div id="tab-dieta" class="tab-content"></div>
+        <div id="tab-masuratori" class="tab-content"></div>
+        <div id="tab-progres" class="tab-content"></div>
+        <div id="tab-note" class="tab-content"></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- CLIENT MODAL -->
+<div class="modal-overlay" id="modal-client">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-client')">✕</button>
+    <div class="modal-title" id="mc-title">ADAUGĂ CLIENT</div>
+    <div class="tabs" style="margin-bottom:16px;">
+      <div class="tab active" onclick="switchMTab('info')">Info</div>
+      <div class="tab" onclick="switchMTab('workout')">Antrenament</div>
+      <div class="tab" onclick="switchMTab('diet')">Dietă</div>
+      <div class="tab" onclick="switchMTab('meas')">Măsurători</div>
+    </div>
+    <div id="mt-info" class="tab-content active">
+      <div class="form-grid">
+        <div class="form-group"><label>Nume *</label><input id="f-name"></div>
+        <div class="form-group"><label>Telefon</label><input id="f-phone"></div>
+        <div class="form-group"><label>Email</label><input id="f-email" type="email"></div>
+        <div class="form-group"><label>Vârstă</label><input id="f-age" type="number"></div>
+        <div class="form-group"><label>Gen</label><select id="f-gender"><option value="">—</option><option>Masculin</option><option>Feminin</option></select></div>
+        <div class="form-group"><label>Obiectiv</label><select id="f-goal"><option value="">—</option><option>Slăbit</option><option>Masă musculară</option><option>Tonifiere</option><option>Rezistență</option><option>Sănătate generală</option></select></div>
+        <div class="form-group"><label>Data start</label><input id="f-start" type="date"></div>
+        <div class="form-group"><label>Durata abonament</label><select id="f-duration"><option value="30">1 lună</option><option value="60">2 luni</option><option value="90">3 luni</option><option value="180">6 luni</option><option value="365">1 an</option></select></div>
+        <div class="form-group"><label>Nivel</label><select id="f-level"><option value="">—</option><option>Începător</option><option>Intermediar</option><option>Avansat</option></select></div>
+        <div class="form-group"><label>Frecvență zile/săpt</label><select id="f-freq"><option value="">—</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+        <div class="form-group full"><label>Afecțiuni</label><textarea id="f-conditions"></textarea></div>
+      </div>
+    </div>
+    <div id="mt-workout" class="tab-content">
+      <div class="form-group" style="margin-bottom:14px;"><label>Plan antrenament</label><textarea id="f-workout" style="min-height:180px;" placeholder="Zi 1 - Piept&#10;- Bench Press 4x10..."></textarea></div>
+      <div class="form-group"><label>Observații</label><textarea id="f-workout-notes"></textarea></div>
+    </div>
+    <div id="mt-diet" class="tab-content">
+      <div class="form-grid">
+        <div class="form-group"><label>Calorii (kcal)</label><input id="f-calories" type="number"></div>
+        <div class="form-group"><label>Proteină (g)</label><input id="f-protein" type="number"></div>
+        <div class="form-group"><label>Carbohidrați (g)</label><input id="f-carbs" type="number"></div>
+        <div class="form-group"><label>Grăsimi (g)</label><input id="f-fats" type="number"></div>
+        <div class="form-group full"><label>Plan alimentar</label><textarea id="f-diet" style="min-height:150px;"></textarea></div>
+        <div class="form-group full"><label>Alergii</label><textarea id="f-allergies"></textarea></div>
+      </div>
+    </div>
+    <div id="mt-meas" class="tab-content">
+      <div class="form-grid">
+        <div class="form-group"><label>Greutate (kg)</label><input id="f-weight" type="number" step="0.1"></div>
+        <div class="form-group"><label>Înălțime (cm)</label><input id="f-height" type="number"></div>
+        <div class="form-group"><label>Abdomen (cm)</label><input id="f-waist" type="number" step="0.1"></div>
+        <div class="form-group"><label>Piept (cm)</label><input id="f-chest" type="number" step="0.1"></div>
+        <div class="form-group"><label>Șolduri (cm)</label><input id="f-hips" type="number" step="0.1"></div>
+        <div class="form-group"><label>Coapsă (cm)</label><input id="f-thigh" type="number" step="0.1"></div>
+        <div class="form-group"><label>Braț drept (cm)</label><input id="f-arm" type="number" step="0.1"></div>
+        <div class="form-group"><label>% Grăsime</label><input id="f-bodyfat" type="number" step="0.1"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
+      <button class="btn-sec" onclick="closeModal('modal-client')">Anulează</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="saveClient()" id="btn-save-client">💾 Salvează</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESS MODAL -->
+<div class="modal-overlay" id="modal-progress">
+  <div class="modal" style="max-width:560px;">
+    <button class="modal-close" onclick="closeModal('modal-progress')">✕</button>
+    <div class="modal-title">ADAUGĂ PROGRES</div>
+    <div id="prog-hint" style="background:rgba(200,241,53,.07);border:1px solid rgba(200,241,53,.2);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--muted);display:none;">📌 <strong style="color:var(--accent);">Valori inițiale:</strong> <span id="prog-hint-text"></span></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Data</label><input id="p-date" type="date"></div>
+      <div class="form-group"><label>Greutate (kg)</label><input id="p-weight" type="number" step="0.1"></div>
+      <div class="form-group"><label>Abdomen (cm)</label><input id="p-waist" type="number" step="0.1"></div>
+      <div class="form-group"><label>Piept (cm)</label><input id="p-chest" type="number" step="0.1"></div>
+      <div class="form-group"><label>Șolduri (cm)</label><input id="p-hips" type="number" step="0.1"></div>
+      <div class="form-group"><label>Coapsă (cm)</label><input id="p-thigh" type="number" step="0.1"></div>
+      <div class="form-group"><label>Braț (cm)</label><input id="p-arm" type="number" step="0.1"></div>
+      <div class="form-group"><label>% Grăsime</label><input id="p-bodyfat" type="number" step="0.1"></div>
+      <div class="form-group full"><label>Notă</label><textarea id="p-note"></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn-sec" onclick="closeModal('modal-progress')">Anulează</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="saveProgress()" id="btn-save-prog">💾 Salvează</button>
+    </div>
+  </div>
+</div>
+
+<!-- SESSION MODAL -->
+<div class="modal-overlay" id="modal-session">
+  <div class="modal" style="max-width:500px;">
+    <button class="modal-close" onclick="closeModal('modal-session')">✕</button>
+    <div class="modal-title" id="ms-title">SESIUNE</div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Client *</label><select id="s-client"></select></div>
+      <div class="form-group"><label>Data</label><input id="s-date" type="date"></div>
+      <div class="form-group"><label>Ora</label><input id="s-time" type="time"></div>
+      <div class="form-group"><label>Durată (min)</label><input id="s-duration" type="number" value="60"></div>
+      <div class="form-group"><label>Tip</label><select id="s-type"><option value="">—</option><option>Forță</option><option>Cardio</option><option>HIIT</option><option>Mobilitate</option><option>Circuit</option><option>Evaluare</option><option>Recuperare</option></select></div>
+      <div class="form-group"><label>Status</label><select id="s-status"><option value="programat">📅 Programat</option><option value="realizat">✅ Realizat</option><option value="anulat">❌ Anulat</option></select></div>
+      <div class="form-group full"><label>Note</label><textarea id="s-notes"></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn-sec" onclick="closeModal('modal-session')">Anulează</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="saveSession()" id="btn-save-sess">💾 Salvează</button>
+    </div>
+  </div>
+</div>
+
+<!-- BACKUP MODAL -->
+<div class="modal-overlay" id="modal-backup">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeModal('modal-backup')">✕</button>
+    <div class="modal-title">💾 BACKUP</div>
+    <div class="ds" style="margin-bottom:14px;">
+      <div class="ds-title">📤 Export date</div>
+      <div id="backup-stats" style="display:flex;gap:8px;margin-bottom:12px;"></div>
+      <button class="btn btn-primary" onclick="exportData()">⬇️ Descarcă backup</button>
+    </div>
+    <div class="ds">
+      <div class="ds-title">📥 Import date</div>
+      <label style="cursor:pointer;text-transform:none;letter-spacing:0;">
+        <span class="btn-sec" style="display:flex;cursor:pointer;">📂 Alege fișier JSON</span>
+        <input type="file" accept=".json" style="display:none;" onchange="handleImport(this)">
+      </label>
+    </div>
+  </div>
+</div>
+
+<script>
+const SURL = 'https://vszywnvyyynfyhczmmgf.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzenl3bnZ5eXluZnloY3ptbWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0ODQzNjYsImV4cCI6MjA4OTA2MDM2Nn0.ifhC_o7OnRaWkD6MSMEugu6BOeQ7cT1ud6UdZG1yJAk';
+
+var sb, currentUser, clients=[], sessions=[], currentClientId=null, editingClientId=null, editingSessionId=null, calView='week', calOffset=0, charts={};
+
+function init() {
+  if (!window.supabase) { 
+    setTimeout(init, 100); 
+    return; 
+  }
+  sb = supabase.createClient(SURL, SKEY, {
+    auth: { storage: localStorage, storageKey: 'fitpro-auth', persistSession: true, autoRefreshToken: true }
+  });
+  
+  // Check session
+  sb.auth.getSession().then(function(r) {
+    if (r.data && r.data.session && r.data.session.user) {
+      startApp(r.data.session.user);
+    } else {
+      // Try saved credentials
+      var e = localStorage.getItem('fp_e'), p = localStorage.getItem('fp_p');
+      if (e && p) {
+        sb.auth.signInWithPassword({email: atob(e), password: atob(p)}).then(function(r2) {
+          if (r2.data && r2.data.user) startApp(r2.data.user);
+          else showAuth();
+        });
+      } else {
+        showAuth();
+      }
+    }
+  }).catch(function() { showAuth(); });
+}
+
+function showAuth() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+async function startApp(user) {
+  currentUser = user;
+  document.getElementById('user-email').textContent = user.email;
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  await loadAll();
+  renderDashboard();
+}
+
+async function loadAll() {
+  var r1 = await sb.from('clients').select('*').order('created_at',{ascending:false});
+  var r2 = await sb.from('sessions').select('*').order('date',{ascending:true});
+  clients = r1.data || [];
+  sessions = r2.data || [];
+}
+
+// AUTH
+function switchAuthTab(t) {
+  document.getElementById('tab-login-btn').classList.toggle('active', t==='login');
+  document.getElementById('tab-reg-btn').classList.toggle('active', t==='register');
+  document.getElementById('login-form').style.display = t==='login'?'block':'none';
+  document.getElementById('reg-form').style.display = t==='register'?'block':'none';
+  document.getElementById('auth-err').style.display='none';
+  document.getElementById('auth-ok').style.display='none';
+}
+
+async function doLogin() {
+  var email = document.getElementById('login-email').value.trim();
+  var pass = document.getElementById('login-pass').value;
+  if (!email||!pass) { showErr('Completează email și parola!'); return; }
+  var btn = document.getElementById('btn-login');
+  btn.disabled=true; btn.textContent='Se conectează...';
+  var r = await sb.auth.signInWithPassword({email:email,password:pass});
+  if (r.error) { showErr('Email sau parolă incorectă!'); btn.disabled=false; btn.textContent='Intră în cont'; }
+  else { 
+    try{localStorage.setItem('fp_e',btoa(email));localStorage.setItem('fp_p',btoa(pass));}catch(e){}
+    startApp(r.data.user); 
+  }
+}
+
+async function doRegister() {
+  var name=document.getElementById('reg-name').value.trim();
+  var email=document.getElementById('reg-email').value.trim();
+  var pass=document.getElementById('reg-pass').value;
+  if(!name||!email||!pass){showErr('Completează toate câmpurile!');return;}
+  if(pass.length<6){showErr('Parola min 6 caractere!');return;}
+  var btn=document.getElementById('btn-reg');
+  btn.disabled=true; btn.textContent='Se creează...';
+  var r=await sb.auth.signUp({email:email,password:pass,options:{data:{full_name:name}}});
+  btn.disabled=false; btn.textContent='Creează cont';
+  if(r.error){showErr(r.error.message);}
+  else{document.getElementById('auth-ok').textContent='Cont creat! Verifică emailul.';document.getElementById('auth-ok').style.display='block';}
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  try{localStorage.removeItem('fp_e');localStorage.removeItem('fp_p');}catch(e){}
+  clients=[];sessions=[];
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+}
+
+function showErr(m){var el=document.getElementById('auth-err');el.textContent=m;el.style.display='block';}
+
+// HELPERS
+function daysLeft(sd,dur){if(!sd)return 0;var e=new Date(sd);e.setDate(e.getDate()+parseInt(dur||30));var t=new Date();t.setHours(0,0,0,0);return Math.ceil((e-t)/86400000);}
+function fmtDate(d){if(!d)return '—';return new Date(d).toLocaleDateString('ro-RO');}
+function isoDate(d){return d.toISOString().split('T')[0];}
+var CC=['#c8f135','#35f1c8','#f13565','#f1a535','#3565f1','#f135c8','#35c8f1','#a5f135','#f17535','#8535f1'];
+function getCC(id){var i=clients.findIndex(function(c){return c.id===id;});return CC[i%CC.length]||'#c8f135';}
+
+// NAVIGATION
+function showPage(n) {
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-'+n).classList.add('active');
+  var m={dashboard:0,clients:1,expiring:2,calendar:3};
+  if(m[n]!==undefined) document.querySelectorAll('.nav-item')[m[n]].classList.add('active');
+  if(n==='dashboard')renderDashboard();
+  if(n==='clients')renderClients();
+  if(n==='expiring')renderExpiring();
+  if(n==='calendar')setCalView(calView);
+}
+
+function switchTab(n) {
+  document.querySelectorAll('#page-detail .tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('#page-detail .tab-content').forEach(function(t){t.classList.remove('active');});
+  var m={profil:0,antrenament:1,dieta:2,masuratori:3,progres:4,note:5};
+  document.querySelectorAll('#page-detail .tab')[m[n]].classList.add('active');
+  document.getElementById('tab-'+n).classList.add('active');
+  renderTab(n);
+}
+
+function switchMTab(n) {
+  document.querySelectorAll('#modal-client .tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('#modal-client .tab-content').forEach(function(t){t.classList.remove('active');});
+  var m={info:0,workout:1,diet:2,meas:3};
+  document.querySelectorAll('#modal-client .tab')[m[n]].classList.add('active');
+  document.getElementById('mt-'+n).classList.add('active');
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');if(id==='modal-backup')refreshBackup();}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});});
+
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+
+// DASHBOARD
+function renderDashboard() {
+  var active=clients.filter(function(c){return daysLeft(c.start_date,c.duration)>0;}).length;
+  var exp=clients.filter(function(c){var d=daysLeft(c.start_date,c.duration);return d>0&&d<=7;}).length;
+  var xp=clients.filter(function(c){return daysLeft(c.start_date,c.duration)<=0;}).length;
+  document.getElementById('s-total').textContent=clients.length;
+  document.getElementById('s-active').textContent=active;
+  document.getElementById('s-exp').textContent=exp;
+  document.getElementById('s-xp').textContent=xp;
+  document.getElementById('notif-zone').innerHTML=exp>0?'<div class="notif">⚠️ <strong>'+exp+' client'+(exp>1?'ți':'')+'</strong> expiră în 7 zile!</div>':'';
+  var ec=clients.filter(function(c){return daysLeft(c.start_date,c.duration)<=7;}).sort(function(a,b){return daysLeft(a.start_date,a.duration)-daysLeft(b.start_date,b.duration);}).slice(0,5);
+  document.getElementById('d-expiring').innerHTML=ec.length===0?'<div class="empty"><div class="ei">✅</div>Nicio expirare</div>':ec.map(function(c){var d=daysLeft(c.start_date,c.duration);return '<div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid rgba(37,37,53,.5);cursor:pointer;" onclick="openClient(\''+c.id+'\')"><div style="font-size:13px;font-weight:500;">'+c.name+'</div><div class="'+(d<=0?'dbd':'dwn')+'">'+(d<=0?'Expirat':d+' zile')+'</div></div>';}).join('');
+  document.getElementById('d-recent').innerHTML=clients.slice(0,5).map(function(c){return '<div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid rgba(37,37,53,.5);cursor:pointer;" onclick="openClient(\''+c.id+'\')"><div style="font-size:13px;font-weight:500;">'+c.name+'</div><div style="font-size:11px;color:var(--muted);">'+fmtDate(c.start_date)+'</div></div>';}).join('')||'<div class="empty"><div class="ei">👥</div></div>';
+}
+
+// CLIENTS
+function renderClients(filter) {
+  filter=filter||'';
+  var list=clients;
+  if(filter){var f=filter.toLowerCase();list=list.filter(function(c){return c.name.toLowerCase().includes(f)||(c.phone||'').includes(f);});}
+  var tb=document.getElementById('clients-tbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="ei">👥</div>'+(filter?'Niciun rezultat':'Adaugă primul client!')+'</div></td></tr>';return;}
+  tb.innerHTML=list.map(function(c){
+    var d=daysLeft(c.start_date,c.duration);
+    var bc=d<=0?'bx':d<=7?'be':'ba',st=d<=0?'Expirat':d<=7?'Expiră curând':'Activ',dc=d<=0?'dbd':d<=7?'dwn':'dok';
+    return '<tr><td><strong style="cursor:pointer;" onclick="openClient(\''+c.id+'\')">'+c.name+'</strong></td><td>'+(c.phone||'—')+'</td><td>'+(c.goal||'—')+'</td><td><span class="badge '+bc+'">'+st+'</span></td><td><span class="'+dc+'">'+(d<=0?'Expirat':d+' zile')+'</span></td><td style="display:flex;gap:5px;"><button class="btn-sec btn-sm" onclick="openClient(\''+c.id+'\')">👁</button><button class="btn-sec btn-sm" onclick="openEditClient(\''+c.id+'\')">✏️</button><button class="btn-danger btn-sm" onclick="deleteClient(\''+c.id+'\')">🗑</button></td></tr>';
+  }).join('');
+}
+function filterClients(v){renderClients(v);}
+
+// EXPIRING
+function renderExpiring() {
+  var list=[...clients].sort(function(a,b){return daysLeft(a.start_date,a.duration)-daysLeft(b.start_date,b.duration);});
+  document.getElementById('exp-tbody').innerHTML=list.map(function(c){
+    var d=daysLeft(c.start_date,c.duration);
+    var e=new Date(c.start_date||new Date());e.setDate(e.getDate()+parseInt(c.duration||30));
+    var bc=d<=0?'bx':d<=7?'be':'ba',st=d<=0?'Expirat':d<=7?'Expiră curând':'Activ',dc=d<=0?'dbd':d<=7?'dwn':'dok';
+    return '<tr><td>'+c.name+'</td><td>'+(c.phone||'—')+'</td><td>'+fmtDate(c.start_date)+'</td><td>'+fmtDate(isoDate(e))+'</td><td><span class="badge '+bc+'">'+st+'</span></td><td><span class="'+dc+'">'+(d<=0?'Expirat':d+' zile')+'</span></td></tr>';
+  }).join('');
+}
+
+// CLIENT DETAIL
+function openClient(id){currentClientId=id;var c=clients.find(function(x){return x.id===id;});if(!c)return;document.getElementById('detail-name').textContent=c.name.toUpperCase();showPage('detail');switchTab('profil');}
+
+async function renderTab(n) {
+  var c=clients.find(function(x){return x.id===currentClientId;});if(!c)return;
+  var el=document.getElementById('tab-'+n);
+
+  if(n==='profil'){
+    var d=daysLeft(c.start_date,c.duration);
+    var e=new Date(c.start_date||new Date());e.setDate(e.getDate()+parseInt(c.duration||30));
+    var pct=Math.max(0,Math.min(100,(d/parseInt(c.duration||30))*100));
+    var bc=d<=0?'bx':d<=7?'be':'ba',st=d<=0?'Expirat':d<=7?'Expiră curând':'Activ',dc=d<=0?'dbd':d<=7?'dwn':'dok';
+    el.innerHTML='<div class="detail-grid"><div class="ds"><div class="ds-title">Informații personale</div>'+
+      [['Vârstă',c.age?c.age+' ani':'—'],['Gen',c.gender||'—'],['Telefon',c.phone||'—'],['Email',c.email||'—'],['Nivel',c.level||'—'],['Obiectiv',c.goal||'—'],['Frecvență',c.freq?c.freq+' zile/săpt':'—']].map(function(x){return '<div class="ir"><span class="ik">'+x[0]+'</span><span class="iv">'+x[1]+'</span></div>';}).join('')+
+      (c.conditions?'<div class="ir"><span class="ik">Afecțiuni</span><span class="iv" style="color:var(--warning);font-size:12px;">'+c.conditions+'</span></div>':'')+
+    '</div><div class="ds"><div class="ds-title">Abonament</div>'+
+      '<div class="ir"><span class="ik">Status</span><span class="iv"><span class="badge '+bc+'">'+st+'</span></span></div>'+
+      '<div class="ir"><span class="ik">Data start</span><span class="iv">'+fmtDate(c.start_date)+'</span></div>'+
+      '<div class="ir"><span class="ik">Expirare</span><span class="iv">'+fmtDate(isoDate(e))+'</span></div>'+
+      '<div class="ir"><span class="ik">Zile rămase</span><span class="iv '+dc+'">'+(d<=0?'Expirat':d+' zile')+'</span></div>'+
+      '<div style="margin-top:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;"><span>Progres abonament</span><span>'+Math.round(pct)+'%</span></div><div class="pb"><div class="pf '+(pct>30?'':pct>10?'pw':'px')+'" style="width:'+pct+'%"></div></div></div>'+
+    '</div></div>';
+  }
+
+  if(n==='antrenament'){el.innerHTML='<div class="ds" style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div class="ds-title" style="margin-bottom:0;">Plan antrenament</div><button class="btn-sec btn-sm" onclick="openEditClient(\''+c.id+'\');switchMTab(\'workout\')">✏️</button></div>'+(c.workout?'<pre style="white-space:pre-wrap;font-size:13px;line-height:1.7;font-family:DM Sans,sans-serif;">'+c.workout+'</pre>':'<div class="empty"><div class="ei">🏋️</div>Niciun plan</div>')+'</div>'+(c.workout_notes?'<div class="ds"><div class="ds-title">Observații</div><p style="font-size:13px;color:var(--warning);">⚠️ '+c.workout_notes+'</p></div>':'');}
+
+  if(n==='dieta'){el.innerHTML=(c.calories||c.protein?'<div class="mg" style="margin-bottom:14px;">'+(c.calories?'<div class="mc"><div class="ml">Calorii</div><div class="mv" style="color:var(--warning);">'+c.calories+'</div><div class="mu">kcal</div></div>':'')+(c.protein?'<div class="mc"><div class="ml">Proteină</div><div class="mv" style="color:var(--accent2);">'+c.protein+'</div><div class="mu">g</div></div>':'')+(c.carbs?'<div class="mc"><div class="ml">Carbo</div><div class="mv">'+c.carbs+'</div><div class="mu">g</div></div>':'')+(c.fats?'<div class="mc"><div class="ml">Grăsimi</div><div class="mv" style="color:var(--accent3);">'+c.fats+'</div><div class="mu">g</div></div>':'')+'</div>':'')+'<div class="ds"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div class="ds-title" style="margin-bottom:0;">Plan alimentar</div><button class="btn-sec btn-sm" onclick="openEditClient(\''+c.id+'\');switchMTab(\'diet\')">✏️</button></div>'+(c.diet?'<pre style="white-space:pre-wrap;font-size:13px;line-height:1.7;font-family:DM Sans,sans-serif;">'+c.diet+'</pre>':'<div class="empty"><div class="ei">🥗</div>Niciun plan</div>')+'</div>'+(c.allergies?'<div class="ds" style="margin-top:14px;"><div class="ds-title">Alergii</div><p style="font-size:13px;color:var(--accent3);">⚠️ '+c.allergies+'</p></div>':'');}
+
+  if(n==='masuratori'){
+    var bmi=(c.weight&&c.height)?(c.weight/((c.height/100)**2)).toFixed(1):null;
+    el.innerHTML='<div class="mg">'+[['Greutate',c.weight,'kg'],['Înălțime',c.height,'cm'],bmi?['IMC',bmi,'kg/m²']:null,['Abdomen',c.waist,'cm'],['Piept',c.chest,'cm'],['Șolduri',c.hips,'cm'],['Coapsă',c.thigh,'cm'],['Braț',c.arm,'cm'],['% Grăsime',c.bodyfat,'%']].filter(Boolean).filter(function(x){return x[1];}).map(function(x){return '<div class="mc"><div class="ml">'+x[0]+'</div><div class="mv">'+x[1]+'</div><div class="mu">'+x[2]+'</div></div>';}).join('')+'</div><div style="text-align:center;margin-top:12px;"><button class="btn-sec btn-sm" onclick="openEditClient(\''+c.id+'\');switchMTab(\'meas\')">✏️ Actualizează</button></div>';
+  }
+
+  if(n==='progres'){
+    var pr=await sb.from('progress').select('*').eq('client_id',c.id).order('date',{ascending:true});
+    var prog=pr.data||[];
+    var last=[...prog].reverse();
+    function lv(f){var p=last.find(function(x){return x[f];});return p?parseFloat(p[f]):null;}
+    function iv(f){return c[f]?parseFloat(c[f]):null;}
+    function dc2(label,field,unit,inv){
+      var i=iv(field),cv2=lv(field);if(!i&&!cv2)return '';
+      var diff=(i!==null&&cv2!==null)?(cv2-i).toFixed(1):null;
+      var col='var(--muted)',arr='';
+      if(diff!==null){var good=inv?diff<0:diff>0;col=diff==0?'var(--muted)':good?'var(--accent)':'var(--accent3)';arr=diff>0?'▲':'▼';}
+      return '<div class="mc"><div class="ml">'+label+'</div><div style="display:flex;justify-content:center;align-items:baseline;gap:6px;margin:4px 0;"><span style="font-size:12px;color:var(--muted);">'+(i??'—')+'</span><span style="color:var(--muted);">→</span><span style="font-size:15px;font-weight:700;">'+(cv2??'—')+'</span></div><div class="mu">'+unit+'</div>'+(diff!==null?'<div style="font-family:monospace;font-size:13px;font-weight:700;color:'+col+';margin-top:4px;">'+arr+' '+(diff>0?'+':'')+diff+' '+unit+'</div>':'')+'</div>';
+    }
+    el.innerHTML='<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn btn-primary" style="width:auto;" onclick="openAddProgress()">+ Adaugă măsurători</button></div>'+
+    '<div class="ds" style="margin-bottom:14px;"><div class="ds-title">📊 COMPARAȚIE START → ACUM</div><div class="mg">'+dc2('Greutate','weight','kg',true)+dc2('Abdomen','waist','cm',true)+dc2('Piept','chest','cm',false)+dc2('Șolduri','hips','cm',true)+dc2('Coapsă','thigh','cm',true)+dc2('Braț','arm','cm',false)+dc2('% Grăsime','bodyfat','%',true)+'</div></div>'+
+    (prog.length>0?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;"><div class="ds"><div class="ds-title">📉 Greutate</div><canvas id="cw" height="160"></canvas></div><div class="ds"><div class="ds-title">📏 Abdomen</div><canvas id="ca" height="160"></canvas></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;"><div class="ds"><div class="ds-title">💪 Braț & Coapsă</div><canvas id="cb" height="160"></canvas></div><div class="ds"><div class="ds-title">🔥 % Grăsime</div><canvas id="cf" height="160"></canvas></div></div>':'')+
+    '<div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>Abdomen</th><th>Braț</th><th>Coapsă</th><th>% Gras</th><th>Notă</th><th></th></tr></thead><tbody>'+
+    [...prog].reverse().map(function(p,i){var ri=prog.length-1-i;return '<tr><td style="font-size:11px;font-family:monospace;">'+fmtDate(p.date)+'</td><td>'+(p.weight?p.weight+' kg':'—')+'</td><td>'+(p.waist?p.waist+' cm':'—')+'</td><td>'+(p.arm?p.arm+' cm':'—')+'</td><td>'+(p.thigh?p.thigh+' cm':'—')+'</td><td>'+(p.bodyfat?p.bodyfat+'%':'—')+'</td><td style="font-size:11px;color:var(--muted);">'+(p.note||'—')+'</td><td><button class="btn-danger btn-sm" onclick="delProgress(\''+p.id+'\')">🗑</button></td></tr>';}).join('')+
+    '</tbody></table></div>';
+    if(prog.length>0)setTimeout(function(){drawCharts(c,prog);},60);
+  }
+
+  if(n==='note'){el.innerHTML='<div class="ds"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div class="ds-title" style="margin-bottom:0;">Note</div><button class="btn btn-primary" style="width:auto;" onclick="saveNotes()">💾 Salvează</button></div><textarea id="notes-ta" style="width:100%;min-height:260px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:DM Sans,sans-serif;font-size:14px;line-height:1.7;outline:none;">'+(c.notes||'')+'</textarea></div>';}
+}
+
+// SAVE/DELETE CLIENT
+function openAddClient(){editingClientId=null;document.getElementById('mc-title').textContent='ADAUGĂ CLIENT';clearCForm();document.getElementById('f-start').value=new Date().toISOString().split('T')[0];switchMTab('info');openModal('modal-client');}
+function openEditClient(id){editingClientId=id;var c=clients.find(function(x){return x.id===id;});if(!c)return;document.getElementById('mc-title').textContent='EDITEAZĂ CLIENT';var fs={name:'f-name',phone:'f-phone',email:'f-email',age:'f-age',gender:'f-gender',goal:'f-goal',level:'f-level',freq:'f-freq',conditions:'f-conditions',workout:'f-workout',workout_notes:'f-workout-notes',calories:'f-calories',protein:'f-protein',carbs:'f-carbs',fats:'f-fats',diet:'f-diet',allergies:'f-allergies',weight:'f-weight',height:'f-height',waist:'f-waist',chest:'f-chest',hips:'f-hips',thigh:'f-thigh',arm:'f-arm',bodyfat:'f-bodyfat'};Object.keys(fs).forEach(function(k){var el=document.getElementById(fs[k]);if(el)el.value=c[k]||'';});document.getElementById('f-start').value=c.start_date||'';document.getElementById('f-duration').value=c.duration||'30';switchMTab('info');openModal('modal-client');}
+function editCurrentClient(){openEditClient(currentClientId);}
+function clearCForm(){['f-name','f-phone','f-email','f-age','f-conditions','f-workout','f-workout-notes','f-calories','f-protein','f-carbs','f-fats','f-diet','f-allergies','f-weight','f-height','f-waist','f-chest','f-hips','f-thigh','f-arm','f-bodyfat'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['f-gender','f-goal','f-level','f-freq'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('f-duration').value='30';}
+
+async function saveClient(){
+  var name=document.getElementById('f-name').value.trim();
+  if(!name){alert('Numele e obligatoriu!');return;}
+  var btn=document.getElementById('btn-save-client');btn.disabled=true;btn.textContent='...';
+  var data={trainer_id:currentUser.id,name:name,phone:document.getElementById('f-phone').value||null,email:document.getElementById('f-email').value||null,age:document.getElementById('f-age').value||null,gender:document.getElementById('f-gender').value||null,goal:document.getElementById('f-goal').value||null,start_date:document.getElementById('f-start').value||null,duration:parseInt(document.getElementById('f-duration').value)||30,level:document.getElementById('f-level').value||null,freq:document.getElementById('f-freq').value||null,conditions:document.getElementById('f-conditions').value||null,workout:document.getElementById('f-workout').value||null,workout_notes:document.getElementById('f-workout-notes').value||null,calories:document.getElementById('f-calories').value||null,protein:document.getElementById('f-protein').value||null,carbs:document.getElementById('f-carbs').value||null,fats:document.getElementById('f-fats').value||null,diet:document.getElementById('f-diet').value||null,allergies:document.getElementById('f-allergies').value||null,weight:document.getElementById('f-weight').value||null,height:document.getElementById('f-height').value||null,waist:document.getElementById('f-waist').value||null,chest:document.getElementById('f-chest').value||null,hips:document.getElementById('f-hips').value||null,thigh:document.getElementById('f-thigh').value||null,arm:document.getElementById('f-arm').value||null,bodyfat:document.getElementById('f-bodyfat').value||null};
+  var r=editingClientId?await sb.from('clients').update(data).eq('id',editingClientId):await sb.from('clients').insert(data);
+  btn.disabled=false;btn.textContent='💾 Salvează';
+  if(r.error){alert('Eroare: '+r.error.message);return;}
+  await loadAll();closeModal('modal-client');renderClients();
+  if(editingClientId&&currentClientId===editingClientId)renderTab('profil');
+}
+async function deleteClient(id){if(!confirm('Ștergi clientul?'))return;await sb.from('clients').delete().eq('id',id);await loadAll();renderClients();}
+async function deleteCurrentClient(){if(!confirm('Ștergi clientul?'))return;await sb.from('clients').delete().eq('id',currentClientId);await loadAll();showPage('clients');}
+
+// PROGRESS
+function openAddProgress(){
+  var c=clients.find(function(x){return x.id===currentClientId;});
+  document.getElementById('p-date').value=new Date().toISOString().split('T')[0];
+  ['p-weight','p-waist','p-chest','p-hips','p-thigh','p-arm','p-bodyfat','p-note'].forEach(function(id){document.getElementById(id).value='';});
+  if(c){var hints=[['Greutate',c.weight,'kg'],['Abdomen',c.waist,'cm'],['Braț',c.arm,'cm']].filter(function(x){return x[1];}).map(function(x){return x[0]+': <strong style="color:var(--text);">'+x[1]+' '+x[2]+'</strong>';});if(hints.length){document.getElementById('prog-hint').style.display='block';document.getElementById('prog-hint-text').innerHTML=hints.join(' | ');}else document.getElementById('prog-hint').style.display='none';}
+  openModal('modal-progress');
+}
+async function saveProgress(){
+  var btn=document.getElementById('btn-save-prog');btn.disabled=true;btn.textContent='...';
+  var r=await sb.from('progress').insert({client_id:currentClientId,trainer_id:currentUser.id,date:document.getElementById('p-date').value,weight:document.getElementById('p-weight').value||null,waist:document.getElementById('p-waist').value||null,chest:document.getElementById('p-chest').value||null,hips:document.getElementById('p-hips').value||null,thigh:document.getElementById('p-thigh').value||null,arm:document.getElementById('p-arm').value||null,bodyfat:document.getElementById('p-bodyfat').value||null,note:document.getElementById('p-note').value||null});
+  btn.disabled=false;btn.textContent='💾 Salvează';
+  if(r.error){alert('Eroare: '+r.error.message);return;}
+  closeModal('modal-progress');renderTab('progres');
+}
+async function delProgress(id){if(!confirm('Ștergi?'))return;await sb.from('progress').delete().eq('id',id);renderTab('progres');}
+async function saveNotes(){var notes=document.getElementById('notes-ta').value;await sb.from('clients').update({notes:notes}).eq('id',currentClientId);var c=clients.find(function(x){return x.id===currentClientId;});if(c)c.notes=notes;alert('Salvat!');}
+
+// CALENDAR
+function setCalView(v){calView=v;document.getElementById('cal-week').style.display=v==='week'?'block':'none';document.getElementById('cal-list').style.display=v==='list'?'block':'none';document.getElementById('cv-week').style.color=v==='week'?'var(--accent)':'';document.getElementById('cv-list').style.color=v==='list'?'var(--accent)':'';renderCalendar();}
+function calNav(d){calOffset+=d;renderCalendar();}
+function getWeekDates(off){var t=new Date();t.setHours(0,0,0,0);var dow=t.getDay(),mon=new Date(t);mon.setDate(t.getDate()-(dow===0?6:dow-1)+off*7);return Array.from({length:7},function(_,i){var d=new Date(mon);d.setDate(mon.getDate()+i);return d;});}
+
+function renderCalendar(){
+  var fc=document.getElementById('cal-filter').value||'';
+  var sel=document.getElementById('cal-filter');var prev=sel.value;
+  sel.innerHTML='<option value="">Toți</option>'+clients.map(function(c){return '<option value="'+c.id+'">'+c.name+'</option>';}).join('');sel.value=prev;
+  var wd=getWeekDates(calOffset);
+  var ws=isoDate(wd[0]),we=isoDate(wd[6]);
+  var MS=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('cal-label').textContent=wd[0].getDate()+' '+MS[wd[0].getMonth()]+' — '+wd[6].getDate()+' '+MS[wd[6].getMonth()]+' '+wd[6].getFullYear();
+  var wsess=sessions.filter(function(s){return s.date>=ws&&s.date<=we&&(!fc||s.client_id===fc);});
+  var done=wsess.filter(function(s){return s.status==='realizat';}).length;
+  var plan=wsess.filter(function(s){return s.status==='programat'||!s.status;}).length;
+  var tmin=wsess.filter(function(s){return s.status==='realizat';}).reduce(function(a,s){return a+(parseInt(s.duration)||60);},0);
+  document.getElementById('cal-stats').innerHTML=[{l:'Sesiuni',v:wsess.length,c:''},{l:'Realizate',v:done,c:'c2'},{l:'Programate',v:plan,c:'cw'},{l:'Ore',v:Math.round(tmin/60*10)/10+'h',c:''}].map(function(x){return '<div class="stat-card '+x.c+'" style="padding:12px;"><div class="stat-label">'+x.l+'</div><div class="stat-value" style="font-size:24px;">'+x.v+'</div></div>';}).join('');
+  if(calView==='week')renderWeek(wd,fc);else renderList(fc);
+}
+
+function renderWeek(wd,fc){
+  var today=isoDate(new Date());
+  var DN=['Lun','Mar','Mie','Joi','Vin','Sâm','Dum'];
+  var wrap=document.createElement('div');wrap.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:6px;';
+  wd.forEach(function(date,di){
+    var ds=isoDate(date),isT=ds===today;
+    var daySess=sessions.filter(function(s){return s.date===ds&&(!fc||s.client_id===fc);}).sort(function(a,b){return (a.time||'').localeCompare(b.time||'');});
+    var col=document.createElement('div');col.className='cal-day'+(isT?' today':'');
+    var hdr=document.createElement('div');hdr.className='cal-hdr';
+    hdr.innerHTML='<div style="font-size:10px;color:'+(isT?'var(--accent)':'var(--muted)')+';text-transform:uppercase;">'+DN[di]+'</div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:'+(isT?'var(--accent)':'var(--text)')+';">'+date.getDate()+'</div>';
+    hdr.onclick=function(){openAddSession(ds);};col.appendChild(hdr);
+    var sw=document.createElement('div');sw.style.padding='4px';
+    daySess.forEach(function(s){
+      var cl=clients.find(function(c){return c.id===s.client_id;});
+      var color=getCC(s.client_id);
+      var si={realizat:'✅',anulat:'❌',programat:'📅'}[s.status||'programat'];
+      var card=document.createElement('div');card.className='cal-sc';
+      card.style.cssText='background:'+color+'18;border:1px solid '+color+'55;border-left:3px solid '+color+';';
+      card.innerHTML='<div style="font-size:10px;font-weight:700;color:'+color+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(cl?cl.name:'?')+'</div>'+(s.time?'<div style="font-size:9px;color:var(--muted);">'+s.time+'</div>':'')+'<div style="font-size:9px;">'+si+'</div>';
+      card.onclick=function(e){e.stopPropagation();openEditSession(s.id);};sw.appendChild(card);
+    });
+    var ab=document.createElement('div');ab.style.cssText='text-align:center;padding:3px;color:var(--muted);font-size:16px;cursor:pointer;opacity:.4;';ab.textContent='+';
+    ab.onmouseenter=function(){ab.style.opacity='1';};ab.onmouseleave=function(){ab.style.opacity='.4';};
+    ab.onclick=function(){openAddSession(ds);};sw.appendChild(ab);col.appendChild(sw);wrap.appendChild(col);
+  });
+  var g=document.getElementById('cal-week');g.innerHTML='';g.appendChild(wrap);
+}
+
+function renderList(fc){
+  var wd=getWeekDates(calOffset);var start=isoDate(wd[0]),end=isoDate(wd[6]);
+  var list=sessions.filter(function(s){return s.date>=start&&s.date<=end&&(!fc||s.client_id===fc);}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time);});
+  var div=document.getElementById('cal-list');
+  if(!list.length){div.innerHTML='<div class="empty"><div class="ei">📅</div>Nicio sesiune</div>';return;}
+  var byDate={};list.forEach(function(s){if(!byDate[s.date])byDate[s.date]=[];byDate[s.date].push(s);});
+  div.innerHTML=Object.keys(byDate).sort().map(function(date){
+    var d=new Date(date);d.setHours(12);
+    return '<div style="margin-bottom:14px;"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:15px;color:var(--muted);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border);">'+fmtDate(date)+'</div>'+
+    byDate[date].map(function(s){
+      var cl=clients.find(function(c){return c.id===s.client_id;});var color=getCC(s.client_id);
+      var si={realizat:'✅',anulat:'❌',programat:'📅'}[s.status||'programat'];
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-left:4px solid '+color+';border-radius:8px;margin-bottom:5px;cursor:pointer;" onclick="openEditSession(\''+s.id+'\')">'+
+        '<div style="font-family:monospace;font-size:12px;color:'+color+';width:42px;">'+(s.time||'—')+'</div>'+
+        '<div style="flex:1;"><div style="font-weight:600;font-size:13px;">'+(cl?cl.name:'—')+'</div>'+(s.type?'<div style="font-size:11px;color:var(--muted);">'+s.type+(s.duration?' · '+s.duration+' min':'')+'</div>':'')+'</div>'+
+        '<div>'+si+'</div><button class="btn-danger btn-sm" onclick="event.stopPropagation();deleteSession(\''+s.id+'\')">🗑</button></div>';
+    }).join('')+'</div>';
+  }).join('');
+}
+
+// SESSIONS
+function openAddSession(pre){
+  editingSessionId=null;
+  document.getElementById('ms-title').textContent='ADAUGĂ SESIUNE';
+  document.getElementById('s-client').innerHTML=clients.map(function(c){return '<option value="'+c.id+'">'+c.name+'</option>';}).join('');
+  document.getElementById('s-date').value=pre||new Date().toISOString().split('T')[0];
+  document.getElementById('s-time').value='09:00';
+  document.getElementById('s-duration').value='60';
+  document.getElementById('s-type').value='';
+  document.getElementById('s-status').value='programat';
+  document.getElementById('s-notes').value='';
+  openModal('modal-session');
+}
+function openEditSession(id){
+  editingSessionId=id;var s=sessions.find(function(x){return x.id===id;});if(!s)return;
+  document.getElementById('ms-title').textContent='EDITEAZĂ SESIUNE';
+  document.getElementById('s-client').innerHTML=clients.map(function(c){return '<option value="'+c.id+'">'+c.name+'</option>';}).join('');
+  document.getElementById('s-client').value=s.client_id;
+  document.getElementById('s-date').value=s.date;
+  document.getElementById('s-time').value=s.time||'';
+  document.getElementById('s-duration').value=s.duration||60;
+  document.getElementById('s-type').value=s.type||'';
+  document.getElementById('s-status').value=s.status||'programat';
+  document.getElementById('s-notes').value=s.notes||'';
+  openModal('modal-session');
+}
+async function saveSession(){
+  var cid=document.getElementById('s-client').value,date=document.getElementById('s-date').value;
+  if(!cid||!date){alert('Client și data sunt obligatorii!');return;}
+  var btn=document.getElementById('btn-save-sess');btn.disabled=true;btn.textContent='...';
+  var data={trainer_id:currentUser.id,client_id:cid,date:date,time:document.getElementById('s-time').value||null,duration:parseInt(document.getElementById('s-duration').value)||60,type:document.getElementById('s-type').value||null,status:document.getElementById('s-status').value,notes:document.getElementById('s-notes').value||null};
+  var r=editingSessionId?await sb.from('sessions').update(data).eq('id',editingSessionId):await sb.from('sessions').insert(data);
+  btn.disabled=false;btn.textContent='💾 Salvează';
+  if(r.error){alert('Eroare: '+r.error.message);return;}
+  await loadAll();closeModal('modal-session');renderCalendar();
+}
+async function deleteSession(id){if(!confirm('Ștergi sesiunea?'))return;await sb.from('sessions').delete().eq('id',id);await loadAll();renderCalendar();}
+
+// CHARTS
+function drawCharts(c,prog){
+  var lbs=prog.map(function(p){return fmtDate(p.date);});
+  function ws(field,sv){var data=prog.map(function(p){return p[field]?parseFloat(p[field]):null;});if(sv&&prog.length&&prog[0].date!==c.start_date)return{l:[fmtDate(c.start_date)+' ★',...lbs],d:[parseFloat(sv),...data]};return{l:lbs,d:data};}
+  function mkChart(id,labels,datasets){if(charts[id])charts[id].destroy();var ctx=document.getElementById(id);if(!ctx)return;charts[id]=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,plugins:{legend:{display:datasets.length>1,labels:{color:'#6b6b85',font:{size:11}}}},scales:{x:{grid:{color:'rgba(37,37,53,.6)'},ticks:{color:'#6b6b85',font:{size:10}}},y:{grid:{color:'rgba(37,37,53,.6)'},ticks:{color:'#6b6b85',font:{size:10}}}}}});}
+  var w=ws('weight',c.weight);mkChart('cw',w.l,[{label:'Greutate',data:w.d,borderColor:'#c8f135',backgroundColor:'rgba(200,241,53,.08)',borderWidth:2,pointRadius:4,tension:0.3,fill:true}]);
+  var a=ws('waist',c.waist);mkChart('ca',a.l,[{label:'Abdomen',data:a.d,borderColor:'#35f1c8',backgroundColor:'rgba(53,241,200,.08)',borderWidth:2,pointRadius:4,tension:0.3,fill:true}]);
+  var ar=ws('arm',c.arm),th=ws('thigh',c.thigh);mkChart('cb',ar.l.length>=th.l.length?ar.l:th.l,[{label:'Braț',data:ar.d,borderColor:'#f1a535',borderWidth:2,pointRadius:4,tension:0.3,fill:false},{label:'Coapsă',data:th.d,borderColor:'#a535f1',borderWidth:2,pointRadius:4,tension:0.3,fill:false}]);
+  var f=ws('bodyfat',c.bodyfat);mkChart('cf',f.l,[{label:'% Grăsime',data:f.d,borderColor:'#f13565',backgroundColor:'rgba(241,53,101,.08)',borderWidth:2,pointRadius:4,tension:0.3,fill:true}]);
+}
+
+// BACKUP
+function refreshBackup(){
+  document.getElementById('backup-stats').innerHTML=[{l:'Clienți',v:clients.length,c:'var(--accent)'},{l:'Sesiuni',v:sessions.length,c:'var(--accent2)'}].map(function(x){return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;flex:1;"><div style="font-family:monospace;font-size:20px;font-weight:700;color:'+x.c+';">'+x.v+'</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">'+x.l+'</div></div>';}).join('');
+}
+async function exportData(){
+  var pr=await sb.from('progress').select('*').eq('trainer_id',currentUser.id);
+  var payload={version:2,exportDate:new Date().toISOString(),data:{clients:clients,sessions:sessions,progress:pr.data||[]}};
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='fitpro-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);
+}
+async function handleImport(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      var parsed=JSON.parse(e.target.result);var data=parsed.data||parsed;
+      if(!data.clients)throw new Error('invalid');
+      
+      // Convert old camelCase columns to snake_case
+      function convertClient(c) {
+        return {
+          id: c.id,
+          trainer_id: currentUser.id,
+          name: c.name,
+          phone: c.phone||null,
+          email: c.email||null,
+          age: c.age||null,
+          gender: c.gender||null,
+          goal: c.goal||null,
+          start_date: c.start_date||c.startDate||null,
+          duration: c.duration||30,
+          level: c.level||null,
+          freq: c.freq||null,
+          conditions: c.conditions||null,
+          workout: c.workout||null,
+          workout_notes: c.workout_notes||c.workoutNotes||null,
+          calories: c.calories||null,
+          protein: c.protein||null,
+          carbs: c.carbs||null,
+          fats: c.fats||null,
+          diet: c.diet||null,
+          allergies: c.allergies||null,
+          weight: c.weight||null,
+          height: c.height||null,
+          waist: c.waist||null,
+          chest: c.chest||null,
+          hips: c.hips||null,
+          thigh: c.thigh||null,
+          arm: c.arm||null,
+          bodyfat: c.bodyfat||null,
+          notes: c.notes||null
+        };
+      }
+      
+      if(!confirm('Import '+data.clients.length+' clienți în cloud?'))return;
+      var eids=new Set(clients.map(function(c){return c.id;}));
+      var nc=data.clients.filter(function(c){return !eids.has(c.id);}).map(convertClient);
+      
+      var errors=0;
+      for(var i=0;i<nc.length;i++){
+        var r=await sb.from('clients').insert(nc[i]);
+        if(r.error){
+          // Try without id (let DB generate new one)
+          var c2=Object.assign({},nc[i]);delete c2.id;
+          var r2=await sb.from('clients').insert(c2);
+          if(r2.error)errors++;
+        }
+      }
+      
+      await loadAll();closeModal('modal-backup');renderDashboard();
+      alert('Import complet!\nAdăugați: '+(nc.length-errors)+' clienți.\n'+(errors>0?errors+' erori (duplicate ignorate).':''));
+    }catch(err){console.error(err);alert('Eroare la import: '+err.message);}
+  };
+  reader.readAsText(file);input.value='';
+}
+
+// START
+init();
+</script>
+</body>
+</html>
