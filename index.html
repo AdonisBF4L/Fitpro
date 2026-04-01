@@ -4,14 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FitPro</title>
-<script>
-// Incarca Supabase
-(function(){
-  var s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js';
-  document.head.appendChild(s);
-})();
-</script>
+<script>document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"><\/script>');</script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -41,14 +34,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
 #app{display:none;}
 .layout{display:flex;min-height:100vh;}
-.sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;}
+.sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;overflow-y:auto;}
 .logo{padding:24px;border-bottom:1px solid var(--border);}
 .logo-text{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--accent);}
 .logo-email{font-size:11px;color:var(--accent2);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.nav{flex:1;padding:16px 0;}
-.nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--muted);font-size:14px;font-weight:500;transition:all .2s;border-left:3px solid transparent;}
+.nav{flex:1;padding:12px 0;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;color:var(--muted);font-size:14px;font-weight:500;transition:all .2s;border-left:3px solid transparent;position:relative;}
 .nav-item:hover{color:var(--text);background:rgba(200,241,53,.05);}
 .nav-item.active{color:var(--accent);background:rgba(200,241,53,.08);border-left-color:var(--accent);}
+.nav-badge{position:absolute;right:14px;background:var(--accent3);color:#fff;border-radius:10px;font-size:10px;font-weight:700;padding:1px 6px;min-width:18px;text-align:center;}
 .sidebar-bottom{padding:16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;}
 .btn-sec{background:var(--card);color:var(--text);border:1px solid var(--border);padding:9px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
 .btn-sec:hover{border-color:var(--accent);color:var(--accent);}
@@ -65,8 +59,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .stat-card.c2::before{background:var(--accent2);}
 .stat-card.c3::before{background:var(--accent3);}
 .stat-card.cw::before{background:var(--warning);}
+.stat-card.cp::before{background:#8535f1;}
 .stat-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
 .stat-value{font-family:'Bebas Neue',sans-serif;font-size:32px;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:2px;}
 .tw{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;overflow-x:auto;}
 .th2{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
 .search{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
@@ -80,6 +76,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
 .ba{background:rgba(200,241,53,.15);color:var(--accent);}
 .be{background:rgba(241,165,53,.15);color:var(--warning);}
 .bx{background:rgba(241,53,101,.15);color:var(--accent3);}
+.bp{background:rgba(133,53,241,.15);color:#a570ff;}
 .dok{color:var(--accent);font-family:monospace;font-size:12px;font-weight:700;}
 .dwn{color:var(--warning);font-family:monospace;font-size:12px;font-weight:700;}
 .dbd{color:var(--accent3);font-family:monospace;font-size:12px;font-weight:700;}
@@ -109,6 +106,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
 .ik{font-size:13px;color:var(--muted);}
 .iv{font-size:13px;font-weight:500;}
 .mg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.mg4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .mc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
 .ml{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
 .mv{font-family:monospace;font-size:20px;font-weight:700;color:var(--accent);}
@@ -127,9 +125,35 @@ tr:hover td{background:rgba(200,241,53,.02);}
 .cal-hdr{padding:8px;border-bottom:1px solid var(--border);text-align:center;cursor:pointer;}
 .cal-sc{margin:4px 6px;border-radius:6px;padding:5px 7px;cursor:pointer;}
 .btn-sm{padding:5px 11px!important;font-size:12px!important;}
+/* MESAJE */
+.msg-bubble{padding:10px 14px;border-radius:12px;max-width:80%;font-size:13px;line-height:1.5;margin-bottom:8px;}
+.msg-trainer{background:rgba(200,241,53,.12);border:1px solid rgba(200,241,53,.2);align-self:flex-end;border-bottom-right-radius:4px;}
+.msg-client{background:rgba(53,241,200,.1);border:1px solid rgba(53,241,200,.2);align-self:flex-start;border-bottom-left-radius:4px;}
+.msg-time{font-size:10px;color:var(--muted);margin-top:4px;}
+.msg-wrap{display:flex;flex-direction:column;gap:4px;}
+/* CLIENT APP */
+.client-topbar{display:flex;align-items:center;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);gap:12px;position:sticky;top:0;z-index:100;}
+.client-brand{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);letter-spacing:2px;}
+.client-username{flex:1;font-size:13px;font-weight:600;color:var(--accent2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.client-tabbar{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;}
+.cli-tab{flex-shrink:0;padding:12px 16px;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .2s;position:relative;}
+.cli-tab:hover{color:var(--text);}
+.cli-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.client-content{padding:20px;max-width:820px;margin:0 auto;}
+.cli-page{display:none;}.cli-page.active{display:block;}
+.cli-hero{background:linear-gradient(135deg,var(--card) 0%,rgba(200,241,53,.04) 100%);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;text-align:center;}
+.cli-greeting{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:4px;}
+.cli-greeting span{color:var(--accent);}
+.cli-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--accent);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--accent);z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:opacity .3s;}
+.invite-check{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(200,241,53,.06);border:1px solid rgba(200,241,53,.2);border-radius:8px;font-size:13px;cursor:pointer;margin-bottom:14px;}
+.invite-check input{width:auto;cursor:pointer;}
+.calc-btn{background:rgba(200,241,53,.1);border:1px solid rgba(200,241,53,.3);color:var(--accent);border-radius:8px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;width:100%;transition:all .2s;}
+.calc-btn:hover{background:rgba(200,241,53,.2);}
+.pay-badge-paid{color:var(--accent);font-size:11px;font-weight:700;}
+.pay-badge-unpaid{color:var(--accent3);font-size:11px;font-weight:700;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%);transition:transform .3s;}
   .sidebar.open{transform:translateX(0);}
@@ -140,6 +164,8 @@ tr:hover td{background:rgba(200,241,53,.02);}
   .form-grid{grid-template-columns:1fr!important;}
   .form-group.full{grid-column:1!important;}
   .ph{flex-direction:column;align-items:flex-start;gap:10px;}
+  .cli-grid-2{grid-template-columns:1fr;}
+  .mg4{grid-template-columns:1fr 1fr;}
 }
 .mobile-bar{display:none;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:99;}
 .hamburger{background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;}
@@ -148,9 +174,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
 </style>
 </head>
 <body>
-
 <div id="loading"><div class="loading-logo">FITPRO</div><div class="spinner"></div></div>
-
 <div id="auth-screen" style="display:none;">
   <div class="auth-box">
     <div class="auth-logo">FITPRO</div>
@@ -174,7 +198,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
     </div>
   </div>
 </div>
-
+<!-- TRAINER APP -->
 <div id="app">
   <div class="mobile-bar">
     <button class="hamburger" onclick="toggleSidebar()">☰</button>
@@ -184,15 +208,14 @@ tr:hover td{background:rgba(200,241,53,.02);}
   <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
   <div class="layout">
     <aside class="sidebar" id="sidebar">
-      <div class="logo">
-        <div class="logo-text">FitPro</div>
-        <div class="logo-email" id="user-email"></div>
-      </div>
+      <div class="logo"><div class="logo-text">FitPro</div><div class="logo-email" id="user-email"></div></div>
       <nav class="nav">
         <div class="nav-item active" onclick="showPage('dashboard');closeSidebar()"><span>📊</span> Dashboard</div>
         <div class="nav-item" onclick="showPage('clients');closeSidebar()"><span>👥</span> Clienți</div>
         <div class="nav-item" onclick="showPage('expiring');closeSidebar()"><span>⏰</span> Abonamente</div>
+        <div class="nav-item" onclick="showPage('financiar');closeSidebar()"><span>💰</span> Financiar</div>
         <div class="nav-item" onclick="showPage('calendar');closeSidebar()"><span>📅</span> Calendar</div>
+        <div class="nav-item" onclick="showPage('mesaje');closeSidebar()" id="nav-mesaje"><span>💬</span> Mesaje<span class="nav-badge" id="badge-mesaje" style="display:none;">0</span></div>
       </nav>
       <div class="sidebar-bottom">
         <button class="btn-sec" onclick="openModal('modal-backup')">💾 Backup</button>
@@ -200,37 +223,57 @@ tr:hover td{background:rgba(200,241,53,.02);}
       </div>
     </aside>
     <main class="main">
-
+      <!-- DASHBOARD -->
       <div id="page-dashboard" class="page active">
         <div class="ph"><div class="pt">BUNĂ ZIUA, <span>TRAINER</span> 💪</div></div>
         <div id="notif-zone"></div>
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-label">Total Clienți</div><div class="stat-value" id="s-total">0</div></div>
-          <div class="stat-card c2"><div class="stat-label">Activi</div><div class="stat-value" id="s-active">0</div></div>
-          <div class="stat-card cw"><div class="stat-label">Expiră 7 zile</div><div class="stat-value" id="s-exp">0</div></div>
-          <div class="stat-card c3"><div class="stat-label">Expirate</div><div class="stat-value" id="s-xp">0</div></div>
+        <div class="stats-grid" id="dash-stats"></div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;">
+          <div class="ds"><div class="ds-title">📈 Venituri pe luni</div><canvas id="chart-revenue" height="120"></canvas></div>
+          <div class="ds"><div class="ds-title">⚡ Acțiuni rapide</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button class="btn-sec" onclick="openAddClient()">➕ Adaugă client nou</button>
+              <button class="btn-sec" onclick="openAddSession(null)">📅 Programează sesiune</button>
+              <button class="btn-sec" onclick="openModal('modal-payment');document.getElementById('pay-client').value=''">💰 Înregistrează plată</button>
+              <button class="btn-sec" onclick="showPage('mesaje')">💬 Vezi mesaje <span id="dash-msg-count" style="color:var(--accent3);font-weight:700;"></span></button>
+            </div>
+          </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div class="tw"><div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">⚠️ Expiră curând</div><div id="d-expiring"></div></div>
-          <div class="tw"><div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">🆕 Adăugați recent</div><div id="d-recent"></div></div>
+          <div class="tw"><div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">💬 Mesaje recente</div><div id="d-messages"></div></div>
         </div>
       </div>
-
+      <!-- CLIENTI -->
       <div id="page-clients" class="page">
         <div class="ph"><div class="pt">CLIENȚI</div><button class="btn btn-primary" style="width:auto;" onclick="openAddClient()">+ Adaugă</button></div>
         <div class="tw">
           <div class="th2"><input class="search" placeholder="🔍 Caută..." oninput="filterClients(this.value)"></div>
-          <table><thead><tr><th>Nume</th><th>Telefon</th><th>Obiectiv</th><th>Status</th><th>Zile</th><th>Acțiuni</th></tr></thead>
+          <table><thead><tr><th>Nume</th><th>Telefon</th><th>Obiectiv</th><th>Status</th><th>Zile</th><th>Plată</th><th>Portal</th><th>Acțiuni</th></tr></thead>
           <tbody id="clients-tbody"></tbody></table>
         </div>
       </div>
-
+      <!-- ABONAMENTE -->
       <div id="page-expiring" class="page">
         <div class="ph"><div class="pt">ABONAMENTE</div></div>
-        <div class="tw"><table><thead><tr><th>Nume</th><th>Telefon</th><th>Start</th><th>Expirare</th><th>Status</th><th>Zile</th></tr></thead>
+        <div class="tw"><table><thead><tr><th>Nume</th><th>Telefon</th><th>Start</th><th>Expirare</th><th>Status</th><th>Zile</th><th>Acțiuni</th></tr></thead>
         <tbody id="exp-tbody"></tbody></table></div>
       </div>
-
+      <!-- FINANCIAR -->
+      <div id="page-financiar" class="page">
+        <div class="ph"><div class="pt">💰 <span>FINANCIAR</span></div><button class="btn btn-primary" style="width:auto;" onclick="openModal('modal-payment');document.getElementById('pay-client').value=''">+ Adaugă plată</button></div>
+        <div class="stats-grid" id="fin-stats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+          <div class="ds"><div class="ds-title">📊 Venituri lunare</div><canvas id="chart-fin" height="160"></canvas></div>
+          <div class="ds"><div class="ds-title">🏆 Top clienți</div><div id="fin-top"></div></div>
+        </div>
+        <div class="tw">
+          <div class="th2"><span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">Toate plățile</span></div>
+          <table><thead><tr><th>Data</th><th>Client</th><th>Sumă</th><th>Tip</th><th>Note</th><th></th></tr></thead>
+          <tbody id="payments-tbody"></tbody></table>
+        </div>
+      </div>
+      <!-- CALENDAR -->
       <div id="page-calendar" class="page">
         <div class="ph"><div class="pt">CALENDAR</div><button class="btn btn-primary" style="width:auto;" onclick="openAddSession(null)">+ Sesiune</button></div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
@@ -246,12 +289,29 @@ tr:hover td{background:rgba(200,241,53,.02);}
         <div id="cal-week"></div>
         <div id="cal-list" style="display:none;"></div>
       </div>
-
+      <!-- MESAJE -->
+      <div id="page-mesaje" class="page">
+        <div class="ph"><div class="pt">💬 <span>MESAJE</span></div></div>
+        <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;height:calc(100vh - 180px);">
+          <div class="tw" style="overflow-y:auto;"><div id="msg-client-list"></div></div>
+          <div class="ds" style="display:flex;flex-direction:column;">
+            <div id="msg-header" style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:14px;color:var(--muted);">Selectează un client</div>
+            <div id="msg-thread" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:14px;padding-bottom:4px;"></div>
+            <div id="msg-input-wrap" style="display:none;gap:8px;display:none;">
+              <textarea id="msg-input" placeholder="Scrie un mesaj..." style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;height:60px;"></textarea>
+              <button class="btn btn-primary" style="width:auto;align-self:flex-end;" onclick="sendMessage()">Trimite</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- CLIENT DETAIL -->
       <div id="page-detail" class="page">
         <button class="back-btn" onclick="showPage('clients')">← Înapoi</button>
         <div class="ph" style="margin-bottom:14px;">
           <div class="pt" id="detail-name">CLIENT</div>
           <div style="display:flex;gap:8px;">
+            <button class="btn-sec btn-sm" onclick="openRenewal(currentClientId)">🔄 Reînnoire</button>
+            <button class="btn-sec btn-sm" onclick="openAddPayment(currentClientId)">💰 Plată</button>
             <button class="btn-sec btn-sm" onclick="openEditClient(currentClientId)">✏️ Editează</button>
             <button class="btn-danger btn-sm" onclick="deleteCurrentClient()">🗑</button>
           </div>
@@ -262,6 +322,8 @@ tr:hover td{background:rgba(200,241,53,.02);}
           <div class="tab" onclick="switchTab('dieta')">🥗 Dietă</div>
           <div class="tab" onclick="switchTab('masuratori')">📏 Măsurători</div>
           <div class="tab" onclick="switchTab('progres')">📈 Progres</div>
+          <div class="tab" onclick="switchTab('plati')">💰 Plăți</div>
+          <div class="tab" onclick="switchTab('mesaje_client')">💬 Mesaje</div>
           <div class="tab" onclick="switchTab('note')">📝 Note</div>
         </div>
         <div id="tab-profil" class="tab-content active"></div>
@@ -269,13 +331,38 @@ tr:hover td{background:rgba(200,241,53,.02);}
         <div id="tab-dieta" class="tab-content"></div>
         <div id="tab-masuratori" class="tab-content"></div>
         <div id="tab-progres" class="tab-content"></div>
+        <div id="tab-plati" class="tab-content"></div>
+        <div id="tab-mesaje_client" class="tab-content"></div>
         <div id="tab-note" class="tab-content"></div>
       </div>
-
     </main>
   </div>
 </div>
-
+<!-- CLIENT APP -->
+<div id="client-app" style="display:none;">
+  <div class="client-topbar">
+    <div class="client-brand">FITPRO</div>
+    <div class="client-username" id="cli-username"></div>
+    <button class="btn-danger" style="width:auto;padding:7px 14px;font-size:12px;" onclick="doLogout()">🚪 Ieși</button>
+  </div>
+  <div class="client-tabbar">
+    <button class="cli-tab active" id="ct-home" onclick="showCliTab('home')">🏠 Acasă</button>
+    <button class="cli-tab" id="ct-workout" onclick="showCliTab('workout')">🏋️ Antrenament</button>
+    <button class="cli-tab" id="ct-diet" onclick="showCliTab('diet')">🥗 Dietă</button>
+    <button class="cli-tab" id="ct-progress" onclick="showCliTab('progress')">📈 Progres</button>
+    <button class="cli-tab" id="ct-sessions" onclick="showCliTab('sessions')">📅 Sesiuni</button>
+    <button class="cli-tab" id="ct-chat" onclick="showCliTab('chat')">💬 Mesaje</button>
+  </div>
+  <div class="client-content">
+    <div id="cli-home" class="cli-page active"></div>
+    <div id="cli-workout" class="cli-page"></div>
+    <div id="cli-diet" class="cli-page"></div>
+    <div id="cli-progress" class="cli-page"></div>
+    <div id="cli-sessions" class="cli-page"></div>
+    <div id="cli-chat" class="cli-page"></div>
+  </div>
+</div>
+<!-- MODALS -->
 <!-- CLIENT MODAL -->
 <div class="modal-overlay" id="modal-client">
   <div class="modal">
@@ -291,7 +378,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
       <div class="form-grid">
         <div class="form-group"><label>Nume *</label><input id="f-name"></div>
         <div class="form-group"><label>Telefon</label><input id="f-phone"></div>
-        <div class="form-group"><label>Email</label><input id="f-email" type="email"></div>
+        <div class="form-group"><label>Email</label><input id="f-email" type="email" oninput="toggleInviteOpt()"></div>
         <div class="form-group"><label>Vârstă</label><input id="f-age" type="number"></div>
         <div class="form-group"><label>Gen</label><select id="f-gender"><option value="">—</option><option>Masculin</option><option>Feminin</option></select></div>
         <div class="form-group"><label>Obiectiv</label><select id="f-goal"><option value="">—</option><option>Slăbit</option><option>Masă musculară</option><option>Tonifiere</option><option>Rezistență</option><option>Sănătate generală</option></select></div>
@@ -299,21 +386,26 @@ tr:hover td{background:rgba(200,241,53,.02);}
         <div class="form-group"><label>Durata abonament</label><select id="f-duration"><option value="30">1 lună</option><option value="60">2 luni</option><option value="90">3 luni</option><option value="180">6 luni</option><option value="365">1 an</option></select></div>
         <div class="form-group"><label>Nivel</label><select id="f-level"><option value="">—</option><option>Începător</option><option>Intermediar</option><option>Avansat</option></select></div>
         <div class="form-group"><label>Frecvență zile/săpt</label><select id="f-freq"><option value="">—</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
-        <div class="form-group full"><label>Afecțiuni</label><textarea id="f-conditions"></textarea></div>
+        <div class="form-group"><label>Preț abonament (RON)</label><input id="f-price" type="number" placeholder="350"></div>
+        <div class="form-group"><label>Afecțiuni</label><input id="f-conditions" placeholder="Ex: hernie, genunchi..."></div>
+        <div class="form-group full" id="invite-opt" style="display:none;">
+          <label class="invite-check"><input type="checkbox" id="f-send-invite" checked> 📧 Trimite invitație pe email — clientul va primi acces la portalul personal</label>
+        </div>
       </div>
     </div>
     <div id="mt-workout" class="tab-content">
-      <div class="form-group" style="margin-bottom:14px;"><label>Plan antrenament</label><textarea id="f-workout" style="min-height:180px;" placeholder="Zi 1 - Piept&#10;- Bench Press 4x10..."></textarea></div>
-      <div class="form-group"><label>Observații</label><textarea id="f-workout-notes"></textarea></div>
+      <div class="form-group" style="margin-bottom:14px;"><label>Plan antrenament</label><textarea id="f-workout" style="min-height:180px;" placeholder="Zi 1 - Piept&#10;- Bench Press 4x10&#10;- Flotări 3x15..."></textarea></div>
+      <div class="form-group"><label>Observații antrenament</label><textarea id="f-workout-notes"></textarea></div>
     </div>
     <div id="mt-diet" class="tab-content">
+      <button class="calc-btn" onclick="calcMacros()" style="margin-bottom:14px;">🧮 Calculează macros automat (din greutate + obiectiv)</button>
       <div class="form-grid">
         <div class="form-group"><label>Calorii (kcal)</label><input id="f-calories" type="number"></div>
         <div class="form-group"><label>Proteină (g)</label><input id="f-protein" type="number"></div>
         <div class="form-group"><label>Carbohidrați (g)</label><input id="f-carbs" type="number"></div>
         <div class="form-group"><label>Grăsimi (g)</label><input id="f-fats" type="number"></div>
         <div class="form-group full"><label>Plan alimentar</label><textarea id="f-diet" style="min-height:150px;"></textarea></div>
-        <div class="form-group full"><label>Alergii</label><textarea id="f-allergies"></textarea></div>
+        <div class="form-group full"><label>Alergii / Intoleranțe</label><textarea id="f-allergies"></textarea></div>
       </div>
     </div>
     <div id="mt-meas" class="tab-content">
@@ -334,7 +426,41 @@ tr:hover td{background:rgba(200,241,53,.02);}
     </div>
   </div>
 </div>
-
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="modal-payment">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeModal('modal-payment')">✕</button>
+    <div class="modal-title">💰 ADAUGĂ PLATĂ</div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Client *</label><select id="pay-client"></select></div>
+      <div class="form-group"><label>Sumă (RON) *</label><input id="pay-amount" type="number" placeholder="350"></div>
+      <div class="form-group"><label>Data</label><input id="pay-date" type="date"></div>
+      <div class="form-group"><label>Tip plată</label><select id="pay-type"><option value="cash">💵 Cash</option><option value="transfer">🏦 Transfer bancar</option><option value="card">💳 Card</option><option value="altele">Altele</option></select></div>
+      <div class="form-group full"><label>Note</label><input id="pay-notes" placeholder="Ex: abonament mai 2026"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn-sec" onclick="closeModal('modal-payment')">Anulează</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="savePayment()" id="btn-save-pay">💾 Salvează</button>
+    </div>
+  </div>
+</div>
+<!-- RENEWAL MODAL -->
+<div class="modal-overlay" id="modal-renewal">
+  <div class="modal" style="max-width:440px;">
+    <button class="modal-close" onclick="closeModal('modal-renewal')">✕</button>
+    <div class="modal-title">🔄 REÎNNOIRE ABONAMENT</div>
+    <div id="renewal-info" style="background:rgba(200,241,53,.06);border:1px solid rgba(200,241,53,.2);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;"></div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Prelungire cu</label><select id="renewal-duration"><option value="30">1 lună (30 zile)</option><option value="60">2 luni (60 zile)</option><option value="90">3 luni (90 zile)</option><option value="180">6 luni (180 zile)</option><option value="365">1 an (365 zile)</option></select></div>
+      <div class="form-group"><label>Înregistrează și plată?</label><select id="renewal-pay"><option value="1">✅ Da, adaugă plată</option><option value="0">Nu</option></select></div>
+      <div class="form-group"><label>Sumă plată (RON)</label><input id="renewal-amount" type="number" placeholder="350"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn-sec" onclick="closeModal('modal-renewal')">Anulează</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="saveRenewal()" id="btn-save-renewal">🔄 Reînnoire</button>
+    </div>
+  </div>
+</div>
 <!-- PROGRESS MODAL -->
 <div class="modal-overlay" id="modal-progress">
   <div class="modal" style="max-width:560px;">
@@ -358,7 +484,28 @@ tr:hover td{background:rgba(200,241,53,.02);}
     </div>
   </div>
 </div>
-
+<!-- CLIENT PROGRESS MODAL -->
+<div class="modal-overlay" id="modal-cli-progress">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('modal-cli-progress')">✕</button>
+    <div class="modal-title">📏 ADAUGĂ MĂSURĂTORI</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Data</label><input id="cp-date" type="date"></div>
+      <div class="form-group"><label>Greutate (kg)</label><input id="cp-weight" type="number" step="0.1"></div>
+      <div class="form-group"><label>Abdomen (cm)</label><input id="cp-waist" type="number" step="0.1"></div>
+      <div class="form-group"><label>Piept (cm)</label><input id="cp-chest" type="number" step="0.1"></div>
+      <div class="form-group"><label>Șolduri (cm)</label><input id="cp-hips" type="number" step="0.1"></div>
+      <div class="form-group"><label>Coapsă (cm)</label><input id="cp-thigh" type="number" step="0.1"></div>
+      <div class="form-group"><label>Braț (cm)</label><input id="cp-arm" type="number" step="0.1"></div>
+      <div class="form-group"><label>% Grăsime</label><input id="cp-bodyfat" type="number" step="0.1"></div>
+      <div class="form-group full"><label>Notă</label><textarea id="cp-note"></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn-sec" onclick="closeModal('modal-cli-progress')">Anulează</button>
+      <button class="btn btn-primary" style="width:auto;" onclick="saveCliProgress()" id="btn-save-cliprog">💾 Salvează</button>
+    </div>
+  </div>
+</div>
 <!-- SESSION MODAL -->
 <div class="modal-overlay" id="modal-session">
   <div class="modal" style="max-width:500px;">
@@ -379,7 +526,6 @@ tr:hover td{background:rgba(200,241,53,.02);}
     </div>
   </div>
 </div>
-
 <!-- BACKUP MODAL -->
 <div class="modal-overlay" id="modal-backup">
   <div class="modal" style="max-width:480px;">
@@ -392,495 +538,909 @@ tr:hover td{background:rgba(200,241,53,.02);}
     </div>
     <div class="ds">
       <div class="ds-title">📥 Import date</div>
-      <label style="cursor:pointer;text-transform:none;letter-spacing:0;">
-        <span class="btn-sec" style="display:flex;cursor:pointer;">📂 Alege fișier JSON</span>
-        <input type="file" accept=".json" style="display:none;" onchange="handleImport(this)">
-      </label>
+      <label style="cursor:pointer;ont-sizeclass="btn-sec" style="display:flex;cursor:pointer;on📂 Alege fișier JSON</span><input type="file" accept=".json" style="display:none;" onchange="handleImport(this)"></label>
     </div>
   </div>
 </div>
-
 <script>
-const SURL = 'https://vszywnvyyynfyhczmmgf.supabase.co';
-const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzenl3bnZ5eXluZnloY3ptbWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0ODQzNjYsImV4cCI6MjA4OTA2MDM2Nn0.ifhC_o7OnRaWkD6MSMEugu6BOeQ7cT1ud6UdZG1yJAk';
-
-var sb, currentUser, clients=[], sessions=[], currentClientId=null, editingClientId=null, editingSessionId=null, calView='week', calOffset=0, charts={};
-
-function init() {
-  if (!window.supabase) { 
-    setTimeout(init, 100); 
-    return; 
-  }
-  sb = supabase.createClient(SURL, SKEY, {
-    auth: { storage: localStorage, storageKey: 'fitpro-auth', persistSession: true, autoRefreshToken: true }
-  });
-  
-  // Check session
-  sb.auth.getSession().then(function(r) {
-    if (r.data && r.data.session && r.data.session.user) {
-      startApp(r.data.session.user);
-    } else {
-      // Try saved credentials
-      var e = localStorage.getItem('fp_e'), p = localStorage.getItem('fp_p');
-      if (e && p) {
-        sb.auth.signInWithPassword({email: atob(e), password: atob(p)}).then(function(r2) {
-          if (r2.data && r2.data.user) startApp(r2.data.user);
-          else showAuth();
-        });
-      } else {
-        showAuth();
-      }
-    }
-  }).catch(function() { showAuth(); });
+// ═══════════════════════════════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════════════════════════════════════════
+const SURL='https://vszywnvyyynfyhczmmgf.supabase.co';
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzenl3bnZ5eXluZnloY3ptbWdmIiwicm9sZSI6backup</button>
+    </h>NumenZ5eXluZontent"></div>
+        <div id="tab-masuratori" clasrpYXQiOjE3NzM0ODQzNjYsImV4m9sZMjA4OTA2MDM2Nn0.ifhC_o7OnRaWkD6MSMEugu6BOeQ7cT1ud6UdZG1yJAkJlZiI6InZsb=windowBhYmFzZSIsIex-tdiv>
+<!-iIsI,zenl);
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════STAT��══════════════════════════════
+const SURL='https://vszywnvyyynfyhczmmgf.supabase.co';
+const SKEY='eyJhbGciOiJlet ger btnUser=ente,ger btn�️ Ae=ente;Jlet allon</th>=[],allv>
+<!-->=[],all</div>
+<=[],all<R -->
+ =[],all
+       =[];Jlet ger btn-sm" onc=ente,ger btn</div>
+-sm" onc=ente,editv>
+<!--nc=ente,edit-sm" onc=ente;Jlet gsm" o <di=ente,gsm" o</div>
+< <di=[],gsm" ov>
+<!--> <di=[],gsm
+       =[];Jlet gchange="re,cck="ca= oncli;Jlet _revCs-ti=ente,_finCs-ti=ente;Jlet aume *Msg-sm" onc=ente;Jlet un;marCy:fl=0;
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════BOOT�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════sb.labe.onuth-optieC═�(asyncnclick,th:auto)=>.ope>
+        <div class="staen" sty').v>
+</.v>
+<scr='pt>
+i;J  if(th:auto&&th:auto.14pxr.ope  ger btnUser=th:auto.14px;ope  gI6InZass==await  <dOrCex-td�️ Ae(th:auto.14pxr;ope  ger btn�️ Ae=ass=;ope  if(ass=.roAe==='h:auto;"{x;curso>
+        <div class="staapp').v>
+</.v>
+<scr='pt>
+i;J  urso>
+        <div class="staath-logo">F').v>
+</.v>
+<scr='pt>
+i;J  urso>
+        <div class="stas="client-').v>
+</.v>
+<scr='TPRO<i;J  ursoawait en" -sm" o</tbod(ass=r;ope  } else {J  urso>
+        <div class="staath-logo">F').v>
+</.v>
+<scr='pt>
+i;J  urso>
+        <div class="stas="client-').v>
+</.v>
+<scr='pt>
+i;J  urso>
+        <div class="staat-').v>
+</.v>
+<scr='TPRO<i;J  urso>
+        <div class="staactive" on').nt:fCeModal=ger btnUser.e" on;J  ursoawait en" All();J  urso  <div class="nav-itemope  }
+  } else {J  urger btnUser=ente; ger btn�️ Ae=ente;Jurso>
+        <div class="staen" sty').v>
+</.v>
+<scr='pt>
+i;J  so>
+        <div class="staapp').v>
+</.v>
+<scr='pt>
+i;J  ur>
+        <div class="stas="client-').v>
+</.v>
+<scr='pt>
+i;J  ur>
+        <div class="staath-logo">F').v>
+</.v>
+<scr='".jsi;J  }
+});
+�async fun  <di  <dOrCex-td�️ Ae(14pxr.opevar r=await sb.fromntrename)">�.id="s-('*>�.eq('id',14px.id).maybeSstyAe();J  if(r.ispa) return r.ispa;opevar inv=await sb.fromnts="cli_la por">�.id="s-('*>�.eq('s="cli_e" on',14px.e" on�.eq('  </died',false).maybeSstyAe();J  if(la .ispa){J  urvar ass=={id:14px.id,roAe:'h:auto;,tactive_id:la .ispa.tactive_id,gsm" o_record_id:la .ispa.s="cli_ld};J  urawait sb.fromntrename)">�./sty��ass=r;ope  await sb.fromnts="cli_la por">�.upispl({  </died:true}�.eq('id',la .ispa.id);ope  await sb.fromnts="cli">�.upispl({s="cli_14px_id:14px.id}�.eq('id',la .ispa.s="cli_ld);ope  return ass=;ope}
+urvar ass=={id:14px.id,roAe:'tactive'};J  await sb.fromntrename)">�./sty��ass=r;opereturn ass=;o}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════AUTH UI�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di  id="auth-err"t).ope>
+        <div class="sta class="auth->�.span>‹<.el><in('  me *;,t==='ick="sw;ope>
+        <div class="sta clav class>�.span>‹<.el><in('  me *;,t==='</div>
+   ;ope>
+        <div class="staenype="ema').v>
+</.v>
+<scr=t==='ick="s?'TPRO<i:'pt>
+i;J  >
+        <div class="stael><inpu').v>
+</.v>
+<scr=t==='</div>
+  ?'TPRO<i:'pt>
+i;J  >
+        <div class="stain-form"').v>
+</.v>
+<scr='pt>
+i;J  >
+        <div class="stain-fook').v>
+</.v>
+<scr='pt>
+i;J}�fun  <di in-fErr(m){var e=>
+        <div class="stain-form"');e.nt:fCeModal=m;e.v>
+</.v>
+<scr='TPRO<i;>
+        <div class="stain-fook').v>
+</.v>
+<scr='pt>
+i;}�fun  <di in-fOk(m){var e=>
+        <div class="stain-fook');e.nt:fCeModal=m;e.v>
+</.v>
+<scr='TPRO<i;>
+        <div class="stain-form"').v>
+</.v>
+<scr='pt>
+i;}
+�async fun  <di -form" st.opevar e" on=>
+        <div class="staenype=e" on'). full.taim();J  var aan><>
+        <div class="staenype=aan>'). full;J  if(!e" on||!aan>) return in-fErr('Co><in-y:auto      plat�er="�.');J  var ass<>
+        <div class="staisplay:no');J  isp.v>
+caled=true; isp.nt:fCeModal='Se - DASHy:aut...';J  var {rm"or}=await sb.labe.signInWithPn btn-p({     ,tn btn-p:tn b});J  isp.v>
+caled=false; isp.nt:fCeModal=';">
+      <div i;J  if(rm"or) in-fErr(rm"or.  <div );o}
+�async fun  <di -f- TRAINER .opevar fy-c=>
+        <div class="stael><fy-c'). full.taim();J  var e" on=>
+        <div class="stas="fg"><l'). full.taim();J  var aan><>
+        <div class="sta<button '). full;J  if(!fy-c||!e" on||!aan>) return in-fErr('Co><in-y:autott</thcâmpurme).');J  if(aan>.length<6) return in-fErr('der="a trebuie v claibid">inim��•••�.');J  var ass<>
+        <div class="staispl<bu');J  isp.v>
+caled=true; isp.nt:fCeModal='Se -"app">
+...';J  var {rm"or}=await sb.labe.signUp({     ,tn btn-p:tn b,textars:{ispa:{   <_fy-c:fy-c}}});J  isp.v>
+caled=false; isp.nt:fCeModal='="app">
+  <dii;J  if(rm"or) in-fErr(rm"or.  <div );o  else in-fOk('CeMo Iex-t! V    icuto     kout"">
+u  <dfirmare, div  in-"">  icut-t�.');J}
+�async fun  <di -formclass{await sb.labe.signOlass;}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════DATA LOAD�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════async fun  <di en" All(){J  if(!ger btnUser) return;J  var uid=ger btnUser.id;J  var [rc,rs,rp,rpay,rm]=await ��mise.all([ope  sb.fromnts="cli">�.id="s-('*>�.eq('tactive_id',1id).(--mu('fy-c'),ope  sb.fromntlick="show.id="s-('*>�.eq('tactive_id',1id).(--mu('ispl',{ascenne;">false}),ope  sb.fromntdth:auto;".id="s-('*,gsm" os(fy-c)>�.eq('tactive_id',1id).(--mu('ispl',{ascenne;">false}),ope  sb.fromntdR -->
+ ;".id="s-('*,gsm" os(fy-c)>�.eq('tactive_id',1id).(--mu('ispl',{ascenne;">false}),ope  sb.fromnt  <div iow.id="s-('*>�.eq('tactive_id',1id).(--mu('Iex-tdd_at',{ascenne;">true}�ope]);o  allon</th>=rc.ispa||[];J  allv>
+<!-->=rs.ispa||[];J  all</div>
+<=rp.ispa||[];J  all<R -->
+ =rpay.ispa||[];J  all
+       =rm.ispa||[];J  un;marCy:fl=all
+       .olid v(m=>m.soptio==='h:auto;&&!m.;mar).length;J  var as="s<>
+        <div class="stais="sidebar-');J  if(is="s){is="s.nt:fCeModal=un;marCy:fl;is="s.v>
+</.v>
+<scr=un;marCy:fl>0?'intn b-TPRO<i:'pt>
+i;}
+urvar dc<>
+        <div class="sta
+            <');J  if(dc) dc.nt:fCeModal=un;marCy:fl>0?`(${un;marCy:fl})`:'';o}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════NAVIGATION�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di   <div clp).ope>
+       queryrflow-orAll('."mod>�.inpEach(x=>x.span>‹<.removn('  me *;) ;ope>
+       queryrflow-orAll('.��</span>�.inpEach(x=>x.span>‹<.removn('  me *;) ;opevar ag=>
+        <div class="stats"si'+p);J  if(ag) ag.span>‹<.add('  me *;);opevar ni=>
+       queryrflow-or('.��</span[ass="ds*="\''+p+'\'"]');J  if(ni) ni.span>‹<.add('  me *;);opeif(a==='ss="nav-ite ;bordeDs="nav-i();o  else if(a==='s="cli">� ;bordeon</th><);o  else if(a==='v></div>>� ;bordeE></div><);o  else if(a==='NANCIAR</>� ;bordeFANCIAR</();o  else if(a==='s-radius'){;border-radius:6;}
+urelse if(a==='debar-') ;borde class();o}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════DASHBOARD�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di ;bordeDs="nav-i().opevar fow=new Dspl(),ms=new Dspl(fow  <dF  <Yeus:6,fow  <dMeMoh:6,1);opevar meMohv>
+<=allv>
+<!-->.olid v(s=>new Dspl(s.ispe)>=ms).length;J  var meMohRev=all<R -->
+ .olid v(p=>new Dspl(p.ispe)>=ms).reduce((a,p)=>a+(p.lay:fl||0),0);opevar totalRev=all<R -->
+ .reduce((a,p)=>a+(p.lay:fl||0),0);opevar   me *=allon</th>.olid v(c=>{if(!g.sub��═�!--_bor)return false;return new Dspl(g.sub��═�!--_bor)>=fow;}).length;J  var lass=El<>
+        <div class="sta
+    lass=;);opelass=El.iniveHTML=`
+grid;grid-template-c-      ;grid-template-c-px;texgroup"rm-g  me           <d-template-c- full">${  me *}var(--muted);">Toate pl�6hread" style="flex:1;ove/${ llon</th>.length}px 1fr;gap:16p  <d-template-c-subsplatal ${ llon</th>.length}s="tw">
+              <label style="cute-c-     c2  ;grid-template-c-px;texg'chat')v cla as<lab       <d-template-c- full">${meMohv>
+<}gap:16p  <d-template-c-subsplass${ llv>
+<!-->.length}stotal             <label style="cute-c-     cw  ;grid-template-c-px;texg     <div cla as<lab       <d-template-c- full"-muted);">Toate pl2�� Des${meMohRev.tfors-raStdiv><'ro-RO')}gap:16p  <d-template-c-subspRdleI           <label style="cute-c-     cp  ;grid-template-c-px;texglatal v    <diab       <d-template-c- full"-muted);">Toate pl2�� Des${totalRev.tfors-raStdiv><'ro-RO')}gap:16p  <d-template-c-subspRdleI          `;ope═Rclicue ds-tiJ  var px;te =[],d<di=[];opeinp(var i=5;i>=0;i--){J  urvar d=new Dspl(fow  <dF  <Yeus:6,fow  <dMeMoh:6-i,1);ope  var e=new Dspl(fow  <dF  <Yeus:6,fow  <dMeMoh:6-i+1,1);ope  px;te .push(d.tfors-raStdiv><'ro-RO',{meMoh:'  <rt'}));ope  ispa.push(all<R -->
+ .olid v(p=>{var pd=new Dspl(p.ispe);return pd>=d&&pd<e;}).reduce((a,p)=>a+(p.lay:fl||0),0));ope}
+urvar cv><>
+        <div class="stads-titrclicue;);opeif(cv>){if(_revCs-ti){_revCs-ti.de    y:6;}_revCs-ti=eew Cs-ti(cv>,{></l:aisr',ispa:{px;te ,ispasets:[{px;te:'Rdl',ispa,dius:8px;pCd" st't-size:12px;color7)',r(--muRtion va}]},textars:{v>
+parse *>true,nonetoneAspow-Rp</l>false,plugirs:{" onnd:{ accept="alse}},ss-ras:{x:{t"dss:{ad" st'#888'},-cli:{ accept="alse}},y:{t"dss:{ad" st'#888'},-cli:{ad" st'#252535'}}}}});}ope═E></div>J  var exp14=allon</th>.olid v(c=>{if(!g.sub��═�!--_bor)return false;var d=new Dspl(g.sub��═�!--_bor);return d>=fow&&d<=new Dspl(fow  <dTiml()+14*86400000);}).s���(a,b)=>new Dspl(a.sub��═�!--_bor)-new Dspl(b.sub��═�!--_bor));J  var expEl<>
+        <div class="sta
+-v></div>>�;J  if(rxpEl) expEl.iniveHTML=exp14.length?exp14.map(c=>{var days=Math.ceil((new Dspl(g.sub��═�!--_bor)-fow)/86400000);return`      <button class="btn-ick="closeModal(>
+  e-betweentton class="btn-sec :none;">📌 <6hrer(--mut()">⬇�amily:'DM Sans',sans-seup full"><label>Pr    <di${c.fy-c}      <diap:wrap;">
+          <button class="btn-sec btn-sm" r JSON</span><i${days<=3?'dbd':days<=7?'dwn':'dok'}es${days}zpx 1fr;gnnoire</button>
+            <button class="btn-sec '${c.id}="dsass="modal-overlay"eI          `}).join(''):'p  <d-templaemptă</button:none;">s')">�p  <d-templaeiv>
+        Nicio v></dare    <14ează      ';ope═Rccconte       J  var msgEl<>
+        <div class="sta
+-  <div iow;J  var rccconMsg =[...new Set(all
+       .olid v(m=>m.soptio==='h:auto;).map(m=>m.s="cli_ld))].son e(0,4�;J  if(msgEl) msgEl.iniveHTML=rccconMsg .length?rccconMsg .map(cid=>{var c=allon</th>.olnd(x=>x.id===cld);var msgs=all
+       .olid v(m=>m.s="cli_ld===cld);var temt=msgs[msg .length-1];var unr=msgs.olid v(m=>m.soptio==='h:auto;&&!m.;mar).length;return`      <button class="btn-ick="closeModal(>
+  e-betweentton class="btn-sec :none;">📌 <6hrer(--mut()">⬇�amily:'DM Sans',sans-seup full"><labeln" style="displayle="margin-bottom:1debar-');id="s-Msg-sm" o '${cid}="ds<         <di${c?c.fy-c:'—'}      <di${un;>0?`JSON</span><i��</is="s�</button:osgroup:te-cicportDataleft:6� Des${un;}px 1fr;`:''}      <buttoad" style="flex:1;oup full"><l      <div ">An�� Des${temt?temt.seModal.son e(0,40)+'…':''} I                `}).join(''):'p  <d-templaemptă</button:none;">s')">�Nici;border- fou      ';o}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════  <diȚI�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di ;bordeon</th><).opevar fow=new Dspl();J  var html=allon</th>.map(c=>{ope  var exp=g.sub��═�!--_bor?new Dspl(g.sub��═�!--_bor):ente;Jursovar days=exp?Math.ceil((exp-fow)/86400000):ente;Jursovar sc=exp?(exp<fow?'bx':days<=7?'be':ais'):'';Jursovar mt-wor=g.s="cli_14px_id?'JSON</span><ins="s bav>
+   Aoption 1fr;':`gnnoire</button>
+            <button claclick.s">APropagp</la();doSborput id '${c.id}=,'${c.e" on||''}owCliTa� put i-overlay" i`;Jursovar temt<R =all<R -->
+ .olid v(p=>p.s="cli_ld===c.id).s���(a,b)=>new Dspl(b.ispe)-new Dspl(a.ispe))[0];ope  return`<trnt-content">
+    " o       '${c.id}="dter;on📂 Alege fișier x;cursortdPr    <di${c.fy-c}      <di${c.ediar?`Jbr>var(--muted);">Toate pl�1hread" style="flex:1;ove${c.ediar}px 1fr;`:''}:flex-endtdPx;cursortdP${c.-emai||'—'}  tdPx;cursortdP${c.lar�||'—'}  tdPx;cursortdPJSON</span><ins="s ${sc}es${exp?exp.tfors-raDsplStdiv><'ro-RO'):'Nesetat'}px 1fr;gatdPx;cursortdP${days!==ente?`JSON</span><i${days<0?'dbd':days<=7?'dwn':'dok'}es${days<0?'E></dat':days+'z'}px 1fr;`:'—'}  tdPx;cursortdP${temt<R ?`JSON</muted);">Toate pl�">Valori iniția   <div cl${temt<R .lay:fl} Rdlebr>var(--muted);ad" style="flex:1;ove${temt<R .ispe}px 1fr;ga 1fr;`:'—'}  tdPx;cursortdP${mt-wor}  tdPx;cursortdbutton claclick.s">APropagp</la()">� Editează</button>
+            <button class="btn-dan'${c.id}="dsk="del-overlay"eItdPx;cureItri`;Jur}).join('');J  >
+        <div class="stas="cli"-tabel>�./siveHTML=html||'<tr>rtdbad" 1fr="8"d-templaemptă�Nici;bos="cli adăugel><tdPJItri';ope═Popabele gch olid v
+urvar cf<>
+        <div class="stadal-olid v;);opeif(cf) cf./siveHTML='ption>HIIT</optioTo>
+   textare'+allon</th>.map(c=>`ption>HIIT</opt${c.id}"i${c.fy-c}  textare`).join('');J}
+�fun  <di olid von</th><q).opeq=q.tforwder-sl();J  >
+       queryrflow-orAll('#s="cli"-tabel tr>�.inpEach(r=>{r.v>
+</.v>
+<scr=r.nt:fCeModal.tforwder-sl()./sclude><q)?'i:'pt>
+i;});o}
+�═odal">
+    <�fun  <di s="btn-iv>
+<!--.opeedit-sm" onc=ente;J  >
+        <div class="sta;">
+    ').nt:fCeModal='<div class="ta';J  var id =['="f-ph=,'"f-emai=,'"fe" on','<sele','<sorm-group ','<s)">Diet�,'<s)">Diettify-c','<so (g)</l=,'"f-ți (g','<so rbl=,'"fimen=,'"frăto,'<ses="tab-c�,'<s)domen�,'<shdomen�,'<sept (','<soldur�,'<shipc�,'<saț (o,'<sermo,'<sabel>No=,'"f-�n e'];opeid .inpEach(id=>{var el<>
+        <div class="stld);if(rl)el. full='i;});o  >
+        <div class="stan</optio'). full='';o  >
+        <div class="stan</oal'). full='';o  >
+        <div class="stan<ediar'). full='';o  >
+        <div class="stan<>4</'). full='';o  >
+        <div class="stan<ent</'). full=new Dspl().tfISOStdiv><).son e(0,10);o  >
+        <div class="stan<>Tip</la'). full='30';o  >
+        <div class="stat type="ch').v>
+</.v>
+<scr='pt>
+i;J  kout')">Antrenamen;J  s="b" style="width:auto;";J}
+�fun  <di  class="btn-danld).opevar c=allon</th>.olnd(x=>x.id===ld);if(!c)return;J  edit-sm" onc=id;J  >
+        <div class="sta;">
+    ').nt:fCeModal='EDITEAZclass="ta';J  >
+        <div class="stan<fy-c'). full=c.fy-c||'';J  >
+        <div class="stan<-emai=). full=c.-emai||'';J  >
+        <div class="stan<g"><l'). full=c.e" on||'';J  >
+        <div class="stan<mod>�. full=c.mod||'';J  >
+        <div class="stan</optio'). full=c.loptio||'';J  >
+        <div class="stan</oal'). full=c.lar�||'';o  >
+        <div class="stan<ent</'). full=g.sub��═�!--_ent</||'';o  >
+        <div class="stan<ediar'). full=c.ediar||'';o  >
+        <div class="stan<>4</'). full=c.>4</uency||'';J  >
+        <div class="stan<-�n e'). full=c.-�n e||'';J  >
+        <div class="stan<orm-group '). full=c.orm-group ||'';J  >
+        <div class="stan<)">Dietă. full=c.)">Diet||'';J  >
+        <div class="stan<)">Diettify-c'�. full=c.)">Diet_ify-c||'';J  >
+        <div class="stan<o (g)</l=). full=c.o (g)</l||'';J  >
+        <div class="stan<-ți (g'). full=c.-ți (g||'';J  >
+        <div class="stan<o rbl=). full=c.o rbl||'';o  >
+        <div class="stan<>ss=;). full=c.>ss=||'';o  >
+        <div class="stan<rător. full=c.răt||'';J  >
+        <div class="stan<ms="tab-c��. full=c.ms="tab-c||'';J  >
+        <div class="stan<)domenă. full=c.)domen||'';J  >
+        <div class="stan<hdomenă. full=c.hdomen||'';J  >
+        <div class="stan<ept ('�. full=c.)pt (||'';J  >
+        <div class="stan<oldur�). full=c.oldur||'';J  >
+        <div class="stan<hipcă. full=c.hipc||'';J  >
+        <div class="stan<aț (o�. full=c.aț (||'';J  >
+        <div class="stan<mpu'). full=c.mrm||'';J  >
+        <div class="stan<abel>No=). full=c.abel_>No||'';J  if(c.e" on� >
+        <div class="stat type="ch').v>
+</.v>
+<scr='TPRO<i;J  kout')">Antrenamen;J  s="b" style="width:auto;";J}
+�fun  <di el><input id="f-a.opevar e" on=>
+        <div class="staffg"><l'). full.taim();J  >
+        <div class="stat type="ch').v>
+</.v>
+<scr=g"><l?'TPRO<i:'pt>
+i;J}
+�fun  <di kout')">Antt).ope>
+       queryrflow-orAll('#="width:auto .tab>�.inpEach((x,i)=>{ope  var chMT=['ename,')">Diet�,'răto,' acti];ope  x.span>‹<.el><in('  me *;,thMT[i]===t);ope});ope['v classo,' ts)">Diet�,'os()" s�,'os( acti].inpEach(id=>{ope  var el<>
+        <div class="stld);ope  if(el) el.span>‹<.el><in('  me *;,id==='os('+t);ope});o}
+�async fun  <di 
+</div>
+<!--.opevar fy-c=>
+        <div class="staf<fy-c'). full.taim();J  if(!fy-c) return ily��'>Telle dure obligelg)<u.');J  var ass<>
+        <div class="staisplODAL -->
+<d');J  isp.v>
+caled=true;ope═Co><ure sub��═�!--_bor fromgroup" + >Tip</laJ  var lasrt=>
+        <div class="stan<ent</'). full;J  var >Ti=parsnput(>
+        <div class="stan<>Tip</la'). full)||30;J  var lubEnc=ente;J  if(tt-ti){var ld=new Dspl(tt-ti);sd.setDspl(td  <dDspl()+>Ti);subEnc=sd.tfISOStdiv><).son e(0,10);}
+urvar d<di={ope  fy-c,-emai:>
+        <div class="stan<-emai=). full.taim(),ope  g"><l:>
+        <div class="staffg"><l'). full.taim(),ope  mod:parsnput(>
+        <div class="stan<mod>�. full)||ente,ope  loptio:>
+        <div class="stan</optio'). full||ente,ope  lar�:>
+        <div class="stan</oal'). full||ente,ope  sub��═�!--_ent</:ent</||ente,sub��═�!--_bor:subEnc,ope  ediar:>
+        <div class="stan<ediar'). full||ente,ope  >4</uency:>
+        <div class="stan<>4</'). full||ente,ope  -�n e:parsnFloat(>
+        <div class="stan<-�n e'). full)||ente,ope  orm-group :>
+        <div class="stan<orm-group '). full||ente,ope  )">Diet:>
+        <div class="stan<)">Dietă. full||ente,ope  )">Diet_ify-c:>
+        <div class="stan<)">Diettify-c'�. full||ente,ope  o (g)</l:parsnput(>
+        <div class="stan<o (g)</l=). full)||ente,ope  -ți (g:parsnput(>
+        <div class="stan<-ți (g'). full)||ente,ope  o rbl:parsnput(>
+        <div class="stan<o rbl=). full)||ente,ope  >ss=:parsnput(>
+        <div class="stan<>ss=;). full)||ente,ope  )" s:>
+        <div class="stan<rător. full||ente,ope  ms="tab-c:>
+        <div class="stan<ms="tab-c��. full||ente,ope  )ergii parsnFloat(>
+        <div class="stan<)domenă. full)||ente,ope  hergii parsnFloat(>
+        <div class="stan<hdomenă. full)||ente,ope  )pt ( parsnFloat(>
+        <div class="stan<)pt ('�. full)||ente,ope  oldur parsnFloat(>
+        <div class="stan<oldur�). full)||ente,ope  hipc parsnFloat(>
+        <div class="stan<hipcă. full)||ente,ope  aț ( parsnFloat(>
+        <div class="stan<aț (o�. full)||ente,ope  mrm parsnFloat(>
+        <div class="stan<mpu'). full)||ente,ope  abel_>No parsnFloat(>
+        <div class="stan<abel>No=). full)||ente,ope  aactive_id:ger btnUser.idope};J  var err,/sty��edId=edit-sm" onc;J  if(rdit-sm" onc){J  urvar r=await sb.fromnts="cli">�.upispl(ispa).eq('id',rdit-sm" onc);err=r.rm"or;
+  } else {J  urvar r=await sb.fromnts="cli">�./sty��ispa).id="s-().istyAe();J    err=r.rm"or;if(r.ispa) /sty��edId=r.ispa.id;ope}
+urif(!err&&!rdit-sm" onc&&>
+        <div class="stan<ebor-t type>�.sheckec){J  urvar e" on=>spa.e" on;J  urif(r" on&&/sty��edId) await doSborput id /sty��edId,     ,true);ope}
+urisp.v>
+caled=false;J  if(rm") return ily��'Eroare: '+rm".  <div );o  imary" style="width:auto;";J  await en" All(); ;bordeon</th><);ott<s�'roup"><salvat!');J}
+�async fun  <di -fSborput id csm" onc,     ,sil<div{J  if(!e" on){if(!sil<divily��'roup">ul nu are e" on.');return;}
+  await sb.fromnts="cli_la por">�.upty��{aactive_id:ger btnUser.id,s="cli_ld:csm" onc,s="cli_e" on:     ,  </died:"alse},{onConfon t:ts="cli_ld'});opevar tempSb=windowBhYmFzZSIsIex-tdiv>
+<!-iIsI,zenl,{labe:{slg)mod:{ <dItem:()=>nnte,s<dItem:()=>{},removnItem:()=>{}},perst (v>
+<!-->false,</diRe>4<shToke->false,flowT</l:aimpon it'}});opevar {rm"or}=await tempSb.labe.signInWithOtp({     ,textars:{shouldCex-tdUser>true,     Rrdir"s-To:windowBPROp</la.g)<gin+windowBPROp</la.pathfy-c}});J  if(rm"or){if(!sil<divily��'Eroare la poorm-e: '+rm"or.  <div );}
+urelse{if(!sil<div{tt<s�'Ia poorm-e taimiv clla '+r    +'!');await en" All();;bordeon</th><);}}o}
+�═odal">
+DETAIL�fun  <di   <d   " o       ld).opeger btn-sm" onc=id;J  var c=allon</th>.olnd(x=>x.id===ld);if(!c)return;J  >
+        <div class="sta
+     <fy-c').nt:fCeModal=g.fy-c;J  k <div clas     ;);opelout')>Antrrename;";J}
+�fun  <di dein-yCer btn-sm" o(){J  if(!ger btn-sm" onc) return;J  if(!g<dfirm('Șt"tabos="cliu  plattt</thisplle? Aceas<l nu pt</thfi <label�.')) return;J  (asyncn)=>{ope  await sb.fromntren:auto;".dein-y(�.eq('s="cli_id',ger btn-sm" onc);ope  await sb.fromntlick="show.dein-y(�.eq('s="cli_id',ger btn-sm" onc);ope  await sb.fromntdR -->
+ ;".dein-y(�.eq('s="cli_id',ger btn-sm" onc);ope  await sb.fromnt  <div iow.dein-y(�.eq('s="cli_id',ger btn-sm" onc);ope  await sb.fromnts="cli_la por">�.dein-y(�.eq('s="cli_id',ger btn-sm" onc);ope  await sb.fromnts="cli">�.dein-y(�.eq('id',ger btn-sm" onc);ope  await en" All(); k <div clas="cli">�;ope})();J}
+�fun  <di kout')>Antt).ope>
+       queryrflow-orAll('#ts"sis      .tab>�.inpEach(x=>x.span>‹<.removn('  me *;) ;ope>
+       queryrflow-orAll('. claseModal>�.inpEach(x=>x.span>‹<.removn('  me *;) ;opevar ass<>
+       queryrflow-or(`#ts"sis      .tab[ass="ds*="'${t}'"]`);J  if(itn)risp.span>‹<.add('  me *;);opevar tc<>
+        <div class="sta cla'+t);opeif(tc) tc.span>‹<.add('  me *;);opeif(t==='rename;" ;borde>An�️ A();o  else if(t==='ant;boaauto;" ;borde>AnAnt;boaauto();o  else if(t==='răta;" ;borde>AnDăta();o  else if(t==='masTip<g)<;" ;borde>AnMasTip<g)<();o  else if(t==='ren:aut;" ;borde>An��:aut();o  else if(t==='rbel<;" ;borde>AnPbel<();o  else if(t==='mebar-_h:auto;" ;borde>AnMebar--sm" o();o  else if(t==='ify-;" ;borde>An="di();J}
+�fun  <di ;borde>An�️ A().opevar c=allon</th>.olnd(x=>x.id===ger btn-sm" onc);if(!c)return;J  var exp=g.sub��═�!--_bor?new Dspl(g.sub��═�!--_bor):ente;Jurvar days=exp?Math.ceil((exp-few Dspl())/86400000):ente;Jur>
+        <div class="sta clarename;".iniveHTML=`
+grid;grid-templa
+     <-client"></select></div>
+rsorr;ont-sizeclass="btn-sDspl personallay:flex;cursoselect></div>
+irr JSON</span><iik">E    px 1fr;gSON</span><iiv"i${c.e" on||'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">Tflofonpx 1fr;gSON</span><iiv"i${c.-emai||'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">Vârsi-ove 1fr;gSON</span><iiv"i${c.s"s?c.s"s+' <li':'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">Genpx 1fr;gSON</span><iiv"i${c.loptio||'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">Ne * px 1fr;gSON</span><iiv"i${c.ediar||'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">Fr"svw">
+-ove 1fr;gSON</span><iiv"i${c.>4</uency?c.>4</uency+' z/v cpt':'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">Obieoption 1fr;gSON</span><iiv"i${c.lar�||'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">Afecrm-union 1fr;gSON</span><iiv"i${c.orm-group ||'—'}   ta</label><inpusootes"></textarea></div>
+ rsorr;ont-sizeclass="btn-sAbooaautolabel><inpusoselect></div>
+irr JSON</span><iik">Snt</on 1fr;gSON</span><iiv"i${c.sub��═�!--_ent</||'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">E></dareon 1fr;gSON</span><iiv ${exp&&exp<few Dspl()?'dbd':days&&days<=7?'dwn':'dok'}es${g.sub��═�!--_bor||'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">Zil< rămaseon 1fr;gSON</span><iiv"i${days!==ente?days<0?'gSON</span><idbd">E></daton 1fr;':`gSON</span><i${days<=7?'dwn':'dok'}es${days}ează   1fr;`:'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">Prețpx 1fr;gSON</span><iiv"i${c.-�n e?c.-�n e+' Rdl':'—'}   ta</label><inpusoselect></div>
+irr JSON</span><iik">Pt-woros="clion 1fr;gSON</span><iiv"i${c.o="cli_14px_id?'JSON</span><ins="s bav>
+   Aoption 1fr;':'JSON</span><ins="s bn-sNela pooton 1fr;'}   ta</label><inpusootes"></textarea></div>
+ rsorr;ont-sizeclass="btn-sMăsTiăt="form-grid">label><inpusoselect></div>
+mg4"><inpusoseselect></div>
+mcorr;ont-sizeclml"    <div gap:16p  <d-templamv"i${c.)domen||'—'}  p:16p  <d-templamu">kgeI           <labsoseselect></div>
+mcorr;ont-sizeclml" Înălgrim gap:16p  <d-templamv"i${c.hdomen||'—'}  p:16p  <d-templamu">cmeI           <labsoseselect></div>
+mcorr;ont-sizeclml"  <div cgap:16p  <d-templamv"i${c.)pt (||'—'}  p:16p  <d-templamu">cmeI           <labsoseselect></div>
+mcorr;ont-sizeclml"  <div class=p:16p  <d-templamv"i${c.abel_>No||'—'}  p:16p  <d-templamu">%eI           <labsoselabel><inpusootes"></textarea></div>
+ rsorr;ont-sizeclass="btn-soptit (icilabel><inpusoselect></div>
+irr JSON</span><iik">Schat')vtotaleon 1fr;gSON</span><iiv"i${allv>
+<!-->.olid v(s=>s.s="cli_ld===cer btn-sm" onc).length}px 1fr;gap:16<inpusoselect></div>
+irr JSON</span><iik">Schat')vect></dieon 1fr;gSON</span><iiv"i${allv>
+<!-->.olid v(s=>s.s="cli_ld===cer btn-sm" onc&&s.at">�==='</t></di').length}px 1fr;gap:16<inpusoselect></div>
+irr JSON</span><iik">MăsTiăt="fon 1fr;gSON</span><iiv"i${all</div>
+<.olid v(p=>p.s="cli_ld===cer btn-sm" onc).length}px 1fr;gap:16<inpusoselect></div>
+irr JSON</span><iik">latal plătiion 1fr;gSON</span><iivr>
+k"i${all<R -->
+ .olid v(p=>p.s="cli_ld===cer btn-sm" onc).reduce((a,p)=>a+(p.lay:fl||0),0).tfors-raStdiv><'ro-RO')} Rdle  ta</label><inpusootes"></tex      `;o}
+�fun  <di ;borde>AnAnt;boaauto().opevar c=allon</th>.olnd(x=>x.id===ger btn-sm" onc);if(!c)return;J  >
+        <div class="sta claant;boaauto;".iniveHTML=c.)">Diet</tex?`rea></div>
+ rsorr;ont-sizeclass="btn-sPben ant;boaautoeI     pre</button>hype=>
+  e:pre-wrapalori inițiant:f;oup fufamily:'DM Sap ',sap -s    ;tn b-hergii 1.8ove${c.)">Diet}pxpre/label><inpuso${c.)">Diet_ify-c?`rea></div>
+ rsov>
+      <div i">Anu4)">�p  <d-templaass="btn-sObs  vorm-iab     p-muted);ad" style="flex:1;otn b-hergii 1.7ove${c.)">Diet_ify-c}pxp       `:''}`
+grid:'p  <d-templaemptă�p  <d-templaeiv>🏋del-o    Niciun plai de ant;boaautoeI    ';o}
+�fun  <di ;borde>AnDăta().opevar c=allon</th>.olnd(x=>x.id===ger btn-sm" onc);if(!c)return;J  var macros=(c.o (g)</l||c.-ți (g)?`rea></div>
+ mg4"v>
+      <div id="backup-stats" stlect></div>
+mcorr;ont-sizeclml" C (g)<is=p:16p  <d-templamv"i${c.o (g)</l||'—'}  p:16p  <d-templamu">kcal             <label style="cumcorr;ont-sizeclml" Pți (g-ovep:16p  <d-templamv"i${c.-ți (g||'—'}  p:16p  <d-templamu">g             <label style="cumcorr;ont-sizeclml" Carbos=p:16p  <d-templamv"i${c.o rbl||'—'}  p:16p  <d-templamu">g             <label style="cumcorr;ont-sizeclml" div clais=p:16p  <d-templamv"i${c.>ss=||'—'}  p:16p  <d-templamu">g             <l      `:'';J  >
+        <div class="sta clarăta;".iniveHTML=`rea></div>
+ rsor${macros}${c.răt?`rea></div>
+ rss="btn-sPben aliclasareI     pre</button>hype=>
+  e:pre-wrapalori inițiant:f;oup fufamily:'DM Sap ',sap -s    ;tn b-hergii 1.8ove${c.răt}pxpre/`:'p  <d-templaemptă�Niciun plai aliclasareI    '}${c.ms="tab-c?`rea></div>
+ rss="btn-v>
+      <div i">Anu�� DesA="tabiab     p-muted);ad" style="flex:1;o"i${c.ss="tab-c}pxp `:''} I    `;o}
+�fun  <di ;borde>AnMasTip<g)<(){
+urvar assg=all</div>
+<.olid v(p=>p.s="cli_ld===cer btn-sm" onc).s���(a,b)=>new Dspl(b.ispe)-new Dspl(a.ispe));J  >
+        <div class="sta clamasTip<g)<;".iniveHTML=`
+grid;grid <button class="btn-ick="closeModal('modal-session')()">⬇️ Desc"btn-save-sess">💾 Salvează</button>
+    </div>
+  </div>
+s="btn-</div>
+<!'${cer btn-sm" onc}="ds+ Adaugid">ăsTiăt=aal-overlay"eI     <label style="cutw  ;tcale ;thead><tr>rthp"><labthprthp   <div gathprthp <div cgathprthpPieptgathprthpȘold<diabthprthpBrațpxthprthp <div class=thprthpNoi-ovethprthpvethprItrivethead> <labetabelP${m/di.map(p=>`ptr>rtdP${m.ispe}pxtdPJtdP${m.)domen||'—'} kgeItdPJtdP${m.)pt (||'—'} cmeItdPJtdP${m.oldur||'—'} cmeItdPJtdP${m.hipc||'—'} cmeItdPJtdP${m.mrm||'—'} cmeItdPJtdP${m.abel_>No||'—'}%eItdPJtdP${m.ify-c||'—'}  tdPrtdPJ Editează</button>
+            <buttondein-y</div>
+<!'${p.id}="ds🗑del-overlay"eItdPeItri`).join('')}x;cureItabelPeItcale ${m/di.length===0?'g  <d-templaemptă�Nicio">ăsTiăt=aal-o    ':''} I    `;o}
+�fun  <di ;borde>An��:aut(){
+urvar assg=all</div>
+<.olid v(p=>p.s="cli_ld===cer btn-sm" onc).s���(a,b)=>new Dspl(a.ispe)-new Dspl(b.ispe));J  var el<>
+        <div class="sta claren:aut;";J  if(!m/di.length){el./siveHTML='p  <d-templaemptă�p  <d-templaeiv>📈-o    Nu exisi-ohispl de ren:auteI    ';return;}
+  el./siveHTML=`Export date</div>
+      <div id="backup-stat<canvas   <bds-titren:auto" hergii="20<opticanvas"eI     <label style="cutw  ;tcale ;thead><tr>rthp"><labthprthp   <div gathprthp <div class=thprthp <div cgathprItrivethead> <labetabelP${[...ren:].rclirsl().map(p=>`ptr>rtdP${m.ispe}pxtdPJtdP${m.)domen||'—'} kgeItdPJtdP${m.abel_>No||'—'}%eItdPJtdP${m.)pt (||'—'} cmeItdPJItri`).join('')}eItabelPeItcale       `;opes<dTimlclas()=>{ope  var ctx<>
+        <div class="stads-titren:auto;";if(!ctx)return;J  urvar d<disets=[];ope  if(assg.s�me(p=>p.)domen)) d<disets.push({px;te:'   <div  (kg)',ispa:m/di.map(p=>p.)domen),r(--muCd" st'#c8f135',oda<!-->.4,yAxisID:'y',e fi�Bius:8px;pCd" st'#c8f135'});ope  if(assg.s�me(p=>p.abel_>No)) d<disets.push({px;te:' <div clas',ispa:m/di.map(p=>p.abel_>No),r(--muCd" st'#f13565',oda<!-->.4,yAxisID:'y2',e fi�Bius:8px;pCd" st'#f13565'});ope  eew Cs-ti(ctx,{></l:atn b',ispa:{px;te :m/di.map(p=>p.ispe),ispasets},textars:{v>
+parse *>true,nonetoneAspow-Rp</l>false,fișia  <di:{modl:aiordx'},plugirs:{" onnd:{px;te :{ad" st'#ccc'}}},ss-ras:{y:{t"dss:{ad" st'#888'},-cli:{ad" st'#252535'}},y2:{:osgroup:'romen�,t"dss:{ad" st'#888'},-cli:{ accept="alse}}}}});J  },100);o}
+�fun  <di ;borde>An�bel<(){
+urvar aays=all<R -->
+ .olid v(p=>p.s="cli_ld===cer btn-sm" onc).s���(a,b)=>new Dspl(b.ispe)-new Dspl(a.ispe));J  var total=aays.reduce((a,p)=>a+(p.lay:fl||0),0);ope>
+        <div class="sta clarbel<;".iniveHTML=`
+grid;grid <button class="btn-ick="closeModal(>
+  e-betweentton class="btn-sec ssion')()">⬇️ Des<inpusoo ta</latal: r    <drt date</
+k"i${total.tfors-raStdiv><'ro-RO')} Rdle     <dia  ta</<inpusoo"btn-save-sess">💾 Salvează</button>
+    </div>
+  </div>
+s="btn-<R -->
+!'${cer btn-sm" onc}="ds+ Pbel�-overlay"
+pusootes"></tex l style="cutw  ;tcale ;thead><tr>rthp"><labthprthpSum-ovethprthpTips=thprthpNoievethprthpvethprItrivethead> <labetabelP${mays.map(p=>`ptr>rtdP${m.ispe}pxtdPJtdrt date</
+k"i${p.lay:fl} RdleItdPJtdP${m.></l||'—'}  tdPrtdP${m.ify-c||'—'}  tdPrtdPJ Editează</button>
+            <buttondein-y<R -->
+!'${p.id}="ds🗑del-overlay"eItdPeItri`).join('')}x;cureItabelPeItcale ${mays.length===0?'g  <d-templaemptă�Nicio"pbel�    </div>rel�-o    ':''} I    `;o}
+�fun  <di ;borde>AnMebar--sm" o(){J  var el<>
+        <div class="sta clamebar-_h:auto;";if(!el)return;J  var msgs=all
+       .olid v(m=>m.s="cli_ld===cer btn-sm" onc).s���(a,b)=>new Dspl(a.Iex-tdd_at)-new Dspl(b.Iex-tdd_at));o  el./siveHTML=`Expor <button class="btn-'modadir"s-oup:ad"umn btn-6     x-hergii 40')">olirflow-y </divssion')()">⬇️ D:none;">p-sta   <bd="clie    th;mares<inpu${msg .map(m=>`pxpor <button class="btn-'modadir"s-oup:ad"umn ton class="b${m.soptio==='tactive'?''modal-s':''modaent</'};ent"></select></div>
+    bubale ${m.soptio==='tactive'?'    tactive':'    h:auto;}es${m.seModal}otes"></textarea></div>
+     tlases${new Dspl(m.Iex-tdd_at).tfors-raStdiv><'ro-RO')}gap:16</tex      `).join('')}x;cur${msg .length===0?'g  <d-templaemptă�Nici;border--o    ':''}
+sootes"></tpxpor <button class="btn-btn-sm" r  <labetexnt<ea   <b
+     <    input""pbeceholdio="Scrie ;border-..."-muted);"btn:1;dius:8px;ptyle="fbg)er(--mu��amily:'DM Sans',sans-ser(--mutrtion v8� D:none;">📌alori inițiant:f;oup fufamily:'DM Sap ',sap -s    ;up full"><labelclatn b:pt>
+;rell"><pt>
+;hergii 6')">�p/texnt<ea  <labe"btn-save-sess">💾 Salvează</button>
+    </divton clself('modal-seayle="marginl-s      
+      ()">Taimite-overlay"
+pu      `;opevar t=>
+        <div class="stas="clie    th;mar;";if(t) t.scrollTop=t.scrollHergii;ope═Markvectdopesb.fromnt  <div iow.upispl({ectd:true}�.eq('s="cli_id',ger btn-sm" onc).eq('soptio','h:auto;";J}
+�async fun  <di 
+l-s      
+      (){opevar input=>
+        <div class="sta
+     <    input;);opevar seModal=input. full.taim();if(!g<dodal||!ger btn-sm" onc)return;J  await sb.fromnt  <div iow./sty��{s="cli_ld:cer btn-sm" onc,aactive_id:ger btnUser.id,soptio:'tactive',g<dodal,ectd:false});J  input. full='';o  await en" All(); ;borde>AnMebar--sm" o();o}
+�fun  <di ;borde>An="di().opevar c=allon</th>.olnd(x=>x.id===ger btn-sm" onc);if(!c)return;J  >
+        <div class="sta claify-;".iniveHTML=`
+grid;grid-templa
+sorr;ont-sizeclass="btn-s="di fișin>label><inpusoetexnt<ea   <bify-c-texnt<ea�</button>
+    100%;mn')hergii 20')">dius:8px;ptyle="fbg)er(--mu��amily:'DM Sans',sans-ser(--mutrtion v8� D:none;">�2��alori inițiant:f;oup fufamily:'DM Sap ',sap -s    ;up full"><l4belclatn b:pt>
+;rell"><lirt"dalo"i${c.ify-c||''}p/texnt<ea  <lababe"btn-save-sess">💾 Salvează</button>
+    </div <div i">Anu')">�yle="marginave="dis("ds💾 Salvpp">
+ note-overlay"
+puex      `;o}
+�async fun  <di 
+</d="dis(".opevar fodis=>
+        <div class="staify-c-texnt<ea'). full;J  await sb.fromnts="cli">�.upispl({ify-c}�.eq('id',ger btn-sm" onc);opeawait en" All(); tt<s�'="di salvate!');J}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════ABONAMENTE EXPIRARE�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di ;bordeE></div><).opevar fow=new Dspl();J  var cl=allon</th>.olid v(c=>g.sub��═�!--_bor).s���(a,b)=>new Dspl(a.sub��═�!--_bor)-new Dspl(b.sub��═�!--_bor));J  >
+        <div class="staexp-tabel>�./siveHTML=cl.map(c=>{ope  var exp=new Dspl(g.sub��═�!--_bor);Jursovar days=Math.ceil((exp-fow)/86400000);Jursovar sc=exp<fow?'bx':days<=7?'be':ais';ope  return`<tr x;cursortdPr    <di${c.fy-c}      <di  tdPrtdP${c.-emai||'—'}  tdPx;cursortdP${c.sub��═�!--_ent</||'—'}  tdPx;cursortdP${c.sub��═�!--_bor}  tdPx;cursortdPJSON</span><ins="s ${sc}es${exp<fow?'E></dat':days<=7?'E></d>
+  urâ-s':'Aopti'}px 1fr;gatdPx;cursortdPgSON</span><i${exp<fow?'dbd':days<=7?'dwn':'dok'}es${days<0?Math.abs(days)+' zil< e></dat':days+' zil<'}px 1fr;gatdPx;cursortdPgnnoire</button>
+            <button class="btn-sec '${c.id}="ds🔄 ass="modal-overlay"eItdPx;cureItri`;Jur}).join('')||'<tr>rtdbad" 1fr="7"d-templaemptă�Nu exisi-ohabooaautoe><tdPJItri';o}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════FINANCIAR�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di ;bordeFANCIAR</().opevar fow=new Dspl(),ms=new Dspl(fow  <dF  <Yeus:6,fow  <dMeMoh:6,1),ys=new Dspl(fow  <dF  <Yeus:6,0,1);opevar mr=all<R -->
+ .olid v(p=>new Dspl(p.ispe)>=ms).reduce((a,p)=>a+(p.lay:fl||0),0);opevar yr=all<R -->
+ .olid v(p=>new Dspl(p.ispe)>=ys).reduce((a,p)=>a+(p.lay:fl||0),0);opevar tr=all<R -->
+ .reduce((a,p)=>a+(p.lay:fl||0),0);opevar  vg= llon</th>.length?Math.8px;p(mr/ llon</th>.length):0;J  >
+        <div class="stanv ilass=;).iniveHTML=`
+grid;grid-template-c-      ;grid-template-c-px;texg     <div cla as<lab       <d-template-c- full"-muted);">Toate pl24� Des${mr.tfors-raStdiv><'ro-RO')}gap:16p  <d-template-c-subspRdleI           <label style="cute-c-     c2  ;grid-template-c-px;texg     <divN</surutoeI       <d-template-c- full"-muted);">Toate pl24� Des${yr.tfors-raStdiv><'ro-RO')}gap:16p  <d-template-c-subspRdleI           <label style="cute-c-     cw  ;grid-template-c-px;texglatal v    <diab       <d-template-c- full"-muted);">Toate pl24� Des${tr.tfors-raStdiv><'ro-RO')}gap:16p  <d-template-c-subspRdleI           <label style="cute-c-     cp  ;grid-template-c-px;texgMedie /os="clion       <d-template-c- full"-muted);">Toate pl24� Des${ vg.tfors-raStdiv><'ro-RO')}gap:16p  <d-template-c-subspRdl /o cl-ovep:16p     `;ope═Cs-tiJ  var px;te =[],d<di=[];opeinp(var i=11;i>=0;i--){J  urvar d=new Dspl(fow  <dF  <Yeus:6,fow  <dMeMoh:6-i,1);ope  var e=new Dspl(fow  <dF  <Yeus:6,fow  <dMeMoh:6-i+1,1);ope  px;te .push(d.tfors-raStdiv><'ro-RO',{meMoh:'  <rt',yeus:'2-digit'}));ope  ispa.push(all<R -->
+ .olid v(p=>{var pd=new Dspl(p.ispe);return pd>=d&&pd<e;}).reduce((a,p)=>a+(p.lay:fl||0),0));ope}
+urvar cv><>
+        <div class="stads-titf(g');opeif(cv>){if(_f(gCs-ti){_f(gCs-ti.de    y:6;}_f(gCs-ti=eew Cs-ti(cv>,{></l:aisr',ispa:{px;te ,ispasets:[{px;te:'Rdl',ispa,dius:8px;pCd" st't-size:12px;color7)',r(--muRtion v5}]},textars:{v>
+parse *>true,nonetoneAspow-Rp</l>false,plugirs:{" onnd:{ accept="alse}},ss-ras:{x:{t"dss:{ad" st'#888',noxRotp</la:45},-cli:{ accept="alse}},y:{t"dss:{ad" st'#888'},-cli:{ad" st'#252535'}}}}});}ope═Tops="tw">
+ J  var topC=allon</th>.map(c=>({iy-c:c.fy-c,id:g.id,rev:all<R -->
+ .olid v(p=>p.s="cli_ld===c.id).reduce((a,p)=>a+(p.lay:fl||0),0)})).s���(a,b)=>b.rcl-a.rcl).son e(0,6);J  >
+        <div class="stanv itop;).iniveHTML=topC.map((c,i)=>`lect></div>
+irr JSON</span><iik"/muted);">Toate pl�3� Des${i===0?'🥇':i===1?'🥈':i===2?'🥉':'  '} ${c.fy-c}   1fr;gSON</span><iivr>
+k"i${c.rcl.tfors-raStdiv><'ro-RO')} Rdle  ta</label>`).join('')||'<  <d-templaemptă�Nu exisi-ohispl      ';ope═<R -->
+  tcaleJ  >
+        <div class="stadR -->
+ -tabel>�./siveHTML=all<R -->
+ .map(p=>`ptr>
+ursortdP${m.ispe}pxtdPJtdPr    <di${p.s="clis?p.s="clis.fy-c:'—'}      <dieItdPx;curetdrt date</
+k"i${(p.lay:fl||0).tfors-raStdiv><'ro-RO')} Rdle tdPx;curetdP${m.></l||'—'}  tdPrtdP${m.ify-c||'—'}  tdP
+ursortdPgnnoire</button>
+            <button cladein-y<R -->
+!'${p.id}="ds🗑del-overlay"eItdP
+ureItri`).join('')||'<tr>rtdbad" 1fr="6"d-templaemptă�Nu exisi-ohplă>
+   tdPJItri';o}
+�fun  <di s="btn-<R -->
+!csm" onc){J  >
+        <div class="stadR th:auto;"./siveHTML=allon</th>.map(c=>`ption>HIIT</opt${c.id}" ${c.id===csm" onc?'id="s-ed':''}i${c.fy-c}  textare`).join('');J  >
+        <div class="stadR tlay:fl'). full='';o  >
+        <div class="stadR tispe'). full=new Dspl().tfISOStdiv><).son e(0,10);o  >
+        <div class="stadR t></l'). full='cash';o  >
+        <div class="stadR tify-c'�. full='';o  s="b" style="widtdR -->
+');o}
+�async fun  <di 
+</d<R -->
+!).opevar lay:fl=parsnFloat(>
+        <div class="stadR tlay:fl'). full";J  if(!lay:fl||lay:fl<=0) return ily��'Sum-o la alid�.');J  var ass<>
+        <div class="staisplODAL dR ');isp.v>
+caled=true;opevar {rm"or}=await sb.fromntdR -->
+ ;"./sty��{ope  o="cli_ld:>
+        <div class="stadR th:auto;". full,lay:fl,ope  ispe:>
+        <div class="stadR tispe'). full,ope  a</l:>
+        <div class="stadR t></l'). full,ope  ify-c:>
+        <div class="stadR tify-c'�. full,ope  aactive_id:ger btnUser.idope});J  isp.v>
+caled=false;J  if(rm"o") return ily��'Eroare: '+rm"o".  <div );o  imary" style="widtdR -->
+');opeawait en" All();J  if(>
+        <div class="stadRgetf(gCIAR</>�.span>‹<.g<doctis('  me *;)  ;bordeFANCIAR</();J  if(>
+        <div class="stadRgets     ;).span>‹<.g<doctis('  me *;)  ;borde>AnPbel<();o  tt<s�'Pbel�    </div>rel�!');J}
+�async fun  <di -ein-y<R -->
+!ld).opeif(!g<dfirm('Șt"tabopbela?')) return;J  await sb.fromntdR -->
+ ;".dein-y(�.eq('id',id);opeawait en" All();J  if(>
+        <div class="stadRgetf(gCIAR</>�.span>‹<.g<doctis('  me *;)  ;bordeFANCIAR</();J  if(>
+        <div class="stadRgets     ;).span>‹<.g<doctis('  me *;)  ;borde>AnPbel<();o}
+�═REÎNNOIRE�fun  <di s="bbtn-sec csm" onc){J  var c=allon</th>.olnd(x=>x.id===gsm" onc);if(!c)return;J  ger btnbtn-sec-sm" onc=csm" onc;J  >
+        <div class="startn-secclasso".iniveHTML=`r    <di${c.fy-c}      <di br>E></dare/surutoă: gSON</span><i${c.sub��═�!--_bor&&new Dspl(g.sub��═�!--_bor)<few Dspl()?'dbd':'dok'}es${g.sub��═�!--_bor||'Nesetat'}px 1fr;`;J  >
+        <div class="startn-secc>Tip</la'). full='30';o  >
+        <div class="startn-seccdR '). full='1';o  >
+        <div class="startn-secclay:fl'). full=c.-�n e||'';J  s="b" style="widtrtn-sec');o}
+�async fun  <di 
+</dbtn-sec ).opevar c=allon</th>.olnd(x=>x.id===ger btnbtn-sec-sm" onc);if(!c)return;J  var >Ti=parsnput(>
+        <div class="startn-secc>Tip</la'). full)||30;J  var zZSI=(c.sub��═�!--_bor&&new Dspl(g.sub��═�!--_bor)>few Dspl())?new Dspl(g.sub��═�!--_bor):eew Dspl();J  zZSIssetDspl(zZSIs <dDspl()+>Ti);opevar fewEnc=zZSIstfISOStdiv><).son e(0,10);o  var ass<>
+        <div class="staisplODAL rtn-sec');isp.v>
+caled=true;opeawait sb.fromnts="cli">�.upispl({sub��═�!--_bor:fewEnc}�.eq('id',ger btnbtn-sec-sm" onc);J  if(>
+        <div class="startn-seccdR '). full==='1'){J  urvar lay:fl=parsnFloat(>
+        <div class="startn-secclay:fl'). full);ope  if(lay:fl>0) await sb.fromntdR -->
+ ;"./sty��{s="cli_ld:cer btnbtn-sec-sm" onc,lay:fl,ispe:new Dspl().tfISOStdiv><).son e(0,10),></l:acash',ify-c:`ass="modal ${>Ti}ează → ${newEnc}`,aactive_id:ger btnUser.id});ope}
+urisp.v>
+caled=false;J  imary" style="widtrtn-sec');opeawait en" All();J  ;bordeon</th><);o;bordeE></div><);J  if(>
+        <div class="stadRgetf(gCIAR</>�.span>‹<.g<doctis('  me *;)  ;bordeFANCIAR</();J  tt<s�`Abooaauto ;bs="modt pân clla ${newEnc}`);J}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════PROGRESS (aactive addseinp o="cli)�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di s="btn-</div>
+<!csm" onc){J  ger btn-sm" onc=ger btn-sm" onc||csm" onc;J  >
+        <div class="staptispe'). full=new Dspl().tfISOStdiv><).son e(0,10);o  [apt)domen�,'psept (','psoldur�,'pshipc�,'psaț (o,'psermo,'psabel>No=,'paify-;].inpEach(id=>{var e<>
+        <div class="stld);if(r)e. full='i;});o  var c=allon</th>.olnd(x=>x.id===gsm" onc);opeif(c){J  urvar hint=>
+        <div class="stam/di-hint-texn');ope  var hintBox=>
+        <div class="stam/di-hint');ope  if(hint) hint.nt:fCeModal=[c.)domen?`${c.)domen}kg`:'',c.)pt (?`Abd:${c.)pt (}cm`:'',c.abel_>No?`div clas:${c.abel_>No}%`:''].olid v(Boolean).join(' | ');ope  if(hintBox) hintBox.v>
+</.v>
+<scr=c.)domen?'TPRO<i:'pt>
+i;Jpe}
+urs="b" style="widtden:auto;";o}
+�async fun  <di 
+</d</div>
+<!).opevar ass<>
+        <div class="staisplODAL d/di');isp.v>
+caled=true;opevar d<di={ope  s="cli_ld:cer btn-sm" onc,aactive_id:ger btnUser.id,ope  ispe:>
+        <div class="stadtispe'). full,ope  )ergii parsnFloat(>
+        <div class="stap<)domenă. full)||ente,ope  )pt ( parsnFloat(>
+        <div class="stap<)pt ('�. full)||ente,ope  oldur parsnFloat(>
+        <div class="stap<oldur�). full)||ente,ope  hipc parsnFloat(>
+        <div class="stap<hipcă. full)||ente,ope  aț ( parsnFloat(>
+        <div class="stap<aț (o�. full)||ente,ope  mrm parsnFloat(>
+        <div class="stap<mpu'). full)||ente,ope  abel_>No parsnFloat(>
+        <div class="stap<abel>No=). full)||ente,ope  ify-c:>
+        <div class="stadaify-;". fullope};J  var {rm"or}=await sb.fromntden:auto;"./sty��ispa);J  isp.v>
+caled=false;J  if(rm"o") return ily��'Eroare: '+rm"o".  <div );o  imary" style="widtden:auto;";o  await en" All(); ;borde>AnMasTip<g)<(); ;borde>An��:aut(); tt<s�'MăsTiăt=aal salvat�!');J}
+�async fun  <di -ein-y</div>
+<!ld).opeif(!g<dfirm('Șt"tabo>ăsTiăt=aala?')) return;J  await sb.fromntden:auto;".dein-y(�.eq('id',id);opeawait en" All(); ;borde>AnMasTip<g)<(); ;borde>An��:aut();J}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════CALENDAR / SESIUNI�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di setCalView(v){calView=v;;bordeoilynd</();}�fun  <di calNav(dir){calOffset+=dir;;bordeoilynd</();}��fun  <di ;bordeoilynd</().opevar fow=new Dspl();J  var olid v<>
+        <div class="stadal-olid v;). full;J  var olid ved=flid v?allv>
+<!-->.olid v(s=>s.s="cli_ld===olid v):allv>
+<!-->;ope═optisJ  var ms=new Dspl(fow  <dF  <Yeus:6,fow  <dMeMoh:6,1);J  var ms>
+<=olid ved.olid v(s=>new Dspl(t.ispe)>=ms);J  >
+        <div class="stasal-lass=;).iniveHTML=`
+grid;grid-templamcorr;ont-sizeclml" latal schat')s=p:16p  <d-templamv"i${olid ved.length}px           <label style="cumcorr;ont-sizeclml" Lcla as<lab       <d-templamv"i${ms>
+<.length}px           <label style="cumcorr;ont-sizeclml" Rct></dieonp:16p  <d-templamv"i${olid ved.olid v(s=>s.at">�==='</t></di').length}px           <label style="cumcorr;ont-sizeclml" Pțgramdieonp:16p  <d-templamv"i${olid ved.olid v(s=>s.at">�==='pțgramdi').length}px          `;opeif(calView==='week;" ;bordeoilWeek(olid ved,fow);o  else ;bordeoil‹<(olid ved,fow);o}��fun  <di ;bordeoilWeek(lick="sh,fow){J  var zZSI=new Dspl(fow);J  zZSIssetDspl(zZSIs <dDspl()-zZSIs <dDsy()+1+calOffset*7);J  var px;te=`${zZSIstfors-raDsplStdiv><'ro-RO',{day:'p   ric',meMoh:'long'})} – `;opevar end=new Dspl(zZSI);endssetDspl(ends <dDspl()+6);J  px;te+=endstfors-raDsplStdiv><'ro-RO',{day:'p   ric',meMoh:'long',yeus:'p   ric'});J  >
+        <div class="stasal-px;te').nt:fCeModal=px;te;Jurvar days=[];opeinp(var i=0;i<7;i++){var d=new Dspl(zZSI);dssetDspl(ds <dDspl()+i);days.push(d);}ope>
+        <div class="stasal-week;"./siveHTML=`Expor <button class=-cli;-cli-templspl-ad"umns:repeat(7,1fr)-btn-sm" r  <lab${days.map(d=>{ope  pevar iso=d.tfISOStdiv><).son e(0,10);o  ursovar dayv>
+<=s>
+<!-->.olid v(s=>s.ispe===lso).s���(a,b)=>(a.tlas||'')>(b.tlas||'')?1:-1);o  ursovar isT"wiy=lso===fow tfISOStdiv><).son e(0,10);o  ursoreturn`<  <d-templasal-wiyb${isT"wiy?'t"wiy':''}"6<inpusoselect></div>
+sal-hdr>
+  </div>
+s="btn-v>
+<!--!'${lso}="d ="btn="Adaugid"schat'er JSON</muted);">Toate pl�1��alori inițialex:1;o"i${dstfors-raDsplStdiv><'ro-RO',{weekday:'  <rt'})}   1fr;gbrPr    <d/muted);">Toate pl�5��a${isT"wiy?'lori iniția  </nt);':''}"6${ds <dDspl()}      <dieIp:16<inpusose${dayv>
+<.map(s=>{var c=allon</th>.olnd(x=>x.id===s.s="cli_ld);var sel=s.at">�==='</t></di'?'niția  </nt)':s.at">�==='<label'?'niția  </nt3)':'nițiawarniv>)';return`<  <d-templasal-sc"/muted);dius:8px;ptt-size:12px;color06ser(--mutleft:3amily:'DM${ad"};gers��:e fi�erv>
+  </div>
+s="bEditv>
+<!--!'${s.id}="dsExpor <butto">Toate pl�1��a">Toawergii 6'0alori i${ad"};"6${s.tlas||''}gap:16p  <d <butto">Toate pl�1��aolirflow:hidden;nt:f-olirflow:ellipcis;>hype=>
+  e:fowrapaes${g?c.fy-c:'—'}  p:16${s.type?`p  <d <butto">Toate pl�0��alori inițialex:1;o"i${s.type}      `:''}      `;}).join('')}x;curpu      `;opeur}).join('')}
+pu      `;ope>
+        <div class="stasal-week;".v>
+</.v>
+<scr='TPRO<i;J  >
+        <div class="stasal-pt ('�.v>
+</.v>
+<scr='pt>
+i;J}
+�fun  <di ;bordeoil‹<(lick="sh,fow){J  >
+        <div class="stasal-px;te').nt:fCeModal='Lisi-ohschat')';J  var lo��ed=[...lick="sh].s���(a,b)=>new Dspl(b.ispe)-new Dspl(a.ispe));J  >
+        <div class="stasal-pt ('�./siveHTML=`Export date<tw  ;tcale ;thead><tr>rthp"><labthprthpOrlabthprthpC="clionthprthpTips=thprthpDurel�-othprthpSt">�vethprthpvethprItrivethead> <labetabelP${lo��ed.map(s=>{var c=allon</th>.olnd(x=>x.id===s.s="cli_ld);var sc=s.at">�==='</t></di'?'ba':s.at">�==='<label'?'bx':'be';return`<tr rtdP${s.ispe}pxtdPJtdP${s.tlas||'—'}  tdPrtdPJ    <di${c?c.fy-c:'—'}      <di  tdPrtdP${s.></l||'—'}  tdPrtdP${s.iTip</la||'—'} min  tdPrtdPJ ON</span><ins="s ${sc}es${s.at">�}px 1fr;gatdPrtdPgnnoire</button>
+            <button class="Editv>
+<!--!'${s.id}="ds✏del-overlay" gnnoire</button>
+            <button cladein-yv>
+<!--!'${s.id}="ds🗑del-overlay"eItdPeItri`;}).join('')}x;cureItabelPeItcale ${lo��ed.length===0?'g  <d-templaemptă�Nicio"schat'e-o    ':''} I    `;o  >
+        <div class="stasal-pt ('�.v>
+</.v>
+<scr='TPRO<i;J  >
+        <div class="stasal-week;".v>
+</.v>
+<scr='pt>
+i;J}
+�fun  <di s="btn-v>
+<!--!preolilDspl){J  editv>
+<!--Ic=ente;J  >
+        <div class="stamss="btn').nt:fCeModal='SESIUNE NOUĂi;J  >
+        <div class="stasth:auto;"./siveHTML=allon</th>.map(c=>`ption>HIIT</opt${c.id}"i${c.fy-c}  textare`).join('');J  >
+        <div class="stastispe'). full=></lof preolilDspl==='stdiv>'?preolilDspl:new Dspl().tfISOStdiv><).son e(0,10);o  >
+        <div class="stas tlas'). full='';o  >
+        <div class="stasc>Tip</la'). full='60';o  >
+        <div class="stasc></l'). full='';o  >
+        <div class="stascat">�'). full='pțgramdi';o  >
+        <div class="stascify-c'�. full='';o  s="b" style="widtlick="s;";J}
+�fun  <di ss="Editv>
+<!--!ic){J  var s=allv>
+<!-->.olnd(x=>x.id===ld);if(!s)return;J  editv>
+<!--Ic=id;J  >
+        <div class="stamss="btn').nt:fCeModal='EDITEAZĂ SESIUNEi;J  >
+        <div class="stasth:auto;"./siveHTML=allon</th>.map(c=>`ption>HIIT</opt${c.id}" ${c.id===s.s="cli_ld?'id="s-ed':''}i${c.fy-c}  textare`).join('');J  >
+        <div class="stastispe'). full=s.ispe||'';J  >
+        <div class="stas tlas'). full=s.tlas||'';o  >
+        <div class="stasc>Tip</la'). full=s.iTip</la||60;o  >
+        <div class="stasc></l'). full=s.></l||'';o  >
+        <div class="stascat">�'). full=s.at">�||'pțgramdi';o  >
+        <div class="stascify-c'�. full=s.ify-c||'';o  s="b" style="widtlick="s;";J}
+�async fun  <di 
+</dv>
+<!--!).opevar ass<>
+        <div class="staisplODAL suto;";isp.v>
+caled=true;opevar d<di={o="cli_ld:>
+        <div class="stasth:auto;". full,ispe:>
+        <div class="stastispe'). full,tlas:>
+        <div class="stas tlas'). full||ente,iTip</la:parsnput(>
+        <div class="stasc>Tip</la'). full)||60,a</l:>
+        <div class="stasc></l'). full||ente,at">�:>
+        <div class="stascat">�'). full,ify-c:>
+        <div class="stastify-c'�. full||ente,aactive_id:ger btnUser.id};J  var err;J  if(rditv>
+<!--Ic){var r=await sb.fromntlick="show.upispl(ispa).eq('id',rditv>
+<!--Ic);err=r.rm"or;}
+urelse{var r=await sb.fromntlick="show./sty��ispa);err=r.rm"or;}
+urisp.v>
+caled=false;J  if(rm") return ily��'Eroare: '+rm".  <div );o  imary" style="widtlick="s;";J  await en" All(); ;bordeoilynd</(); tt<s�'Schat'l salvat�!');J}
+�async fun  <di -ein-yv>
+<!--!ic){J  if(!g<dfirm('Șt"taboschat'ea?')) return;J  await sb.fromntlick="show.dein-y(�.eq('id',id);opeawait en" All(); ;bordeoilynd</();J}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════MESAJE�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di ;bordeMebar-!).opevar pt (=>
+        <div class="stams  h:auto-pt ('�;J  p��<./siveHTML=allon</th>.map(c=>{J  urvar msgs=all
+       .olid v(m=>m.s="cli_ld===c.ir);Jursovar unr=msg .olid v(m=>m.soptio==='h:auto;&&!m.ectd).length;Jursovar temt=msg [msg .length-1];ope  return`<  <dle="marginl="s-Msg-sm" o('${c.id}="dd <butto:none;">�2�� 16   r(--mut()">⬇�amily:'DM Sans',sans-segers��:e fi�ervdius:8px;pt${  me *Msg-sm" oId===c.ir?'t-size:12px;color06s':'tacn 1fruto;};tacn group:.2s;ent"></select> <button class="btn-ick="closeModal(>
+  e-betweentton class="btn-sec "6<inpusosel    <d/muted);">Toate pl�3� Des${c.fy-c}      <di<inpusose${unr>0?`gSON</span><inav-ns="sdd <butto:osgroup:at">icDes${unr}   1fr;`:''}<inpusootes"></textarea><muted);">Toate pl�1��alori inițialex:1;o <div i">An3��aolirflow:hidden;nt:f-olirflow:ellipcis;>hype=>
+  e:fowrapaes${temt?temt.seModal.son e(0,36)+'…':'Nici;border-'}otes"></tex      `;our}).join('')||'<  <d-templaemptă�Nici;bos="clion    ';J  if(!l me *Msg-sm" oId&& llon</th>.length>0) nl="s-Msg-sm" o( llon</th>[0].ir);Jurelse if(l me *Msg-sm" oId" ;bordeMsgTh;mar(";J}
+�async fun  <di 
+l="s-Msg-sm" o(ic){J    me *Msg-sm" oId=id;J  var c=allon</th>.olnd(x=>x.id===ld);J  >
+        <div class="stamsg-head v;).nt:fCeModal=g?c.fy-c:'on</th';J  >
+        <div class="stamsg-input-wrap;".v>
+</.v>
+<scr='"btn';J  await sb.fromnt  <div iow.upispl({ectd:true}�.eq('s="cli_id',ic).eq('soptio','h:auto;";Jpeawait en" All();J  ;bordeMebar-!);J  ;bordeMsgTh;mar(";J}
+�fun  <di ;bordeMsgTh;mar("{J  var msgs=all
+       .olid v(m=>m.s="cli_ld===l me *Msg-sm" oId".s���(a,b)=>new Dspl(a.Iex-tdd_at)-new Dspl(b.Iex-tdd_at));o  var el<>
+        <div class="sta    th;mar;";o  el./siveHTML=msg .map(m=>`pxpor/div>
+     wrapdd <buttoton class="b${m.soptio==='tactive'?''modal-s':''modaent</'};ent"></lect></div>
+    bubale ${m.soptio==='tactive'?'    tactive':'    h:auto;}es${m.seModal}otes"></texrea></div>
+     tlases${new Dspl(m.Iex-tdd_at).tfors-raStdiv><'ro-RO')}gap:16</tlabel>`).join('')||'<  <d-templaemptă�Nici;border-. Scrie alveul!on    ';J  el.scrollTop=el.scrollHergii;o}
+�async fun  <di 
+l-s
+      (){opevar input=>
+        <div class="sta    input;);opevar seModal=input. full.taim();J  if(!g<dodal||!l me *Msg-sm" oId" ;bturn;J  input. full='';o  await sb.fromnt  <div iow./sty��{s="cli_ld:l me *Msg-sm" oId,aactive_id:ger btnUser.id,soptio:'tactive',g<dodal,ectd:false});J  await en" All(); ;bordeMsgTh;mar(";J}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════MACRO�CALCULATOR (îbor"wid o="cli)�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di s-rcMacros(){opevar wergii=parsnFloat(>
+        <div class="staf<)domenă. full);opevar hergii=parsnFloat(>
+        <div class="staf<hdomenă. full);opevar iv =parsnput(>
+        <div class="staf-iv '). full)||30;J  var loptio=>
+        <div class="staf-loptio'�. full||'Masculin';J  var lar�=>
+        <div class="staf-loec'). full||'Mw">
+ ivee';J  if(!)domen||!hdomen) return ily��'Compin-yp">
+ g  <div a și    ălgrim a     tca-ul MăsTiăt="fomai    tâi.');J  var amr=goptio==='Feminin'?10*)domen+6.25*hdomen-5*Rget161:10*)domen+6.25*hdomen-5*Rge+5;opevar i me ity=>
+       querySl="s-or('#f->4</')&&>
+        <div class="staf->4</'). full>3?1.55:1.375;opevar tdee=Math.8px;p(amr*i me ity);opevar sr�=lar�==='Slăbit'?Math.8px;p(tdee*0.8):lar�==='Masid">usculaiă'?Math.8px;p(tdee*1.1):tdee;
+urvar asst=Math.8px;p()domen*2.2);J  var oat=Math.8px;p(sr�*0.25/9);opevar srrb=Math.8px;p((sr�tdent*4-oat*9)/4);opeswitchMTab('răt');J  >
+        <div class="staf-o (g)</l'). full=cal;J  >
+        <div class="staf--ți (g'). full=-ți;J  >
+        <div class="staf-o rbl'). full=carb;J  >
+        <div class="staf-fss=;). full=fss;J  tt<s�`Macros s-rcabele: ${cal} kcal | P:${m/dt}g Ci${aarb}g Fi${>No}g`);J}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════BACKUP�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di s="bBiusup(){J  >
+        <div class="stabiusup-lass=;).iniveHTML=`
+grid;SON</span><ins="s bav>${allon</th>.length}s="tw">
+ a  ta</<inpuJSON</span><ins="s bn-s${allv>
+<!-->.length}sschat')s= ta</<inpuJSON</span><ins="s bp"i${all</div>
+<.length}sden:autes= ta</<inpuJSON</span><ins="s"i${all<R -->
+ .length}sdlă>
+    1fr;`;J  s="b" style="widtbiusup;";J}
+�fun  <di exp���"><l(){opevar d<di={exp���"><l:new Dspl().tfISOStdiv><),lirsoup:'14',gn</th>:allon</th>,lick="sh:allv>
+<!-->,den:auto:all</div>
+<,dR -->
+ :all<R -->
+ };J  var blob=new Blob([JSON.stdiv>ify�ispa,ente,2)],{></l:aapplicp</la/json'});o  var a=>
+       Iex-tdiv clas('a;";a.h;mf=URL Iex-tdObj"s-URL(blob);J  a.downen" ='"itdentbiusup-'+new Dspl().tfISOStdiv><).son e(0,10)+'.json';a.="mar(";J}
+�async fun  <di handleImp���(input){opevar olie=input.olie>[0];if(!olie)return;J  try{J  urvar d<di=JSON.parsn(await olie.nt:f());ope  if(!g<dfirm('Imp���ul adaugid"ispl noi (nu șt"tae exisin-se). CeMoinuă?'))return;J  urif(>spa.gn</th>){inp(var c of >spa.gn</th>){c.aactive_id=ger btnUser.id;await sb.fromnts="cli">�.upty��c,{onCeMf"mat:'id'});}}J  urif(>spa.lick="sh){inp(var s of >spa.lick="sh){s.aactive_id=ger btnUser.id;await sb.fromntlick="show.upty��s,{onCeMf"mat:'id'});}}J  urif(>spa.den:auto){inp(var p of >spa.den:auto){await sb.fromntden:auto;".upty��p,{onCeMf"mat:'id'});}}J  urif(>spa.dR -->
+ ){inp(var py of >spa.dR -->
+ ){await sb.fromntdR -->
+ ;".upty��py,{onCeMf"mat:'id'});}}J  urawait en" All(); ;bordeon</th><);oimary" style="widtbiusup;"; tt<s�'Imp��� f(gC></di!');J  }cp<ch(e){aly��'Eroarella imp���: '+r.  <div );}J}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════CLIENT PORTAL�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════async fun  <di en" on</thP���tyldenolie){J  if(!m/dolie.s="cli_record_ic){J    >
+        <div class="stasli-hom-;".iniveHTML='<  <d-templaemptăd <butto:none;">6')">�p  <d-templaeiv>⏳on    CeMoul nu esin asociat unui aactive. CeMoi myp">
+ ant;boorul tău.on    ';J    ;bturn;J  }
+urvar [rc,rp,rs,rm]=await </dmise.ss=([J    sb.fromnts="cli">�.
+l="s-('*'�.eq('id',m/dolie.s="cli_record_ic).maybeSe;"ll(),J    sb.fromntden:auto;".
+l="s-('*'�.eq('s="cli_id',m/dolie.s="cli_record_ic).sans-('rspe',{ascbore;">true}�,J    sb.fromntlick="show.
+l="s-('*'�.eq('s="cli_id',m/dolie.s="cli_record_ic).sans-('rspe',{ascbore;">false}),J    sb.fromnt  <div iow.
+l="s-('*'�.eq('s="cli_id',m/dolie.s="cli_record_ic).sans-('Iex-tdd_at',{ascbore;">true}�J  ]);o  im"cli"><l=rc.ispa;o  im"cli</div>
+<"><l=rm.ispa||[];opeim"cliv>
+<!-->"><l=rs.ispa||[];opeim"
+       =rm.ispa||[];opeif(cm"cli"><l) >
+        <div class="stasli-uty�fy-c;).nt:fCeModal=gm"cli"><l.fy-c;opeshowon<Tab('hom-;";J}
+�fun  <di showon<Tab(tab){J  >
+       querySl="s-orAll('.s="-tab;).inpEach(x=>x.span>‹<.remove('  me *;) ;J  >
+       querySl="s-orAll('.s="-piv ').inpEach(x=>x.span>‹<.remove('  me *;) ;J  var ass<>
+        <div class="stact-'+tab);opeif(ass)risp.span>‹<.non('  me *;);
+urvar ag=>
+        <div class="stas="-'+tab);opeif(pg) ag.span>‹<.non('  me *;);
+urif(tab==='hom-;" ;bordeon<H�me();Jurelse if(tab==='workout;) ;bordeon<Workout();Jurelse if(tab==='răt') ;bordeon<Dăt();Jurelse if(tab==='den:auto;" ;bordeon<</div>
+<!);Jurelse if(tab==='lick="show ;bordeon<v>
+<!-->!);Jurelse if(tab==='chat') ;bordeon<Chat(";J}
+�fun  <di ;bordeon<H�me(){J  if(!gm"cli"><l){>
+        <div class="stasli-hom-;".iniveHTML='<  <d-templaemptăp"><i fiv>
+<oniblieeI    ';return;}
+  var c=gm"cli"><l,fow=new Dspl();J  var exp=g.sub��═�!--_bor?new Dspl(g.sub��═�!--_bor):ente;J  var days=exp?Math.ceil((exp-fow)/86400000):ente;J  var temtW=im"cli</div>
+<"><l.length?im"cli</div>
+<"><l[im"cli</div>
+<"><l.length-1].)domen:ente;J  var diff=(temtW&&c.)domen)?+(temtW-c.)domen).tfFixed(1):ente;J  >
+        <div class="stasli-hom-;".iniveHTML=`
+grid;grid-templasli-heroent"></select></div>
+sli-iv>eoing">Bcl-o,oo ta</${c.fy-c.spli-(' ')[0]}   1fr;! 💪otes"></textarea><muted);lori inițialex:1;o">Toate pl�3� DesIel� den:autul tăuotes"></tex      
+</select></div>
+sli-ivid-2ent"></select></div>
+/div>
+     nt:f-ton cbtn-sec "6<inpusoselgrid-template-c-px;texg   <div  surutoăeIp:16<inpusoserea><muted);">Toate pl32��a">Toawergii 7'0alori iniția  </nt);es${temtW||c.)domen||'—'}eIp:16<inpusoserea><muted);lori inițialex:1;o">Toate plĸ� Deskge${diff!==ente?`gSON</muted);lori i${diff<0?'#4caf50':'niția  </nt3)'}"6${diff>0?'+':''}${diff} kg fațid"ie ent</   1fr;`:''}<inpusosootes"></textartes"></textarea></div>
+ /div>
+     nt:f-ton cbtn-sec "6<inpusoselgrid-template-c-px;texgAbooaautoeIp:16<inpusoserea><muted);">Toate pl32��a">Toawergii 7'0alori i${days!==ente&&days<=7?'niția  </nt3)':'niția  </nt)'};"6${days!==ente?days:'—'}eIp:16<inpusoserea><muted);lori inițialex:1;o">Toate plĸ� Desază rămase${g.sub��═�!--_bor?`gbrP${c.sub��═�!--_bor}`:''}<inpusosootes"></textartes"></tex      
+</select></div>
+sli-ivid-2ent"></select></div>
+/div>
+     nt:f-ton cbtn-sec "6lgrid-template-c-px;texgSchat'i rct></dieonp:16p  <dmuted);">Toate pl28��a">Toawergii 7'0alori iniția  </nt);es${im"cliv>
+<!-->"><l.olid v(s=>s.at">�==='</t></di').length}px           <labselect></div>
+/div>
+     nt:f-ton cbtn-sec "6lgrid-template-c-px;texgMăsTiăt="fonp:16p  <dmuted);">Toate pl28��a">Toawergii 7'0alori iniția  </nt);es${im"cli</div>
+<"><l.length}px           <labe      <lab${c.lar�?`;grid-templa
+sorr;ont-sizeclass="btn-s🎯 Obi"s-ovul tăuotes"><p<muted);lori inițiant:f;oes${c.lar�}pxp>      `:''}`;J}
+�fun  <di ;bordeon<Workout(){J  >
+        <div class="stasli-workout;)./siveHTML=cl"cli"><l&&cm"cli"><l.workout <lab?`;grid-templa
+sorr;ont-sizeclass="btn-s🏋️ Pben ant;boaautoeIp:16<pal sbutton>hype=>
+  e:pal wrapalori inițiant:f;oup fufamily:'DM Sap ',sap -s    ;tn b)hergii 1.8;up full"><l4beles${im"cli"><l.workout}pxpre>      ` <lab:'<  <d-templaemptăpp  <d-templaeiv>🏋️      Ant;boorul nu a adăugat unopbei -e ant;boaauto.on    ';J}
+�fun  <di ;bordeon<Dăt(){
+  var c=gm"cli"><l;J  var macros=(c&&(g.o (g)</l||c.-ți (g))?`;grid-templamg4iv>
+     ssion')()">⬇�6m" r  <label style="cumcorr;ont-sizeclml" C (g)<)s=p:16p  <d-templamv"i${g.o (g)</l||'—'}eIp:16p  <d-templamuesko (px           <label style="cumcorr;ont-sizeclml" Pți (g-ovep:16p  <d-templamv"i${g.-ți (g||'—'}eIp:16p  <d-templamuesgpx           <label style="cumcorr;ont-sizeclml" Carbohidra>
+   p:16p  <d-templamv"i${g.o rbs||'—'}eIp:16p  <d-templamuesgpx           <label style="cumcorr;ont-sizeclml" div cla   p:16p  <d-templamv"i${g.fss=||'—'}eIp:16p  <d-templamuesgpx           <l      `:'';J  var dietPben=c&&c.diet?`;grid-templa
+ss="btn-sPben aliautoareIp:16<pal sbutton>hype=>
+  e:pal wrapalori inițiant:f;oup fufamily:'DM Sap ',sap -s    ;tn b)hergii 1.8;"i${g.diet}pxpre>`:'<  <d-templaemptăd <butto:none;">2')">�Ant;boorul nu a adăugat unopbei -e dietă.on    ';J  >
+        <div class="stasli-răt')./siveHTML=`Export date</div>
+     ssion')()">⬇�4� Des${macros}${dietPben}otes"></texrea></div>
+ 
+sor <labselect></div>
+/ds="btn-s🧮 C-rcabelor macronutrtw">
+ a      <labselect></div>
+form-ivid"6<inpusoselgrid-templaform-ivoup  ;px;teg   <div  (kg)</px;teg<input   <bdmawergii" a</l="number"IIT</opt${c?c.)domen||'':''}"6eIp:16<inpusoserea><-templaform-ivoup  ;px;tegÎ ălgrim  (cm)</px;teg<input   <bdmahergii" a</l="number"IIT</opt${c?c.hdomen||'':''}"6eIp:16<inpusoserea><-templaform-ivoup  ;px;tegVârsoăeIpx;teg<input   <bdmaa"sdda</l="number"IIT</opt${c?c.a"s||'':''}"6eIp:16<inpusoserea><-templaform-ivoup  ;px;tegSexeIpx;teg<
+l="s-   <bdmagoptio  ;textareMasculin  textare;textareFeminin  textare;/
+l="s-6eIp:16<inpusoserea><-templaform-ivoup  ;px;tegNivel i me itdieonpx;teg<
+l="s-   <bdmai me ity"6<inpusosesertion>HIIT</opt1.2xgScdutoareItextare;textarIIT</opt1.375">Ușor i me eItextare<inpusosesertion>HIIT</opt1.55" id="s-ed>Motioat i me eItextarertion>HIIT</opt1.725">Fot</e i me eItextarer/
+l="s-6eIp:16<inpusoserea><-templaform-ivoup  ;px;tegObi"s-oveIpx;teg<
+l="s-   <bdmagar�"6<inpusosesertion>HIIT</optnonetonexgMe">
+ iveeeItextarertion>HIIT</optcutxgSlăbiteItextarertion>HIIT</optbulk">Masid">usculaiăeItextarer/
+l="s-6eIp:16<inpusoeIp:16<inpusoennoire</buttons-rc-btn<button clas-rcon<Macros()iv>
+     ssion')">Anu')">�s🧮 C-rcabyp">
+-overlay"
+puexserea><  <bdli-macro-autult">otes"></tex      `;o}
+�fun  <di s-rcon<Macros(){opevar w=parsnFloat(>
+        <div class="stadmawergiiă. full);opevar h=parsnFloat(>
+        <div class="stadmahdomenă. full);opevar i=parsnput(>
+        <div class="stadmaa"s'). full)||30;J  var l=>
+        <div class="stadmaloptio'�. full;opevar i m=parsnFloat(>
+        <div class="stadmai me ityă. full);opevar lar�=>
+        <div class="stadmagar�'�. full;opeif(!)||!h) return ily��'Compin-yp">
+ g  <div a și    ălgrim a.');J  var amr=g==='Feminin'?10*)+6.25*h-5*Rt161:10*)+6.25*h-5*R+5;opevar tdee=Math.8px;p(amr*i m);opevar sr�=lar�==='cut'?Math.8px;p(tdee*.8):lar�==='bulk'?Math.8px;p(tdee*1.1):tdee;
+urvar asst=Math.8px;p()*2.2);J  var oat=Math.8px;p(sr�*.25/9);opevar srrb=Math.8px;p((sr�tdent*4-oat*9)/4);ope>
+        <div class="stasli-macro-autult;".iniveHTML=`
+grid;gridmuted);dius:8px;ptyle="fbg)er(--mu��amily:'DM Sans',sans-ser(--mutrtion vĸ� D:none;">�6m" ssion')">Anu4m" r  <lababel style="cumg4i6<inpusoserea><-templamcorr;ont-sizeclml" C (g)<)s=p:16p  <d-templamv"<muted);lori iniția  </nt);es${ir�}pxp:16p  <d-templamuesko (px           <lab<label style="cumcorr;ont-sizeclml" Pți (g-ovep:16p  <d-templamv"<muted);lori i#4fc3f7;es${m/dt}gpx           <lab<label style="cumcorr;ont-sizeclml" Carbovep:16p  <d-templamv"<muted);lori i#ff9800;es${irrb}gpx           <lab<label style="cumcorr;ont-sizeclml" div cla   p:16p  <d-templamv"<muted);lori i#ef5350;es${>No}gpx           <labseltes"></textarea><muted);">Toate pl�1��alori inițialex:1;o <div i">An8��ant:f-ton cbtn-sec "6BMR: ${Math.8px;p(amr)} kcal | TDEE: ${tdee} kcalotes"></tex      `;o}
+�fun  <di ;bordeon<</div>
+<!){o  var el<>
+        <div class="stas="-pen:auto;";o  var assg=[...im"cli</div>
+<"><l].s���(a,b)=>new Dspl(a.ispe)-new Dspl(b.ispe));J  el./siveHTML=`
+grid;gridmuted);n class="btn-ick="closeModal('modal-s;ssion')()">⬇�2m" r  <lababennoire</button>
+      alvearăd <buttowidth:autov>
+  </div>
+s="b" style="widts="-pen:auto;";>
+        <div class="stasptispe'). full=new Dspl().tfISOStdiv><).son e(0,10);">+ Adaugid">ăsTiăt=aal-overlay"
+puexe      <lab${pen:.length>1?`Export date</div>
+     ssion')()">⬇�4� Des<canvas<  <bdli-ds-titpen:" hergii="200">otcanvas>      `:''}</texrea></div>
+ tw  ;tcale ;thead><tr>rthp"><labthprthp   <div abthprthpAbdoclaabthprthp% div clasabthprthpNol�-othprItrivethead> <labetabelP${[...pen:].rclersn().map(p=>`ptr>rtdP${m.ispe}pxtdPJtdP${m.)domen||'—'} kgpxtdPJtdP${m.)pt (||'—'} cmpxtdPJtdP${m.abel_>No||'—'}%  tdPrtdP${m.ify-c||'—'}  tdPeItri`).join('')}x;cureItabelPeItcale ${pen:.length===0?'g  <d-templaemptă�Nu ai adăugat nicio">ăsTiăt=aal-o    ':''} I    `;o  if(pen:.length>1){J    setTlasout(()=>{ope  pevar ctx<>
+        <div class="stas="-ds-titpen:');if(!ctx)return;J  ur  eew Cs-ti(ctx,{></l:atn b',ispa:{px;te :pen:.map(p=>p.ispe),ispasets:[{px;te:'   <div  (kg)',ispa:pen:.map(p=>p.)domen),r(--muCd" st'#c8f135',odasoup:.4,e fi�Bius:8px;pCd" st'#c8f135',olil>false}]},textars:{v>
+parse *>true,nonetoneAspow-Rp</l>false,plugirs:{" onnd:{px;te :{ad" st'#ccc'}}},ss-ras:{x:{t"dss:{ad" st'#888'},-cli:{ad" st'#252535'}},y:{t"dss:{ad" st'#888'},-cli:{ad" st'#252535'}}}}});opeur},100);ope}
 }
-
-function showAuth() {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-}
-
-async function startApp(user) {
-  currentUser = user;
-  document.getElementById('user-email').textContent = user.email;
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  await loadAll();
-  renderDashboard();
-}
-
-async function loadAll() {
-  var r1 = await sb.from('clients').select('*').order('created_at',{ascending:false});
-  var r2 = await sb.from('sessions').select('*').order('date',{ascending:true});
-  clients = r1.data || [];
-  sessions = r2.data || [];
-}
-
-// AUTH
-function switchAuthTab(t) {
-  document.getElementById('tab-login-btn').classList.toggle('active', t==='login');
-  document.getElementById('tab-reg-btn').classList.toggle('active', t==='register');
-  document.getElementById('login-form').style.display = t==='login'?'block':'none';
-  document.getElementById('reg-form').style.display = t==='register'?'block':'none';
-  document.getElementById('auth-err').style.display='none';
-  document.getElementById('auth-ok').style.display='none';
-}
-
-async function doLogin() {
-  var email = document.getElementById('login-email').value.trim();
-  var pass = document.getElementById('login-pass').value;
-  if (!email||!pass) { showErr('Completează email și parola!'); return; }
-  var btn = document.getElementById('btn-login');
-  btn.disabled=true; btn.textContent='Se conectează...';
-  var r = await sb.auth.signInWithPassword({email:email,password:pass});
-  if (r.error) { showErr('Email sau parolă incorectă!'); btn.disabled=false; btn.textContent='Intră în cont'; }
-  else { 
-    try{localStorage.setItem('fp_e',btoa(email));localStorage.setItem('fp_p',btoa(pass));}catch(e){}
-    startApp(r.data.user); 
-  }
-}
-
-async function doRegister() {
-  var name=document.getElementById('reg-name').value.trim();
-  var email=document.getElementById('reg-email').value.trim();
-  var pass=document.getElementById('reg-pass').value;
-  if(!name||!email||!pass){showErr('Completează toate câmpurile!');return;}
-  if(pass.length<6){showErr('Parola min 6 caractere!');return;}
-  var btn=document.getElementById('btn-reg');
-  btn.disabled=true; btn.textContent='Se creează...';
-  var r=await sb.auth.signUp({email:email,password:pass,options:{data:{full_name:name}}});
-  btn.disabled=false; btn.textContent='Creează cont';
-  if(r.error){showErr(r.error.message);}
-  else{document.getElementById('auth-ok').textContent='Cont creat! Verifică emailul.';document.getElementById('auth-ok').style.display='block';}
-}
-
-async function doLogout() {
-  await sb.auth.signOut();
-  try{localStorage.removeItem('fp_e');localStorage.removeItem('fp_p');}catch(e){}
-  clients=[];sessions=[];
-  document.getElementById('app').style.display='none';
-  document.getElementById('auth-screen').style.display='flex';
-}
-
-function showErr(m){var el=document.getElementById('auth-err');el.textContent=m;el.style.display='block';}
-
-// HELPERS
-function daysLeft(sd,dur){if(!sd)return 0;var e=new Date(sd);e.setDate(e.getDate()+parseInt(dur||30));var t=new Date();t.setHours(0,0,0,0);return Math.ceil((e-t)/86400000);}
-function fmtDate(d){if(!d)return '—';return new Date(d).toLocaleDateString('ro-RO');}
-function isoDate(d){return d.toISOString().split('T')[0];}
-var CC=['#c8f135','#35f1c8','#f13565','#f1a535','#3565f1','#f135c8','#35c8f1','#a5f135','#f17535','#8535f1'];
-function getCC(id){var i=clients.findIndex(function(c){return c.id===id;});return CC[i%CC.length]||'#c8f135';}
-
-// NAVIGATION
-function showPage(n) {
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active');});
-  document.getElementById('page-'+n).classList.add('active');
-  var m={dashboard:0,clients:1,expiring:2,calendar:3};
-  if(m[n]!==undefined) document.querySelectorAll('.nav-item')[m[n]].classList.add('active');
-  if(n==='dashboard')renderDashboard();
-  if(n==='clients')renderClients();
-  if(n==='expiring')renderExpiring();
-  if(n==='calendar')setCalView(calView);
-}
-
-function switchTab(n) {
-  document.querySelectorAll('#page-detail .tab').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('#page-detail .tab-content').forEach(function(t){t.classList.remove('active');});
-  var m={profil:0,antrenament:1,dieta:2,masuratori:3,progres:4,note:5};
-  document.querySelectorAll('#page-detail .tab')[m[n]].classList.add('active');
-  document.getElementById('tab-'+n).classList.add('active'); 
-  renderTab(n);
-}
-
-function switchMTab(n) {
-  document.querySelectorAll('#modal-client .tab').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('#modal-client .tab-content').forEach(function(t){t.classList.remove('active');});
-  var m={info:0,workout:1,diet:2,meas:3};
-  document.querySelectorAll('#modal-client .tab')[m[n]].classList.add('active');
-  document.getElementById('mt-'+n).classList.add('active');
-}
-
-function openModal(id){document.getElementById(id).classList.add('open');if(id==='modal-backup')refreshBackup();}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.modal-overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});});
-
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
-function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
-
-// DASHBOARD
-function renderDashboard() {
-  var active=clients.filter(function(c){return daysLeft(c.start_date,c.duration)>0;}).length;
-  var exp=clients.filter(function(c){var d=daysLeft(c.start_date,c.duration);return d>0&&d<=7;}).length;
-  var xp=clients.filter(function(c){return daysLeft(c.start_date,c.duration)<=0;}).length;
-  document.getElementById('s-total').textContent=clients.length;
-  document.getElementById('s-active').textContent=active;
-  document.getElementById('s-exp').textContent=exp;
-  document.getElementById('s-xp').textContent=xp;
-  document.getElementById('notif-zone').innerHTML=exp>0?'<div class="notif">⚠️ <strong>'+exp+' client'+(exp>1?'ți':'')+'</strong> expiră în 7 zile!</div>':'';
-  var ec=clients.filter(function(c){return daysLeft(c.start_date,c.duration)<=7;}).sort(function(a,b){return daysLeft(a.start_date,a.duration)-daysLeft(b.start_date,b.duration);}).slice(0,5);
-  document.getElementById('d-expiring').innerHTML=ec.length===0?'<div class="empty"><div class="ei">✅</div>Nicio expirare</div>':ec.map(function(c){var d=daysLeft(c.start_date,c.duration);return '<div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid rgba(37,37,53,.5);cursor:pointer;" onclick="openClient(\''+c.id+'\')"><div style="font-size:13px;font-weight:500;">'+c.name+'</div><div class="'+(d<=0?'dbd':'dwn')+'">'+(d<=0?'Expirat':d+' zile')+'</div></div>';}).join('');
-  document.getElementById('d-recent').innerHTML=clients.slice(0,5).map(function(c){return '<div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid rgba(37,37,53,.5);cursor:pointer;" onclick="openClient(\''+c.id+'\')"><div style="font-size:13px;font-weight:500;">'+c.name+'</div><div style="font-size:11px;color:var(--muted);">'+fmtDate(c.start_date)+'</div></div>';}).join('')||'<div class="empty"><div class="ei">👥</div></div>';
-}
-
-// CLIENTS
-function renderClients(filter) {
-  filter=filter||'';
-  var list=clients;
-  if(filter){var f=filter.toLowerCase();list=list.filter(function(c){return c.name.toLowerCase().includes(f)||(c.phone||'').includes(f);});}
-  var tb=document.getElementById('clients-tbody');
-  if(!list.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="ei">👥</div>'+(filter?'Niciun rezultat':'Adaugă primul client!')+'</div></td></tr>';return;}
-  tb.innerHTML=list.map(function(c){
-    var d=daysLeft(c.start_date,c.duration);
-    var bc=d<=0?'bx':d<=7?'be':'ba',st=d<=0?'Expirat':d<=7?'Expiră curând':'Activ',dc=d<=0?'dbd':d<=7?'dwn':'dok';
-    return '<tr><td><strong style="cursor:pointer;" onclick="openClient(\''+c.id+'\')">'+c.name+'</strong></td><td>'+(c.phone||'—')+'</td><td>'+(c.goal||'—')+'</td><td><span class="badge '+bc+'">'+st+'</span></td><td><span class="'+dc+'">'+(d<=0?'Expirat':d+' zile')+'</span></td><td style="display:flex;gap:5px;"><button class="btn-sec btn-sm" onclick="openClient(\''+c.id+'\')">👁</button><button class="btn-sec btn-sm" onclick="openEditClient(\''+c.id+'\')">✏️</button><button class="btn-danger btn-sm" onclick="deleteClient(\''+c.id+'\')">🗑</button></td></tr>';
-  }).join('');
-}
-function filterClients(v){renderClients(v);}
-
-// EXPIRING
-function renderExpiring() {
-  var list=[...clients].sort(function(a,b){return daysLeft(a.start_date,a.duration)-daysLeft(b.start_date,b.duration);});
-  document.getElementById('exp-tbody').innerHTML=list.map(function(c){
-    var d=daysLeft(c.start_date,c.duration);
-    var e=new Date(c.start_date||new Date());e.setDate(e.getDate()+parseInt(c.duration||30));
-    var bc=d<=0?'bx':d<=7?'be':'ba',st=d<=0?'Expirat':d<=7?'Expiră curând':'Activ',dc=d<=0?'dbd':d<=7?'dwn':'dok';
-    return '<tr><td>'+c.name+'</td><td>'+(c.phone||'—')+'</td><td>'+fmtDate(c.start_date)+'</td><td>'+fmtDate(isoDate(e))+'</td><td><span class="badge '+bc+'">'+st+'</span></td><td><span class="'+dc+'">'+(d<=0?'Expirat':d+' zile')+'</span></td></tr>';
-  }).join('');
-}
-
-// CLIENT DETAIL
-function openClient(id){currentClientId=id;var c=clients.find(function(x){return x.id===id;});if(!c)return;document.getElementById('detail-name').textContent=c.name.toUpperCase();showPage('detail');switchTab('profil');}
-
-async function renderTab(n) {
-  var c=clients.find(function(x){return x.id===currentClientId;});if(!c)return;
-  var el=document.getElementById('tab-'+n);
-
-  if(n==='profil'){
-    var d=daysLeft(c.start_date,c.duration);
-    var e=new Date(c.start_date||new Date());e.setDate(e.getDate()+parseInt(c.duration||30));
-    var pct=Math.max(0,Math.min(100,(d/parseInt(c.duration||30))*100));
-    var bc=d<=0?'bx':d<=7?'be':'ba',st=d<=0?'Expirat':d<=7?'Expiră curând':'Activ',dc=d<=0?'dbd':d<=7?'dwn':'dok';
-    el.innerHTML='<div class="detail-grid"><div class="ds"><div class="ds-title">Informații personale</div>'+
-      [['Vârstă',c.age?c.age+' ani':'—'],['Gen',c.gender||'—'],['Telefon',c.phone||'—'],['Email',c.email||'—'],['Nivel',c.level||'—'],['Obiectiv',c.goal||'—'],['Frecvență',c.freq?c.freq+' zile/săpt':'—']].map(function(x){return '<div class="ir"><span class="ik">'+x[0]+'</span><span class="iv">'+x[1]+'</span></div>';}).join('')+
-      (c.conditions?'<div class="ir"><span class="ik">Afecțiuni</span><span class="iv" style="color:var(--warning);font-size:12px;">'+c.conditions+'</span></div>':'')+
-    '</div><div class="ds"><div class="ds-title">Abonament</div>'+
-      '<div class="ir"><span class="ik">Status</span><span class="iv"><span class="badge '+bc+'">'+st+'</span></span></div>'+
-      '<div class="ir"><span class="ik">Data start</span><span class="iv">'+fmtDate(c.start_date)+'</span></div>'+
-      '<div class="ir"><span class="ik">Expirare</span><span class="iv">'+fmtDate(isoDate(e))+'</span></div>'+
-      '<div class="ir"><span class="ik">Zile rămase</span><span class="iv '+dc+'">'+(d<=0?'Expirat':d+' zile')+'</span></div>'+
-      '<div style="margin-top:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;"><span>Progres abonament</span><span>'+Math.round(pct)+'%</span></div><div class="pb"><div class="pf '+(pct>30?'':pct>10?'pw':'px')+'" style="width:'+pct+'%"></div></div></div>'+
-    '</div></div>';
-  }
-
-  if(n==='antrenament'){el.innerHTML='<div class="ds" style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div class="ds-title" style="margin-bottom:0;">Plan antrenament</div><button class="btn-sec btn-sm" onclick="openEditClient(\''+c.id+'\');switchMTab(\'workout\')">✏️</button></div>'+(c.workout?'<pre style="white-space:pre-wrap;font-size:13px;line-height:1.7;font-family:DM Sans,sans-serif;">'+c.workout+'</pre>':'<div class="empty"><div class="ei">🏋️</div>Niciun plan</div>')+'</div>'+(c.workout_notes?'<div class="ds"><div class="ds-title">Observații</div><p style="font-size:13px;color:var(--warning);">⚠️ '+c.workout_notes+'</p></div>':'');}
-
-  if(n==='dieta'){el.innerHTML=(c.calories||c.protein?'<div class="mg" style="margin-bottom:14px;">'+(c.calories?'<div class="mc"><div class="ml">Calorii</div><div class="mv" style="color:var(--warning);">'+c.calories+'</div><div class="mu">kcal</div></div>':'')+(c.protein?'<div class="mc"><div class="ml">Proteină</div><div class="mv" style="color:var(--accent2);">'+c.protein+'</div><div class="mu">g</div></div>':'')+(c.carbs?'<div class="mc"><div class="ml">Carbo</div><div class="mv">'+c.carbs+'</div><div class="mu">g</div></div>':'')+(c.fats?'<div class="mc"><div class="ml">Grăsimi</div><div class="mv" style="color:var(--accent3);">'+c.fats+'</div><div class="mu">g</div></div>':'')+'</div>':'')+'<div class="ds"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div class="ds-title" style="margin-bottom:0;">Plan alimentar</div><button class="btn-sec btn-sm" onclick="openEditClient(\''+c.id+'\');switchMTab(\'diet\')">✏️</button></div>'+(c.diet?'<pre style="white-space:pre-wrap;font-size:13px;line-height:1.7;font-family:DM Sans,sans-serif;">'+c.diet+'</pre>':'<div class="empty"><div class="ei">🥗</div>Niciun plan</div>')+'</div>'+(c.allergies?'<div class="ds" style="margin-top:14px;"><div class="ds-title">Alergii</div><p style="font-size:13px;color:var(--accent3);">⚠️ '+c.allergies+'</p></div>':'');}
-
-  if(n==='masuratori'){
-    var bmi=(c.weight&&c.height)?(c.weight/((c.height/100)**2)).toFixed(1):null;
-    el.innerHTML='<div class="mg">'+[['Greutate',c.weight,'kg'],['Înălțime',c.height,'cm'],bmi?['IMC',bmi,'kg/m²']:null,['Abdomen',c.waist,'cm'],['Piept',c.chest,'cm'],['Șolduri',c.hips,'cm'],['Coapsă',c.thigh,'cm'],['Braț',c.arm,'cm'],['% Grăsime',c.bodyfat,'%']].filter(Boolean).filter(function(x){return x[1];}).map(function(x){return '<div class="mc"><div class="ml">'+x[0]+'</div><div class="mv">'+x[1]+'</div><div class="mu">'+x[2]+'</div></div>';}).join('')+'</div><div style="text-align:center;margin-top:12px;"><button class="btn-sec btn-sm" onclick="openEditClient(\''+c.id+'\');switchMTab(\'meas\')">✏️ Actualizează</button></div>';
-  }
-
-  if(n==='progres'){
-    var pr=await sb.from('progress').select('*').eq('client_id',c.id).order('date',{ascending:true});
-    var prog=pr.data||[];
-    var last=[...prog].reverse();
-    function lv(f){var p=last.find(function(x){return x[f];});return p?parseFloat(p[f]):null;}
-    function iv(f){return c[f]?parseFloat(c[f]):null;}
-    function dc2(label,field,unit,inv){
-      var i=iv(field),cv2=lv(field);if(!i&&!cv2)return '';
-      var diff=(i!==null&&cv2!==null)?(cv2-i).toFixed(1):null;
-      var col='var(--muted)',arr='';
-      if(diff!==null){var good=inv?diff<0:diff>0;col=diff==0?'var(--muted)':good?'var(--accent)':'var(--accent3)';arr=diff>0?'▲':'▼';}
-      return '<div class="mc"><div class="ml">'+label+'</div><div style="display:flex;justify-content:center;align-items:baseline;gap:6px;margin:4px 0;"><span style="font-size:12px;color:var(--muted);">'+(i??'—')+'</span><span style="color:var(--muted);">→</span><span style="font-size:15px;font-weight:700;">'+(cv2??'—')+'</span></div><div class="mu">'+unit+'</div>'+(diff!==null?'<div style="font-family:monospace;font-size:13px;font-weight:700;color:'+col+';margin-top:4px;">'+arr+' '+(diff>0?'+':'')+diff+' '+unit+'</div>':'')+'</div>';
-    }
-    el.innerHTML='<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn btn-primary" style="width:auto;" onclick="openAddProgress()">+ Adaugă măsurători</button></div>'+
-    '<div class="ds" style="margin-bottom:14px;"><div class="ds-title">📊 COMPARAȚIE START → ACUM</div><div class="mg">'+dc2('Greutate','weight','kg',true)+dc2('Abdomen','waist','cm',true)+dc2('Piept','chest','cm',false)+dc2('Șolduri','hips','cm',true)+dc2('Coapsă','thigh','cm',true)+dc2('Braț','arm','cm',false)+dc2('% Grăsime','bodyfat','%',true)+'</div></div>'+
-    (prog.length>0?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;"><div class="ds"><div class="ds-title">📉 Greutate</div><canvas id="cw" height="160"></canvas></div><div class="ds"><div class="ds-title">📏 Abdomen</div><canvas id="ca" height="160"></canvas></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;"><div class="ds"><div class="ds-title">💪 Braț & Coapsă</div><canvas id="cb" height="160"></canvas></div><div class="ds"><div class="ds-title">🔥 % Grăsime</div><canvas id="cf" height="160"></canvas></div></div>':'')+
-    '<div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>Abdomen</th><th>Braț</th><th>Coapsă</th><th>% Gras</th><th>Notă</th><th></th></tr></thead><tbody>'+
-    [...prog].reverse().map(function(p,i){var ri=prog.length-1-i;return '<tr><td style="font-size:11px;font-family:monospace;">'+fmtDate(p.date)+'</td><td>'+(p.weight?p.weight+' kg':'—')+'</td><td>'+(p.waist?p.waist+' cm':'—')+'</td><td>'+(p.arm?p.arm+' cm':'—')+'</td><td>'+(p.thigh?p.thigh+' cm':'—')+'</td><td>'+(p.bodyfat?p.bodyfat+'%':'—')+'</td><td style="font-size:11px;color:var(--muted);">'+(p.note||'—')+'</td><td><button class="btn-danger btn-sm" onclick="delProgress(\''+p.id+'\')">🗑</button></td></tr>';}).join('')+
-    '</tbody></table></div>';
-    if(prog.length>0)setTimeout(function(){drawCharts(c,prog);},60);
-  }
-
-  if(n==='note'){el.innerHTML='<div class="ds"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div class="ds-title" style="margin-bottom:0;">Note</div><button class="btn btn-primary" style="width:auto;" onclick="saveNotes()">💾 Salvează</button></div><textarea id="notes-ta" style="width:100%;min-height:260px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:DM Sans,sans-serif;font-size:14px;line-height:1.7;outline:none;">'+(c.notes||'')+'</textarea></div>';}
-}
-
-// SAVE/DELETE CLIENT
-function openAddClient(){editingClientId=null;document.getElementById('mc-title').textContent='ADAUGĂ CLIENT';clearCForm();document.getElementById('f-start').value=new Date().toISOString().split('T')[0];switchMTab('info');openModal('modal-client');}
-function openEditClient(id){editingClientId=id;var c=clients.find(function(x){return x.id===id;});if(!c)return;document.getElementById('mc-title').textContent='EDITEAZĂ CLIENT';var fs={name:'f-name',phone:'f-phone',email:'f-email',age:'f-age',gender:'f-gender',goal:'f-goal',level:'f-level',freq:'f-freq',conditions:'f-conditions',workout:'f-workout',workout_notes:'f-workout-notes',calories:'f-calories',protein:'f-protein',carbs:'f-carbs',fats:'f-fats',diet:'f-diet',allergies:'f-allergies',weight:'f-weight',height:'f-height',waist:'f-waist',chest:'f-chest',hips:'f-hips',thigh:'f-thigh',arm:'f-arm',bodyfat:'f-bodyfat'};Object.keys(fs).forEach(function(k){var el=document.getElementById(fs[k]);if(el)el.value=c[k]||'';});document.getElementById('f-start').value=c.start_date||'';document.getElementById('f-duration').value=c.duration||'30';switchMTab('info');openModal('modal-client');}
-function editCurrentClient(){openEditClient(currentClientId);}
-function clearCForm(){['f-name','f-phone','f-email','f-age','f-conditions','f-workout','f-workout-notes','f-calories','f-protein','f-carbs','f-fats','f-diet','f-allergies','f-weight','f-height','f-waist','f-chest','f-hips','f-thigh','f-arm','f-bodyfat'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['f-gender','f-goal','f-level','f-freq'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('f-duration').value='30';}
-
-async function saveClient(){
-  var name=document.getElementById('f-name').value.trim();
-  if(!name){alert('Numele e obligatoriu!');return;}
-  var btn=document.getElementById('btn-save-client');btn.disabled=true;btn.textContent='...';
-  var data={trainer_id:currentUser.id,name:name,phone:document.getElementById('f-phone').value||null,email:document.getElementById('f-email').value||null,age:document.getElementById('f-age').value||null,gender:document.getElementById('f-gender').value||null,goal:document.getElementById('f-goal').value||null,start_date:document.getElementById('f-start').value||null,duration:parseInt(document.getElementById('f-duration').value)||30,level:document.getElementById('f-level').value||null,freq:document.getElementById('f-freq').value||null,conditions:document.getElementById('f-conditions').value||null,workout:document.getElementById('f-workout').value||null,workout_notes:document.getElementById('f-workout-notes').value||null,calories:document.getElementById('f-calories').value||null,protein:document.getElementById('f-protein').value||null,carbs:document.getElementById('f-carbs').value||null,fats:document.getElementById('f-fats').value||null,diet:document.getElementById('f-diet').value||null,allergies:document.getElementById('f-allergies').value||null,weight:document.getElementById('f-weight').value||null,height:document.getElementById('f-height').value||null,waist:document.getElementById('f-waist').value||null,chest:document.getElementById('f-chest').value||null,hips:document.getElementById('f-hips').value||null,thigh:document.getElementById('f-thigh').value||null,arm:document.getElementById('f-arm').value||null,bodyfat:document.getElementById('f-bodyfat').value||null};
-  var r=editingClientId?await sb.from('clients').update(data).eq('id',editingClientId):await sb.from('clients').insert(data);
-  btn.disabled=false;btn.textContent='💾 Salvează';
-  if(r.error){alert('Eroare: '+r.error.message);return;}
-  await loadAll();closeModal('modal-client');renderClients();
-  if(editingClientId&&currentClientId===editingClientId)renderTab('profil');
-}
-async function deleteClient(id){if(!confirm('Ștergi clientul?'))return;await sb.from('clients').delete().eq('id',id);await loadAll();renderClients();}
-async function deleteCurrentClient(){if(!confirm('Ștergi clientul?'))return;await sb.from('clients').delete().eq('id',currentClientId);await loadAll();showPage('clients');}
-
-// PROGRESS
-function openAddProgress(){
-  var c=clients.find(function(x){return x.id===currentClientId;});
-  document.getElementById('p-date').value=new Date().toISOString().split('T')[0];
-  ['p-weight','p-waist','p-chest','p-hips','p-thigh','p-arm','p-bodyfat','p-note'].forEach(function(id){document.getElementById(id).value='';});
-  if(c){var hints=[['Greutate',c.weight,'kg'],['Abdomen',c.waist,'cm'],['Braț',c.arm,'cm']].filter(function(x){return x[1];}).map(function(x){return x[0]+': <strong style="color:var(--text);">'+x[1]+' '+x[2]+'</strong>';});if(hints.length){document.getElementById('prog-hint').style.display='block';document.getElementById('prog-hint-text').innerHTML=hints.join(' | ');}else document.getElementById('prog-hint').style.display='none';}
-  openModal('modal-progress');
-}
-async function saveProgress(){
-  var btn=document.getElementById('btn-save-prog');btn.disabled=true;btn.textContent='...';
-  var r=await sb.from('progress').insert({client_id:currentClientId,trainer_id:currentUser.id,date:document.getElementById('p-date').value,weight:document.getElementById('p-weight').value||null,waist:document.getElementById('p-waist').value||null,chest:document.getElementById('p-chest').value||null,hips:document.getElementById('p-hips').value||null,thigh:document.getElementById('p-thigh').value||null,arm:document.getElementById('p-arm').value||null,bodyfat:document.getElementById('p-bodyfat').value||null,note:document.getElementById('p-note').value||null});
-  btn.disabled=false;btn.textContent='💾 Salvează';
-  if(r.error){alert('Eroare: '+r.error.message);return;}
-  closeModal('modal-progress');renderTab('progres');
-}
-async function delProgress(id){if(!confirm('Ștergi?'))return;await sb.from('progress').delete().eq('id',id);renderTab('progres');}
-async function saveNotes(){var notes=document.getElementById('notes-ta').value;await sb.from('clients').update({notes:notes}).eq('id',currentClientId);var c=clients.find(function(x){return x.id===currentClientId;});if(c)c.notes=notes;alert('Salvat!');}
-
-// CALENDAR
-function setCalView(v){calView=v;document.getElementById('cal-week').style.display=v==='week'?'block':'none';document.getElementById('cal-list').style.display=v==='list'?'block':'none';document.getElementById('cv-week').style.color=v==='week'?'var(--accent)':'';document.getElementById('cv-list').style.color=v==='list'?'var(--accent)':'';renderCalendar();}
-function calNav(d){calOffset+=d;renderCalendar();}
-function getWeekDates(off){var t=new Date();t.setHours(0,0,0,0);var dow=t.getDay(),mon=new Date(t);mon.setDate(t.getDate()-(dow===0?6:dow-1)+off*7);return Array.from({length:7},function(_,i){var d=new Date(mon);d.setDate(mon.getDate()+i);return d;});}
-
-function renderCalendar(){
-  var fc=document.getElementById('cal-filter').value||'';
-  var sel=document.getElementById('cal-filter');var prev=sel.value;
-  sel.innerHTML='<option value="">Toți</option>'+clients.map(function(c){return '<option value="'+c.id+'">'+c.name+'</option>';}).join('');sel.value=prev;
-  var wd=getWeekDates(calOffset);
-  var ws=isoDate(wd[0]),we=isoDate(wd[6]);
-  var MS=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
-  document.getElementById('cal-label').textContent=wd[0].getDate()+' '+MS[wd[0].getMonth()]+' — '+wd[6].getDate()+' '+MS[wd[6].getMonth()]+' '+wd[6].getFullYear();
-  var wsess=sessions.filter(function(s){return s.date>=ws&&s.date<=we&&(!fc||s.client_id===fc);});
-  var done=wsess.filter(function(s){return s.status==='realizat';}).length;
-  var plan=wsess.filter(function(s){return s.status==='programat'||!s.status;}).length;
-  var tmin=wsess.filter(function(s){return s.status==='realizat';}).reduce(function(a,s){return a+(parseInt(s.duration)||60);},0);
-  document.getElementById('cal-stats').innerHTML=[{l:'Sesiuni',v:wsess.length,c:''},{l:'Realizate',v:done,c:'c2'},{l:'Programate',v:plan,c:'cw'},{l:'Ore',v:Math.round(tmin/60*10)/10+'h',c:''}].map(function(x){return '<div class="stat-card '+x.c+'" style="padding:12px;"><div class="stat-label">'+x.l+'</div><div class="stat-value" style="font-size:24px;">'+x.v+'</div></div>';}).join('');
-  if(calView==='week')renderWeek(wd,fc);else renderList(fc);
-}
-
-function renderWeek(wd,fc){
-  var today=isoDate(new Date());
-  var DN=['Lun','Mar','Mie','Joi','Vin','Sâm','Dum'];
-  var wrap=document.createElement('div');wrap.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:6px;';
-  wd.forEach(function(date,di){
-    var ds=isoDate(date),isT=ds===today;
-    var daySess=sessions.filter(function(s){return s.date===ds&&(!fc||s.client_id===fc);}).sort(function(a,b){return (a.time||'').localeCompare(b.time||'');});
-    var col=document.createElement('div');col.className='cal-day'+(isT?' today':'');
-    var hdr=document.createElement('div');hdr.className='cal-hdr';
-    hdr.innerHTML='<div style="font-size:10px;color:'+(isT?'var(--accent)':'var(--muted)')+';text-transform:uppercase;">'+DN[di]+'</div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:'+(isT?'var(--accent)':'var(--text)')+';">'+date.getDate()+'</div>';
-    hdr.onclick=function(){openAddSession(ds);};col.appendChild(hdr);
-    var sw=document.createElement('div');sw.style.padding='4px';
-    daySess.forEach(function(s){
-      var cl=clients.find(function(c){return c.id===s.client_id;});
-      var color=getCC(s.client_id);
-      var si={realizat:'✅',anulat:'❌',programat:'📅'}[s.status||'programat'];
-      var card=document.createElement('div');card.className='cal-sc';
-      card.style.cssText='background:'+color+'18;border:1px solid '+color+'55;border-left:3px solid '+color+';';
-      card.innerHTML='<div style="font-size:10px;font-weight:700;color:'+color+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(cl?cl.name:'?')+'</div>'+(s.time?'<div style="font-size:9px;color:var(--muted);">'+s.time+'</div>':'')+'<div style="font-size:9px;">'+si+'</div>';
-      card.onclick=function(e){e.stopPropagation();openEditSession(s.id);};sw.appendChild(card);
-    });
-    var ab=document.createElement('div');ab.style.cssText='text-align:center;padding:3px;color:var(--muted);font-size:16px;cursor:pointer;opacity:.4;';ab.textContent='+';
-    ab.onmouseenter=function(){ab.style.opacity='1';};ab.onmouseleave=function(){ab.style.opacity='.4';};
-    ab.onclick=function(){openAddSession(ds);};sw.appendChild(ab);col.appendChild(sw);wrap.appendChild(col);
-  });
-  var g=document.getElementById('cal-week');g.innerHTML='';g.appendChild(wrap);
-}
-
-function renderList(fc){
-  var wd=getWeekDates(calOffset);var start=isoDate(wd[0]),end=isoDate(wd[6]);
-  var list=sessions.filter(function(s){return s.date>=start&&s.date<=end&&(!fc||s.client_id===fc);}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time);});
-  var div=document.getElementById('cal-list');
-  if(!list.length){div.innerHTML='<div class="empty"><div class="ei">📅</div>Nicio sesiune</div>';return;}
-  var byDate={};list.forEach(function(s){if(!byDate[s.date])byDate[s.date]=[];byDate[s.date].push(s);});
-  div.innerHTML=Object.keys(byDate).sort().map(function(date){
-    var d=new Date(date);d.setHours(12);
-    return '<div style="margin-bottom:14px;"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:15px;color:var(--muted);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border);">'+fmtDate(date)+'</div>'+
-    byDate[date].map(function(s){
-      var cl=clients.find(function(c){return c.id===s.client_id;});var color=getCC(s.client_id);
-      var si={realizat:'✅',anulat:'❌',programat:'📅'}[s.status||'programat'];
-      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-left:4px solid '+color+';border-radius:8px;margin-bottom:5px;cursor:pointer;" onclick="openEditSession(\''+s.id+'\')">'+
-        '<div style="font-family:monospace;font-size:12px;color:'+color+';width:42px;">'+(s.time||'—')+'</div>'+
-        '<div style="flex:1;"><div style="font-weight:600;font-size:13px;">'+(cl?cl.name:'—')+'</div>'+(s.type?'<div style="font-size:11px;color:var(--muted);">'+s.type+(s.duration?' · '+s.duration+' min':'')+'</div>':'')+'</div>'+
-        '<div>'+si+'</div><button class="btn-danger btn-sm" onclick="event.stopPropagation();deleteSession(\''+s.id+'\')">🗑</button></div>';
-    }).join('')+'</div>';
-  }).join('');
-}
-
-// SESSIONS
-function openAddSession(pre){
-  editingSessionId=null;
-  document.getElementById('ms-title').textContent='ADAUGĂ SESIUNE';
-  document.getElementById('s-client').innerHTML=clients.map(function(c){return '<option value="'+c.id+'">'+c.name+'</option>';}).join('');
-  document.getElementById('s-date').value=pre||new Date().toISOString().split('T')[0];
-  document.getElementById('s-time').value='09:00';
-  document.getElementById('s-duration').value='60';
-  document.getElementById('s-type').value='';
-  document.getElementById('s-status').value='programat';
-  document.getElementById('s-notes').value='';
-  openModal('modal-session');
-}
-function openEditSession(id){
-  editingSessionId=id;var s=sessions.find(function(x){return x.id===id;});if(!s)return;
-  document.getElementById('ms-title').textContent='EDITEAZĂ SESIUNE';
-  document.getElementById('s-client').innerHTML=clients.map(function(c){return '<option value="'+c.id+'">'+c.name+'</option>';}).join('');
-  document.getElementById('s-client').value=s.client_id;
-  document.getElementById('s-date').value=s.date;
-  document.getElementById('s-time').value=s.time||'';
-  document.getElementById('s-duration').value=s.duration||60;
-  document.getElementById('s-type').value=s.type||'';
-  document.getElementById('s-status').value=s.status||'programat';
-  document.getElementById('s-notes').value=s.notes||'';
-  openModal('modal-session');
-}
-async function saveSession(){
-  var cid=document.getElementById('s-client').value,date=document.getElementById('s-date').value;
-  if(!cid||!date){alert('Client și data sunt obligatorii!');return;}
-  var btn=document.getElementById('btn-save-sess');btn.disabled=true;btn.textContent='...';
-  var data={trainer_id:currentUser.id,client_id:cid,date:date,time:document.getElementById('s-time').value||null,duration:parseInt(document.getElementById('s-duration').value)||60,type:document.getElementById('s-type').value||null,status:document.getElementById('s-status').value,notes:document.getElementById('s-notes').value||null};
-  var r=editingSessionId?await sb.from('sessions').update(data).eq('id',editingSessionId):await sb.from('sessions').insert(data);
-  btn.disabled=false;btn.textContent='💾 Salvează';
-  if(r.error){alert('Eroare: '+r.error.message);return;}
-  await loadAll();closeModal('modal-session');renderCalendar();
-}
-async function deleteSession(id){if(!confirm('Ștergi sesiunea?'))return;await sb.from('sessions').delete().eq('id',id);await loadAll();renderCalendar();}
-
-// CHARTS
-function drawCharts(c,prog){
-  var lbs=prog.map(function(p){return fmtDate(p.date);});
-  function ws(field,sv){var data=prog.map(function(p){return p[field]?parseFloat(p[field]):null;});if(sv&&prog.length&&prog[0].date!==c.start_date)return{l:[fmtDate(c.start_date)+' ★',...lbs],d:[parseFloat(sv),...data]};return{l:lbs,d:data};}
-  function mkChart(id,labels,datasets){if(charts[id])charts[id].destroy();var ctx=document.getElementById(id);if(!ctx)return;charts[id]=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,plugins:{legend:{display:datasets.length>1,labels:{color:'#6b6b85',font:{size:11}}}},scales:{x:{grid:{color:'rgba(37,37,53,.6)'},ticks:{color:'#6b6b85',font:{size:10}}},y:{grid:{color:'rgba(37,37,53,.6)'},ticks:{color:'#6b6b85',font:{size:10}}}}}});}
-  var w=ws('weight',c.weight);mkChart('cw',w.l,[{label:'Greutate',data:w.d,borderColor:'#c8f135',backgroundColor:'rgba(200,241,53,.08)',borderWidth:2,pointRadius:4,tension:0.3,fill:true}]);
-  var a=ws('waist',c.waist);mkChart('ca',a.l,[{label:'Abdomen',data:a.d,borderColor:'#35f1c8',backgroundColor:'rgba(53,241,200,.08)',borderWidth:2,pointRadius:4,tension:0.3,fill:true}]);
-  var ar=ws('arm',c.arm),th=ws('thigh',c.thigh);mkChart('cb',ar.l.length>=th.l.length?ar.l:th.l,[{label:'Braț',data:ar.d,borderColor:'#f1a535',borderWidth:2,pointRadius:4,tension:0.3,fill:false},{label:'Coapsă',data:th.d,borderColor:'#a535f1',borderWidth:2,pointRadius:4,tension:0.3,fill:false}]);
-  var f=ws('bodyfat',c.bodyfat);mkChart('cf',f.l,[{label:'% Grăsime',data:f.d,borderColor:'#f13565',backgroundColor:'rgba(241,53,101,.08)',borderWidth:2,pointRadius:4,tension:0.3,fill:true}]);
-}
-
-// BACKUP
-function refreshBackup(){
-  document.getElementById('backup-stats').innerHTML=[{l:'Clienți',v:clients.length,c:'var(--accent)'},{l:'Sesiuni',v:sessions.length,c:'var(--accent2)'}].map(function(x){return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center;flex:1;"><div style="font-family:monospace;font-size:20px;font-weight:700;color:'+x.c+';">'+x.v+'</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">'+x.l+'</div></div>';}).join('');
-}
-async function exportData(){
-  var pr=await sb.from('progress').select('*').eq('trainer_id',currentUser.id);
-  var payload={version:2,exportDate:new Date().toISOString(),data:{clients:clients,sessions:sessions,progress:pr.data||[]}};
-  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='fitpro-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);
-}
-async function handleImport(input){
-  var file=input.files[0];if(!file)return;
-  var reader=new FileReader();
-  reader.onload=async function(e){
-    try{
-      var parsed=JSON.parse(e.target.result);var data=parsed.data||parsed;
-      if(!data.clients)throw new Error('invalid');
-      
-      // Convert old camelCase columns to snake_case
-      function convertClient(c) {
-        return {
-          id: c.id,
-          trainer_id: currentUser.id,
-          name: c.name,
-          phone: c.phone||null,
-          email: c.email||null,
-          age: c.age||null,
-          gender: c.gender||null,
-          goal: c.goal||null,
-          start_date: c.start_date||c.startDate||null,
-          duration: c.duration||30,
-          level: c.level||null,
-          freq: c.freq||null,
-          conditions: c.conditions||null,
-          workout: c.workout||null,
-          workout_notes: c.workout_notes||c.workoutNotes||null,
-          calories: c.calories||null,
-          protein: c.protein||null,
-          carbs: c.carbs||null,
-          fats: c.fats||null,
-          diet: c.diet||null,
-          allergies: c.allergies||null,
-          weight: c.weight||null,
-          height: c.height||null,
-          waist: c.waist||null,
-          chest: c.chest||null,
-          hips: c.hips||null,
-          thigh: c.thigh||null,
-          arm: c.arm||null,
-          bodyfat: c.bodyfat||null,
-          notes: c.notes||null
-        };
-      }
-      
-      if(!confirm('Import '+data.clients.length+' clienți în cloud?'))return;
-      var eids=new Set(clients.map(function(c){return c.id;}));
-      var nc=data.clients.filter(function(c){return !eids.has(c.id);}).map(convertClient);
-      
-      var errors=0;
-      for(var i=0;i<nc.length;i++){
-        var r=await sb.from('clients').insert(nc[i]);
-        if(r.error){
-          // Try without id (let DB generate new one)
-          var c2=Object.assign({},nc[i]);delete c2.id;
-          var r2=await sb.from('clients').insert(c2);
-          if(r2.error)errors++;
-        }
-      }
-      
-      await loadAll();closeModal('modal-backup');renderDashboard();
-      alert('Import complet!\nAdăugați: '+(nc.length-errors)+' clienți.\n'+(errors>0?errors+' erori (duplicate ignorate).':''));
-    }catch(err){console.error(err);alert('Eroare la import: '+err.message);}
-  };
-  reader.readAsText(file);input.value='';
-}
-
-// START
-init();
-</script>
-</body>
-</html>
+�fun  <di ;bordeon<v>
+<!-->!).opevar fow=new Dspl();J  var upcoming=im"cliv>
+<!-->"><l.olid v(s=>s.at">�==='pțgramdi'&&new Dspl(t.ispe)>=fow).s���(a,b)=>new Dspl(a.ispe)-new Dspl(b.ispe));J  var aemt=im"cliv>
+<!-->"><l.olid v(s=>s.at">�!=='pțgramdi').s���(a,b)=>new Dspl(b.ispe)-new Dspl(a.ispe));J  >
+        <div class="stas="-lick="show./siveHTML=`
+grid;grid-templa/div>
+     ssion')()">⬇�4� Des <labselect></div>
+/ds="btn-s📅 Schat'i pțgramdieonp:16
+pusose${upcoming.length?upcoming.map(s=>`lect></div>
+irr JSON</span><iik"P${s.ispe}${s.tlas?'lla '+s.tlas:''} I 1fr;gS   <d/span><iiv"P${s.></l||'Schat'l'}      <di SON</span><ins="s bn-s${s.iTip</la||60} min   ta</label>`).join(''):'<  <dmuted);lori inițialex:1;o:none;">�')" 0o">Toate pl�3� DesNicio"schat'e pțgramdi-ovep:16'}</texrtes"></texrea></div>
+ 
+sor <labselect></div>
+/ds="btn-sIst="fc schat')s=p:16
+pusose${aemt.length?`;tcaled <buttowidth:100%er(--mutlorlapse:lorlapseo">Toate pl�3� Des;thead><tr>rthv>
+     nt:f-ton cblefto:none;">6��alori inițialex:1;o"i"><labthprthv>
+     nt:f-ton cblefto:none;">6��alori inițialex:1;o"iTips=thprthv>
+     nt:f-ton cblefto:none;">6��alori inițialex:1;o"i"urel�-othprthv>
+     nt:f-ton cblefto:none;">6��alori inițialex:1;o"iSt">�vethprItrivethead> <lababetabelP${aemt.map(s=>`ltr>rtdb <butto:none;">6� Des${s.ispe}pxtdPJtdb <butto:none;">6� Des${s.></l||'—'}  tdPrtdb <butto:none;">6� Des${s.iTip</la||'—'} min  tdPrtdb <butto:none;">6� DesJ ON</span><ins="s ${s.at">�==='</t></di'?'ba':'bx'}es${s.at">�}px 1fr;gatdPrItri`).join('')}eItabelPeItcale `:'<  <dmuted);lori inițialex:1;o:none;">�')" 0o">Toate pl�3� DesNiciun ist="fcvep:16'}</texrtes">`;o}
+�fun  <di ;bordeon<Chat("{J  >
+        <div class="stasli-chat')./siveHTML=`
+grid;gridmuted);n class="btn-'modadire  <di:ad"umn;hergii s-rc(100vh - 18')")Des <labselect></div>
+/ds="btn-v>
+     ssion')()">⬇�')">�s💬 Mebar- cu ant;boorulltes"></textarea><  <bdli-m   th;mar"/muted);"mod:1aolirflow-y:autovn class="btn-'modadire  <di:ad"umn;btn-6m" ssion')()">⬇�2m" r ltes"></textarea><muted);n class="btn-btn-sm" r  <labababett:faala<  <bdli-m   input"opbeceholtio="Scrie ;border-..."/muted);"mod:1adius:8px;ptyle="fbg)er(--mu��amily:'DM Sans',sans-ser(--mutrtion v8� D:none;">�0��alori inițiant:f;oup fufamily:'DM Sap ',sap -s    ;">Toate pl�3� Douttn b:pt>
+;v>
+e plpt>
+;hergii 6'm" r
+  keydown<iif(cle   ItrlKey&&cle   key==='End v;)soptCm"
+      ("dsE/tt:faala  <labababennoire</button>
+      alvearăd <buttowidth:autovton clself('modal-s;"dle="marginlptCm"
+      ("dsTlveite-overlay"
+puexsertes"></tex      `;ourvar th;mar<>
+        <div class="stas="-    th;mar;";o  th;mar./siveHTML=cl"
+       .map(m=>`pxpor/div>
+     wrapdd <buttoton class="b${m.soptio==='h:auto;?''modal-s':''modaent</'};ent"></lect></div>
+    bubale ${m.soptio==='h:auto;?'    tactive':'    h:auto;}es${m.seModal}otes"></texrea></div>
+     tlases${new Dspl(m.Iex-tdd_at).tfors-raStdiv><'ro-RO')}gap:16</tlabel>`).join('')||'<  <d-templaemptă�Nici;border-. Tlveite alveul!on    ';J  th;mar.scrollTop=th;mar.scrollHergii;o}
+�async fun  <di 
+l-sCm"
+      ("{opevar input=>
+        <div class="stadli-m   input;);opevar seModal=input. full.taim();if(!g<dodal||!gm"cli"><l)return;J  await sb.fromnt  <div iow./sty��{s="cli_ld:im"cli"><l.id,aactive_id:ger btnP/dolie.aactive_id,soptio:'h:auto;,g<dodal,ectd:false});J  input. full='';o  var r=await sb.fromnt  <div iow.
+l="s-('*'�.eq('s="cli_id',im"cli"><l.id).sans-('Iex-tdd_at',{ascbore;">true}�;opeim"
+       =r.ispa||[];ope;bordeon<Chat(";J}
+�async fun  <di 
+</don<</div>
+<!){o  if(!gm"cli"><l||!ger btnP/dolie" ;bturn;J  var ass<>
+        <div class="staisplODAL gm"d/di');isp.v>
+caled=true;opevar d<di={ope  s="cli_ld:cm"cli"><l.id,aactive_id:ger btnP/dolie.aactive_id,ope  ispe:>
+        <div class="stasptispe'). full||new Dspl().tfISOStdiv><).son e(0,10),ope  )ergii parsnFloat(>
+        <div class="stacp<)domenă. full)||ente,ope  )pt ( parsnFloat(>
+        <div class="stacp<)pt ('�. full)||ente,ope  oldur parsnFloat(>
+        <div class="stacp<oldur�). full)||ente,ope  hipc parsnFloat(>
+        <div class="stacp<hipcă. full)||ente,ope  aț ( parsnFloat(>
+        <div class="stacp<aț (o�. full)||ente,ope  mrm parsnFloat(>
+        <div class="stacp<mpu'). full)||ente,ope  abel_>No parsnFloat(>
+        <div class="stacp<abel>No=). full)||ente,ope  ify-c:>
+        <div class="stacdaify-;". fullope};J  if(!>spa.)domen&&!>spa.)pt (){isp.v>
+caled=false;return ily��'Adaugid"cel pu>
+ i g  <div a.');}J  var {rm"or}=await sb.fromntden:auto;"./sty��ispa);J  isp.v>
+caled=false;J  if(rm"o") return ily��'Eroare: '+rm"o".  <div );o  imary" style="widts="-pen:auto;";o  var r=await sb.fromntden:auto;".
+l="s-('*'�.eq('s="cli_id',im"cli"><l.id).sans-('rspe',{ascbore;">true}�;o  im"cli</div>
+<"><l=r.ispa||[];ope;bordeon<</div>
+<!); tt<s�'MăsTiăt=aal salvat�!');J}
+�══════════════════════════════
+// CONFIG & SUPABASE
+// ═══════════════════UTILS�══════════════════════════════
+// CONFIG & SUPABASE
+// ══════════════════fun  <di s="b" stylic){>
+        <div class="stld).span>‹<.non('s="b');}�fun  <di cmary" stylic){>
+        <div class="stld).span>‹<.remove('s="b');}�fun  <di toggraSideb</().>
+        <div class="stasideb</>�.span>‹<.toggra('s="b');>
+        <div class="staolirlR ').span>‹<.toggra('s="b');}�fun  <di cmarySideb</().>
+        <div class="stasideb</>�.span>‹<.remove('s="b');>
+        <div class="staolirlR ').span>‹<.remove('s="b');}�
+let _tt<s�Tlasr=ente;Jfun  <di to<s�m  ){o  var el<>
+        <div class="stato<s�;);
+urif(!el){el<>
+       Iex-tdiv clas('   ;);el./d=ato<s�;;el.span>Name=ato<s�;;>
+       abel.appl-sChild(el);}
+urel.nt:fCeModal=m  ;el.v>
+</.opacity='1';o  imearTlasout(_tt<s�Tlasr);_tt<s�Tlasr=setTlasout(()=>{el.v>
+</.opacity='0';},2800);o}
+�═Cmaryor"wids di slirlR  ="mar
+>
+       nonEle  Lisin-s-('I"mar',e=>{opeif(r.nt< <d.span>‹<.g<doctis('="widtolirlR ')) cmary" stylr.nt< <d.ld);J}�;o�═End v key in   <div  input
+>
+       nonEle  Lisin-s-('keydown',e=>{opeif(r.key==='End v;&&!e.shiftKey){J    if(>
+         me *iv clas&&>
+         me *iv clas.id===a    input;) 
+l-s
+      ();ope}
+});o</��═�>o</abelPo</html>
