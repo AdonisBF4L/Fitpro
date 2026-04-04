@@ -1,4 +1,4 @@
-<!D&CTYPE html>
+<!DOCTYPE html>
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
@@ -544,11 +544,11 @@ tr:hover td{background:rgba(200,241,53,.02);}
 </div>
 <script>
 // ═══════════════════════════════════════════════════════
-// CONFIG & SUPABASE
+// CONFIG & S]`6CASE
 // ═══════════════════════════════════════════════════════
-const SURL='https://vszywnvyyynfyhczmmgf.supabase.co';
+const S]RL='https://vszywnvyyynfyhczmmgf.supabase.co';
 const SKEY='\x65\x79\x4a\x68\x62\x47\x63\x69\x4f\x69\x4a\x49\x55\x7a\x49\x31\x4e\x69\x49\x73\x49\x6e\x52\x35\x63\x43\x49\x36\x49\x6b\x70\x58\x56\x43\x4a\x39\x2e\x65\x79\x4a\x70\x63\x33\x4d\x69\x4f\x69\x4a\x7a\x64\x58\x42\x68\x59\x6d\x46\x7a\x5a\x53\x49\x73\x49\x6e\x4a\x6c\x5a\x69\x49\x36\x49\x6e\x5a\x7a\x65\x6e\x6c\x33\x62\x6e\x5a\x35\x65\x58\x6c\x75\x5a\x6e\x6c\x6f\x59\x33\x70\x74\x62\x57\x64\x6d\x49\x69\x77\x69\x63\x6d\x39\x73\x5a\x53\x49\x36\x49\x6d\x46\x75\x62\x32\x34\x69\x4c\x43\x4a\x70\x59\x58\x51\x69\x4f\x6a\x45\x33\x4e\x7a\x4d\x30\x4f\x44\x51\x7a\x4e\x6a\x59\x73\x49\x6d\x56\x34\x63\x43\x49\x36\x4d\x6a\x41\x34\x4f\x54\x41\x32\x4d\x44\x4d\x32\x4e\x6e\x30\x2e\x69\x66\x68\x43\x5f\x6f\x37\x4f\x6e\x52\x61\x57\x6b\x44\x36\x4d\x53\x4d\x45\x75\x67\x75\x36\x42\x4f\x65\x51\x37\x63\x54\x31\x75\x64\x36\x55\x64\x5a\x47\x31\x79\x4a\x41\x6b';
-const sb=window.supabase.createClient(SURL,SKEY);
+const sb=window.supabase.createClient(S]RL,SKEY);
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -890,7 +890,7 @@ async function saveClient(){
 async function doSendInvite(clientId,email,silent){
   if(!email){if(!silent)alert('Clientul nu are email.');return;}
   await sb.from('client_invites').upsert({trainer_id:currentUser.id,client_id:clientId,client_email:email,accepted:false},{onConflict:'client_id'});
-  var tempSb=window.supabase.createClient(SURL,SKEY,{auth:{storage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},persistSession:false,autoRefreshToken:false,flowType:'implicit'}});
+  var tempSb=window.supabase.createClient(S]RL,SKEY,{auth:{storage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},persistSession:false,autoRefreshToken:false,flowType:'implicit'}});
   var {error}=await tempSb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});
   if(error){if(!silent)alert('Eroare invitație: '+error.message);}
   else{if(!silent){toast('Invitație trimisă la '+email+'!');await loadAll();renderClients();}}
@@ -940,7 +940,8 @@ function renderTabProfil(){
   var c=allClients.find(x=>x.id===currentClientId);if(!c)return;
   var exp=c.subscription_end?new Date(c.subscription_end):null;
   var days=exp?Math.ceil((exp-new Date())/86400000):null;
-  document.getElementById('tab-profil').innerHTML=`
+  rTabProfil();
+  else if(t==='profil').innerHTML=`
     <div class="detail-grid">
       <div class="ds"><div class="ds-title">Date personale</div>
         <div class="ir"><span class="ik">Email</span><span class="iv">${c.email||'—'}</span></div>
@@ -971,14 +972,15 @@ function renderTabProfil(){
         <div class="ir"><span class="ik">Sesiuni totale</span><span class="iv">${allSessions.filter(s=>s.client_id===currentClientId).length}</span></div>
         <div class="ir"><span class="ik">Sesiuni realizate</span><span class="iv">${allSessions.filter(s=>s.client_id===currentClientId&&s.status==='realizat').length}</span></div>
         <div class="ir"><span class="ik">Măsurători</span><span class="iv">${allProgress.filter(p=>p.client_id===currentClientId).length}</span></div>
-        <div class="ir"><span class="ik">Total plătit</span><span class="iv dok">${allPayments.filter(p=>p.client_id===currentClientId).reduce((a,p)=>a+(p.amount||0),0).toLocaleString('ro-RO')} RON</span></div>
+        <div class="ir"><span class="ik">Total plătit</span><span class="iv rTk">${allPayments.filter(p=>p.client_id===currentClientId).reduce((a,p)=>a+(p.amount||0),0).toLocaleString('ro-RO')} RON</span></div>
       </div>
     </div>`;
 }
 
 function renderTabAntrenament(){
   var c=allClients.find(x=>x.id===currentClientId);if(!c)return;
-  document.getElementById('tab-antrenament').innerHTML=c.workout
+  rTabProfil();
+  else if(t==='antrenament').innerHTML=c.workout
     ?`<div class="ds"><div class="ds-title">Plan antrenament</div><pre style="white-space:pre-wrap;color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.8;">${c.workout}</pre></div>
       ${c.workout_notes?`<div class="ds" style="margin-top:14px;"><div class="ds-title">Observații</div><p style="color:var(--muted);line-height:1.7;">${c.workout_notes}</p></div>`:''}`
     :'<div class="empty"><div class="ei">🏋️</div>Niciun plan de antrenament</div>';
@@ -992,12 +994,14 @@ function renderTabDieta(){
     <div class="mc"><div class="ml">Carbo</div><div class="mv">${c.carbs||'—'}</div><div class="mu">g</div></div>
     <div class="mc"><div class="ml">Grăsimi</div><div class="mv">${c.fats||'—'}</div><div class="mu">g</div></div>
   </div>`:'';
-  document.getElementById('tab-dieta').innerHTML=`<div class="ds">${macros}${c.diet?`<div class="ds-title">Plan alimentar</div><pre style="white-space:pre-wrap;color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.8;">${c.diet}</pre>`:'<div class="empty">Niciun plan alimentar</div>'}${c.allergies?`<div class="ds-title" style="margin-top:12px;">Alergii</div><p style="color:var(--muted);">${c.allergies}</p>`:''}</div>`;
+  rTabProfil();
+  else if(t==='dieta').innerHTML=`<div class="ds">${macros}${c.diet?`<div class="ds-title">Plan ali elsar</div><pre style="white-space:pre-wrap;color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.8;">${c.diet}</pre>`:'<div class="empty">Niciun plan ali elsar</div>'}${c.allergies?`<div class="ds-title" style="margin-top:12px;">Alergii</div><p style="color:var(--muted);">${c.allergies}</p>`:''}</div>`;
 }
 
 function renderTabMasuratori(){
   var prog=allProgress.filter(p=>p.client_id===currentClientId).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  document.getElementById('tab-masuratori').innerHTML=`
+  rTabProfil();
+  else if(t==='masuratori').innerHTML=`
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn btn-primary" style="width:auto;" onclick="openAddProgress('${currentClientId}')">+ Adaugă măsurătoare</button></div>
     <div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>Abdomen</th><th>Piept</th><th>Șolduri</th><th>Braț</th><th>% Grăsime</th><th>Notă</th><th></th></tr></thead>
     <tbody>${prog.map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.waist||'—'} cm</td><td>${p.chest||'—'} cm</td><td>${p.hips||'—'} cm</td><td>${p.arm||'—'} cm</td><td>${p.body_fat||'—'}%</td><td>${p.notes||'—'}</td><td><button class="btn-sec btn-sm" onclick="deleteProgress('${p.id}')">🗑️</button></td></tr>`).join('')}
@@ -1006,7 +1010,7 @@ function renderTabMasuratori(){
 
 function renderTabProgres(){
   var prog=allProgress.filter(p=>p.client_id===currentClientId).sort((a,b)=>new Date(a.date)-new Date(b.date));
-  var el=document.getElementById('tab-progres');
+  var el=document.getElementById(t==='progres');
   if(!prog.length){el.innerHTML='<div class="empty"><div class="ei">📈</div>Nu există date de progres</div>';return;}
   el.innerHTML=`<div class="ds" style="margin-bottom:14px;"><canvas id="chart-progress" height="200"></canvas></div>
     <div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>% Grăsime</th><th>Abdomen</th></tr></thead>
@@ -1023,18 +1027,18 @@ function renderTabProgres(){
 function renderTabPlati(){
   var pays=allPayments.filter(p=>p.client_id===currentClientId).sort((a,b)=>new Date(b.date)-new Date(a.date));
   var total=pays.reduce((a,p)=>a+(p.amount||0),0);
-  document.getElementById('tab-plati').innerHTML=`
+  document.getElementById(t==='plati').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <span>Total: <strong class="dok">${total.toLocaleString('ro-RO')} RON</strong></span>
+      <span>Total: <strong class="dTk">${total.toLocaleString('ro-RO')} RON</strong></span>
       <button class="btn btn-primary" style="width:auto;" onclick="openAddPayment('${currentClientId}')">+ Plată</button>
     </div>
     <div class="tw"><table><thead><tr><th>Data</th><th>Sumă</th><th>Tip</th><th>Note</th><th></th></tr></thead>
-    <tbody>${pays.map(p=>`<tr><td>${p.date}</td><td class="dok">${p.amount} RON</td><td>${p.type||'—'}</td><td>${p.notes||'—'}</td><td><button class="btn-sec btn-sm" onclick="deletePayment('${p.id}')">🗑️</button></td></tr>`).join('')}
+    <tbody>${pays.map(p=>`<tr><td>${p.date}</td><td class="dTk">${p.amount} RON</td><td>${p.type||'—'}</td><td>${p.notes||'—'}</td><td><button class="btn-sec btn-sm" onclick="deletePayment('${p.id}')">🗑️</button></td></tr>`).join('')}
     </tbody></table>${pays.length===0?'<div class="empty">Nicio plată înregistrată</div>':''}</div>`;
 }
 
 function renderTabMesajeClient(){
-  var el=document.getElementById('tab-mesaje_client');if(!el)return;
+  var el=document.getElementById(t==='mesaje_client');if(!el)return;
   var msgs=allMessages.filter(m=>m.client_id===currentClientId).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
   el.innerHTML=`<div style="display:flex;flex-direction:column;gap:6px;max-height:400px;overflow-y:auto;margin-bottom:12px;padding:4px;" id="client-msg-thread">
     ${msgs.map(m=>`<div style="display:flex;flex-direction:column;align-items:${m.sender==='trainer'?'flex-end':'flex-start'};">
@@ -1062,7 +1066,8 @@ async function sendDetailMessage(){
 
 function renderTabNote(){
   var c=allClients.find(x=>x.id===currentClientId);if(!c)return;
-  document.getElementById('tab-note').innerHTML=`
+  rTabProfil();
+  else if(t==='note').innerHTML=`
     <div class="ds"><div class="ds-title">Note interne</div>
       <textarea id="notes-textarea" style="width:100%;min-height:200px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:vertical;">${c.notes||''}</textarea>
       <button class="btn btn-primary" style="width:auto;margin-top:10px;" onclick="saveNotes()">💾 Salvează note</button>
@@ -1122,11 +1127,11 @@ function renderFinanciar(){
   if(cvs){if(_finChart){_finChart.destroy();}_finChart=new Chart(cvs,{type:'bar',data:{labels,datasets:[{label:'RON',data,backgroundColor:'rgba(200,241,53,.7)',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888',maxRotation:45},grid:{display:false}},y:{ticks:{color:'#888'},grid:{color:'#252535'}}}}});}
   // Top clienți
   var topC=allClients.map(c=>({name:c.name,id:c.id,rev:allPayments.filter(p=>p.client_id===c.id).reduce((a,p)=>a+(p.amount||0),0)})).sort((a,b)=>b.rev-a.rev).slice(0,6);
-  document.getElementById('fin-top').innerHTML=topC.map((c,i)=>`<div class="ir"><span class="ik" style="font-size:13px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'  '} ${c.name}</span><span class="iv dok">${c.rev.toLocaleString('ro-RO')} RON</span></div>`).join('')||'<div class="empty">Nu există date</div>';
+  document.getElementById('fin-top').innerHTML=topC.map((c,i)=>`<div class="ir"><span class="ik" style="font-size:13px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'  '} ${c.name}</span><span class="iv rTk">${c.rev.toLocaleString('ro-RO')} RON</span></div>`).join('')||'<div class="empty">Nu există date</div>';
   // Payments table
   document.getElementById('payments-tbody').innerHTML=allPayments.map(p=>`<tr>
-    <td>${p.date}</td><td><strong>${p.clients?p.clients.name:'—'}</strong></td>
-    <td class="dok">${(p.amount||0).toLocaleString('ro-RO')} RON</td>
+    <td>${p.date}</td><td><strong>${p.clients?p.clientsiv><strong>${c?c.name</td>
+    <td class="dTk">${(p.amount||0).toLocaleString('ro-RO')} RON</td>
     <td>${p.type||'—'}</td><td>${p.notes||'—'}</td>
     <td><button class="btn-sec btn-sm" onclick="deletePayment('${p.id}')">🗑️</button></td>
   </tr>`).join('')||'<tr><td colspan="6" class="empty">Nu există plăți</td></tr>';
@@ -1206,7 +1211,7 @@ async function saveRenewal(){
 function openAddProgress(clientId){
   currentClientId=currentClientId||clientId;
   document.getElementById('p-date').value=new Date().toISOString().slice(0,10);
-  ['p-weight','p-waist','p-chest','p-hips','p-thigh','p-arm','p-bodyfat','p-note'].forEach(id=>{var e=document.getElementById(id);if(e)e.value='';});
+  ['p-weight','p-waist','p-chest','p-hips','p-thigh','p-arm','p-bodyfat','p'note'].forEach(id=>{var e=document.getElementById(id);if(e)e.value='';});
   var c=allClients.find(x=>x.id===clientId);
   if(c){
     var hint=document.getElementById('prog-hint-text');
@@ -1229,7 +1234,7 @@ async function saveProgress(){
     thigh:parseFloat(document.getElementById('p-thigh').value)||null,
     arm:parseFloat(document.getElementById('p-arm').value)||null,
     body_fat:parseFloat(document.getElementById('p-bodyfat').value)||null,
-    notes:document.getElementById('p-note').value
+    notes:document.getElementById('p'note').value
   };
   var {error}=await sb.from('progress').insert(data);
   btn.disabled=false;
@@ -1281,8 +1286,8 @@ function renderCalWeek(sessions,now){
       var daySess=sessions.filter(s=>s.date===iso).sort((a,b)=>(a.time||'')>(b.time||'')?1:-1);
       var isToday=iso===now.toISOString().slice(0,10);
       return`<div class="cal-day ${isToday?'today':''}">
-        <div class="cal-hdr" onclick="openAddSession('${iso}')" title="Adaugă sesiune"><span style="font-size:11px;color:var(--muted);">${d.toLocaleDateString('ro-RO',{weekday:'short'})}</span><br><strong style="font-size:15px;${isToday?'color:var(--accent);':''}">${d.getDate()}</strong></div>
-        ${daySess.map(s=>{var c=allClients.find(x=>x.id===s.client_id);var col=s.status==='realizat'?'var(--accent)':s.status==='anulat'?'var(--accent3)':'var(--warning)';return`<div class="cal-sc" style="background:rgba(200,241,53,.06);border-left:3px solid ${col};cursor:pointer;" onclick="openEditSession('${s.id}')"><div style="font-size:11px;font-weight:600;color:${col};">${s.time||''}</div><div style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c?c.name:'—'}</div>${s.type?`<div style="font-size:10px;color:var(--muted);">${s.type}</div>`:''}</div>`;}).join('')}
+        <div class="cal-hdr" onclick="openAddSession('${iso}')" title="Adaugă sesiune"><span style="font-size:11px;color:var(--muted);">${d.toLocaleDateString('ro-RO',{weekday:'short'})}</span><br><strong style="font-size:15px;${isToday?'color:var(--accent);':''}">${d.getDate()${c?c.name</div>
+        ${daySess.map(s=>{var c=allClients.find(x=>x.id===s.client_id);var col=s.status==='realizat'?'var(--accent)':s.status==='anulat'?'var(--accent3)':'var(--warning)';return`<div class="cal-sc" style="background:rgba(200,241,53,.06);border-left:3px solid ${col};cursor:pointer;" onclick="openEditSession('${s.id}')"><div style="font-size:11px;font-weight:600;color:${col};">${s.time||''}</div><div style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c?civ><strong>${cdiv>${s.type?`<div style="font-size:10px;color:var(--muted);">${s.type}</div>`:''}</div>`;}).join('')}
       </div>`;
     }).join('')}
   </div>`;
@@ -1293,8 +1298,9 @@ function renderCalWeek(sessions,now){
 function renderCalList(sessions,now){
   document.getElementById('cal-label').textContent='Listă sesiuni';
   var sorted=[...sessions].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  document.getElementById('cal-list').innerHTML=`<div class="tw"><table><thead><tr><th>Data</th><th>Ora</th><th>Client</th><th>Tip</th><th>Durată</th><th>Status</th><th></th></tr></thead>
-    <tbody>${sorted.map(s=>{var c=allClients.find(x=>x.id===s.client_id);var sc=s.status==='realizat'?'ba':s.status==='anulat'?'bx':'be';return`<tr><td>${s.date}</td><td>${s.time||'—'}</td><td><strong>${c?c.name:'—'}</strong></td><td>${s.type||'—'}</td><td>${s.duration||'—'} min</td><td><span class="badge ${sc}">${s.status}</span></td><td><button class="btn-sec btn-sm" onclick="openEditSession('${s.id}')">✏️</button> <button class="btn-sec btn-sm" onclick="deleteSession('${s.id}')">🗑️</button></td></tr>`;}).join('')}
+  rTabProfil();
+  else if(tcal-list').innerHTML=`<div class="tw"><table><thead><tr><th>Data</th><th>Ora</th><th>Client</th><th>Tip</th><th>Durată</th><th>Status</th><th></th></tr></thead>
+    <tbody>${sorted.map(s=>{var c=allClients.find(x=>x.id===s.client_id);var sc=s.status==='realizat'?'ba':s.status==='anulat'?'bx':'be';return`<tr><td>${s.date}</td><td>${s.time||'—'}</td><td><strong>${c?civ><strong>${cstrong></td><td>${s.type||'—'}</td><td>${s.duration||'—'} min</td><td><span class="badge ${sc}">${s.status}</span></td><td><button class="btn-sec btn-sm" onclick="openEditSession('${s.id}')">✏️</button> <button class="btn-sec btn-sm" onclick="deleteSession('${s.id}')">🗑️</button></td></tr>`;}).join('')}
     </tbody></table>${sorted.length===0?'<div class="empty">Nicio sesiune</div>':''}</div>`;
   document.getElementById('cal-list').style.display='block';
   document.getElementById('cal-week').style.display='none';
@@ -1369,7 +1375,7 @@ function renderMesaje(){
 async function selectMsgClient(id){
   activeMsgClientId=id;
   var c=allClients.find(x=>x.id===id);
-  document.getElementById('msg-header').textContent=c?c.name:'Client';
+  document.getElementById('msg-header').textContent=c?civ><strClient';
   document.getElementById('msg-input-wrap').style.display='flex';
   await sb.from('messages').update({read:true}).eq('client_id',id).eq('sender','client');
   await loadAll();
@@ -1379,7 +1385,7 @@ async function selectMsgClient(id){
 
 function renderMsgThread(){
   var msgs=allMessages.filter(m=>m.client_id===activeMsgClientId).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
-  var el=document.getElementById('msg-thread');
+  var el=document.getElementById(tmsg-thread');
   el.innerHTML=msgs.map(m=>`<div class="msg-wrap" style="align-items:${m.sender==='trainer'?'flex-end':'flex-start'};">
     <div class="msg-bubble ${m.sender==='trainer'?'msg-trainer':'msg-client'}">${m.content}</div>
     <div class="msg-time">${new Date(m.created_at).toLocaleString('ro-RO')}</div>
@@ -1443,13 +1449,30 @@ function exportData(){
 async function handleImport(input){
   var file=input.files[0];if(!file)return;
   try{
-    var data=JSON.parse(await file.text());
+    var raw=JSON.parse(await file.text());
+    // Suport format vechi (v1): datele sunt in raw.data
+    var data=(raw.data && (raw.data.clients||raw.data.sessions)) ? raw.data : raw;
+    // Extrage progresele inglobate in clienti (format vechi)
+    var embeddedProgress=[];
+    if(data.clients){
+      data.clients.forEach(function(c){
+        if(c.progress&&c.progress.length){
+          c.progress.forEach(function(p,i){
+            if(!p.id) p.id=c.id+'_p'+i;
+            p.client_id=c.id;
+            embeddedProgress.push(p);
+          });
+        }
+        delete c.progress; // curata campul din obiectul client
+      });
+    }
+    var totalProgress=(data.progress||[]).concat(embeddedProgress);
     if(!confirm('Importul adaugă date noi (nu șterge existente). Continuă?'))return;
     if(data.clients){for(var c of data.clients){c.trainer_id=currentUser.id;await sb.from('clients').upsert(c,{onConflict:'id'});}}
     if(data.sessions){for(var s of data.sessions){s.trainer_id=currentUser.id;await sb.from('sessions').upsert(s,{onConflict:'id'});}}
-    if(data.progress){for(var p of data.progress){await sb.from('progress').upsert(p,{onConflict:'id'});}}
+    if(totalProgress.length){for(var p of totalProgress){p.trainer_id=currentUser.id;await sb.from('progress').upsert(p,{onConflict:'id'});}}
     if(data.payments){for(var py of data.payments){await sb.from('payments').upsert(py,{onConflict:'id'});}}
-    await loadAll(); renderClients(); closeModal('modal-backup'); toast('Import finalizat!');
+    await loadAll(); renderClients(); closeModal('modal-backup'); toast('Import finalizat! '+( data.clients?data.clients.length:0)+' clienți importați.');
   }catch(e){alert('Eroare la import: '+e.message);}
 }
 
@@ -1471,7 +1494,7 @@ async function loadClientPortal(profile){
   clientProgressData=rp.data||[];
   clientSessionsData=rs.data||[];
   cliMessages=rm.data||[];
-  if(clientData) document.getElementById('cli-username').textContent=clientData.name;
+  if(clientData) document.getElementById('cli-userv><s').textContent=clientDataiv><s;
   showCliTab('home');
 }
 
@@ -1524,8 +1547,8 @@ function renderCliHome(){
 }
 
 function renderCliWorkout(){
-  document.getElementById('cli-workout').innerHTML=clientData&&clientData.workout
-    ?`<div class="ds"><div class="ds-title">🏋️ Plan antrenament</div><pre style="white-space:pre-wrap;color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.8;font-size:14px;">${clientData.workout}</pre></div>`
+  document.getElementById('cli-workout').innerHTML=clientData&&clientDataiworkout
+    ?`<div class="ds"><div class="ds-title">🏋️ Plan antrenament</div><pre style="white-space:pre-wrap;color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.8;font-size:14px;">${clientDataiworkout}</pre></div>`
     :'<div class="empty"><div class="ei">🏋️</div>Antrenorul nu a adăugat un plan de antrenament.</div>';
 }
 
@@ -1537,167 +1560,148 @@ function renderCliDiet(){
     <div class="mc"><div class="ml">Carbohidrați</div><div class="mv">${c.carbs||'—'}</div><div class="mu">g</div></div>
     <div class="mc"><div class="ml">Grăsimi</div><div class="mv">${c.fats||'—'}</div><div class="mu">g</div></div>
   </div>`:'';
-  var dietPlan=c&&c.diet?`<div class="ds-title">Plan alimentar</div><pre style="white-space:pre-wrap;color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.8;">${c.diet}</pre>`:'<div class="empty" style="padding:20px;">Antrenorul nu a adăugat un plan de dietă.</div>';
-  document.getElementById('cli-diet').innerHTML=`<div class="ds" style="margin-bottom:14px;">${macros}${dietPlan}</div>
-    <div class="ds">
-      <div class="ds-title">🧮 Calculator macronutrienți</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Greutate (kg)</label><input id="cm-weight" type="number" value="${c?c.weight||'':''}"></div>
-        <div class="form-group"><label>Înălțime (cm)</label><input id="cm-height" type="number" value="${c?c.height||'':''}"></div>
-        <div class="form-group"><label>Vârstă</label><input id="cm-age" type="number" value="${c?c.age||'':''}"></div>
-        <div class="form-group"><label>Sex</label><select id="cm-gender"><option>Masculin</option><option>Feminin</option></select></div>
-        <div class="form-group"><label>Nivel activitate</label><select id="cm-activity">
-          <option value="1.2">Sedentar</option><option value="1.375">Ușor activ</option>
-          <option value="1.55" selected>Moderat activ</option><option value="1.725">Foarte activ</option></select></div>
-        <div class="form-group"><label>Obiectiv</label><select id="cm-goal">
-          <option value="maintain">Menținere</option><option value="cut">Slăbit</option><option value="bulk">Masă musculară</option></select></div>
-      </div>
-      <button class="calc-btn" onclick="calcCliMacros()" style="margin-top:10px;">🧮 Calculează</button>
-      <div id="cli-macro-result"></div>
-    </div>`;
+  var dietPlan=c&&c.diet?`<div class="ds-title">Plan alimentar</div><pre style="white-space:pre-wrap;color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.8;">${c.diet�══><div class="ml">Calorii<re stories||c.protein))?`<div class="p}</div><div class="mu">kcal</divfpcolor:var(--tex� var [rc,rp,i-workout').innerHTML=clientDlse if><table><thead><tr><th>Dr;"><div cldiv class="mc">ro-RO')}<otein</spas="ds--time">${new Date(m.crea����e="text-align:center;ament</div�� C{prot}go.proteinutrss="badgstyle="text-align:centededP"ds" -label">Abonament</div>dedP"dsouMediiv st      <div(";)</iv st <urn;
+"widtcment);">"Id('p="number".client_id??    <div stame</dicolor:var(--muted);ft</div>dedP"dsouMediiv st Îrători m (cm)</iv st <urn;
+"widtcmeht);">"Id('p="number".client_id??  h <div stame</dicolor:var(--muted);ft</div>dedP"dsouMediiv st Vârse="foiv st <urn;
+"widtcmea">${d('p="number".client_id??  a"> stame</dicolor:var(--muted);ft</div>dedP"dsouMediiv st Sexfoiv st <profil"widtcmet+6.25edient.getent.getEument.getient.getght-5*aument.geti/profilicolor:var(--muted);ft</div>dedP"dsouMediiv st Nivelector('#ize:2iv st <profil"widtcme='Slăbi-label">Abouteid===s.client_1.2iv sde-spaceent.getient.ge.client_1.375">Ușolector(ceent.getabel">Abouteid===s.client_1.55" tion>`).>Mo.25ivfctor(ceent.geteid===s.client_1.725">Foiv>efctor(ceent.gete/profilicolor:var(--muted);ft</div>dedP"dsouMediiv st le="colofoiv st <profil"widtcmetnct-label">Abouteid===s.client_lugins:{claseight) rceent.geteid===s.client_cutiv ):goalceent.geteid===s.client_bulk">d(tdee*1.1):tdeeceent.gete/profilicolor:var(--mcolor:var(--mcm" onclick="de${pr-btn{s.id}')">�${prta;eFloat(d"><div cldiv claes()">💾div�� C{prot>';
+ sync function uted);fwidtcntDrotei-
+    t"goal?`<div class="kout(){
+  docum${prta;eFloat(document.gmentById('f-height').value);
+  var agcment);">seFloat(document.gmentById('f-height').value);
+  var agcmeparseInt(document.getElentById('f-age').value)||30;
+  var gcmea">=document.getElementByli-'+tab);
+  if(pg) pg.clasm;
+  var goal=douerySelectomentById('f-height').value);
+  var agcme='Slăbint(document.getEld('f-goal').value||'Menținerecmetnct goal=douery alermple� greutatea și înălțimea în tab-ul Măsurători maminin'?10*weight*height-5*age-161 activicume5*age+5;
+ activicume+r*activity);
+  var cal=goal==='St'?Math.round(tdee*0.cut;
+  var prot=Math.�'?Math.rounbulk;
+  var prot=Math.round(weight*2.2);
+  var fat=Math.(cal*0.25/9);
+  var carb=Math.rond((cal-prot*4-fat*9)/4);
+  switchMTab('diet');
+  documi-workout').innerHTML=clientDrotei-
+    tss="cli-hero">
+      <di241,53,.06);borderr;backggol};cursrsor:pointer;background:$(--bordrive:trcriptttom:1px <divdiv claes()"4div class=s="ml">Grăsimipx;:var(--muted);ft</div></div><div class="mv">${c.calories||'—'}</div>>${c.goal}</p></div>ata.length}</ctioniv></div>
+    <div class="mc"><div class=ass="ml">Proteină</div><div class="mv">${c.protein||'—'}</div><>${c.goal}</p>#4fc3f7gth}<`);
 }
+="mc"><div class=ass="ml">Proteină</div><div class="ss="mrotein||'—'}</div><>${c.goal}</p>#ff9800gth}</c═�="mc"><div class=ass="ml">Proteină</div><div class="v">${c.fats||'—'}</div><div>${c.goal}</p>#ef5350gth}<═�ss="ds" style="text-t-size:11px;color:var(--muted);margin-top:3px;overflow:hidden;text-ovar(-ass="stat-label">MăBMRC:${ var cal=goal=)b}g F:${fTDEEC:${(weib}g F:oal?`<div class="kout(){
+  docum if(tab==='sessionsocument.tmsg-thread');
+  el.innerHTMssLis); renderTabM2.2);
+ gnew D/div></div>
+    </te)-new Date(a.date));
+a rTabProfil();
+ belse if(tcadiv class="ms>
+      <di241,53,t:space-between;align-items:c    <div;div class="mc">2div class=s="m" onclick="deletsion(Top=ar))?`<div cwidth:auto('${s.id}')"><dit('Import finssLis); renderTg-thread');
+  el.innerHTMsoISOString().slice(0,10);
+  ['p-weight','p-waist','p">+ e="font-  await sb.frsync function lass="ds"><dis); allClien1s="ds-title">🏋><div cldiv class="mc">ro-RO'<canvasfwidtcntDfinChas); ".getElem"200"goacanvasrenderCliWor${new Date(m.creaata</th><th>Ora</th><th>Client</th><th>     <di</th><th>Abdol.i</th><th>% ].filter</th><th>No</th></trorted.map(s=>{var c=allCliew Ds); ])} Re // )ate}</td><td>ng>${p.clients?p.clien{p.c  <div style=" kgs?p.clien{p.c est: style=" cms?p.clien{p.ct.getEle style="%/td>
+    <td><button class="btncolspan="6" clasted.length===0?'<div clas); allCliecio sesiune</div>':''}</diu aikcal</divfnv>`;
+  await sb.frsyd.getElementById('cative); allClien1yId('clsetTtertByI()ring().slice(0ctprog-hint');
+    if(hint) hcntDfinChas); 'arseInttxs){for(var c   ata:{labelstx;
+  var ═�abel:'RON',dat:e); ate}</td}).redua,backgroundColor:'     <div(";)abel:'Re); ate}</td})documen{respon,border#c8f135',emss,ses.4,MsgClB1,53,.7)',border#c8f135',ringages').,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{N',dat:// Top clccc
+  v888',maxRotation:45},grid:{disp});}
+  // Top clienți
+  id:{color:'#252535'}}}}});}
+  // Top clienți
+  var tar c }t',0;
+  clot(){
+  docum if(tab==='chat') rocument..subscription_end?new upcot-5g==>s.status==='realizat').length}</div></dlementByIdnd)>new DattElementBlaste)-new Date(a.date));
+a rTabProfil();
+ belse if(tca2.2);  re=>s.status==='realizat').length}</div!></div>`;
+  if()-new Date(a.date));
+  rTabProfil();
+  else if(tcal-list').innerHTML=`<div cntD=r.error;}
+  li-hero">
+      <div class���><div cldiv class="mc">ro-RO'e="text-align:center;ament</div��  style="div>`;
+  e-t-size:11px;${upcot-5gclientPrupcot-5gcnd(x=>xs="ik" style="font-size:13px;">${||'—'}</trong>${?'}
 
-function calcCliMacros(){
-  var w=parseFloat(document.getElementById('cm-weight').value);
-  var h=parseFloat(document.getElementById('cm-height').value);
-  var a=parseInt(document.getElementById('cm-age').value)||30;
-  var g=document.getElementById('cm-gender').value;
-  var act=parseFloat(document.getElementById('cm-activity').value);
-  var goal=document.getElementById('cm-goal').value;
-  if(!w||!h) return alert('Completează greutatea și înălțimea.');
-  var bmr=g==='Feminin'?10*w+6.25*h-5*a-161:10*w+6.25*h-5*a+5;
-  var tdee=Math.round(bmr*act);
-  var cal=goal==='cut'?Math.round(tdee*.8):goal==='bulk'?Math.round(tdee*1.1):tdee;
-  var prot=Math.round(w*2.2);
-  var fat=Math.round(cal*.25/9);
-  var carb=Math.round((cal-prot*4-fat*9)/4);
-  document.getElementById('cli-macro-result').innerHTML=`
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:14px;">
-      <div class="mg4">
-        <div class="mc"><div class="ml">Calorii</div><div class="mv" style="color:var(--accent);">${cal}</div><div class="mu">kcal</div></div>
-        <div class="mc"><div class="ml">Proteină</div><div class="mv" style="color:#4fc3f7;">${prot}g</div></div>
-        <div class="mc"><div class="ml">Carbo</div><div class="mv" style="color:#ff9800;">${carb}g</div></div>
-        <div class="mc"><div class="ml">Grăsimi</div><div class="mv" style="color:#ef5350;">${fat}g</div></div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">BMR: ${Math.round(bmr)} kcal | TDEE: ${tdee} kcal</div>
-    </div>`;
+/'+ong>${Elemen{c.rev.;">${ccaleStrin>`;}).joinon nc funce||'—'}</tSessions.length} sesiunigetElementByIdbadge $iv class="empty">Nu exstoriesont-size:12px;">zile rămattom:1px >� 0gresul tău</div>
+iv>`;
+  docum"div>`;
+  .proteinor${new ime">${new Date(m.crea����e="text-align:center;ament</dIssizecv">${filtered.e:11px;${;  rclientPr`/th><t?`<div cwidth:',0%$(--borde:1lapse:e:1lapsegresul tău</div>
+>Ora</th><th>C><div class="stat-lr:poattom:1px6.type}</div>`:''}</div>`ient</th><th><div class="stat-lr:poattom:1px6.type}</div>`:''}</div>`>Status</th><div class="stat-lr:poattom:1px6.type}</div>`:''}</div>`ith></th></tr><><div class="stat-lr:poattom:1px6.type}</div>`:''}</div>`thead>
+    <orted.map(s=>{varar c=allCli;  rcnd(x=>xs=mpty">Nclass="ei">⏳</o-RO')}—'}</td><td><Nclass="ei">⏳</o-RO')}�ration||'—'} min</Nclass="ei">⏳</o-RO')}—><span class="badge ${sc}">Nclass="ei">⏳</o-RO'{s.status}</span></td>.status==='anulat'?'bx':'bs.datd><button class="btn-sec bolspan="6" clastngth===0?'<div c`storiesont-size:12px;">zile rămattom:1px >� 0gresul tău</div>
+iv>`un issizecroteinor${new ime">kout(){
+  docum if(tab==liHome('cli-workout').innerHTML=clientDfunctiv class="ms>
+      <di241,53,t:space-betwe    <dire docu:px;">
+;�><div ${pr(',0vh - 18>�)RO'e="text-align:center;ament</><div cldiv class="mc">>💾div�� ();
 }
-
-function renderCliProgress(){
-  var el=document.getElementById('cli-progress');
-  var prog=[...clientProgressData].sort((a,b)=>new Date(a.date)-new Date(b.date));
-  el.innerHTML=`
-    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-      <button class="btn btn-primary" style="width:auto;" onclick="openModal('modal-cli-progress');document.getElementById('cp-date').value=new Date().toISOString().slice(0,10);">+ Adaugă măsurătoare</button>
-    </div>
-    ${prog.length>1?`<div class="ds" style="margin-bottom:14px;"><canvas id="cli-chart-prog" height="200"></canvas></div>`:''}
-    <div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>Abdomen</th><th>% Grăsime</th><th>Notă</th></tr></thead>
-    <tbody>${[...prog].reverse().map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.waist||'—'} cm</td><td>${p.body_fat||'—'}%</td><td>${p.notes||'—'}</td></tr>`).join('')}
-    </tbody></table>${prog.length===0?'<div class="empty">Nu ai adăugat nicio măsurătoare</div>':''}</div>`;
-  if(prog.length>1){
-    setTimeout(()=>{
-      var ctx=document.getElementById('cli-chart-prog');if(!ctx)return;
-      new Chart(ctx,{type:'line',data:{labels:prog.map(p=>p.date),datasets:[{label:'Greutate (kg)',data:prog.map(p=>p.weight),borderColor:'#c8f135',tension:.4,pointBackgroundColor:'#c8f135',fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#ccc'}}},scales:{x:{ticks:{color:'#888'},grid:{color:'#252535'}},y:{ticks:{color:'#888'},grid:{color:'#252535'}}}}});
-    },100);
-  }
-}
-
-function renderCliSessions(){
-  var now=new Date();
-  var upcoming=clientSessionsData.filter(s=>s.status==='programat'&&new Date(s.date)>=now).sort((a,b)=>new Date(a.date)-new Date(b.date));
-  var past=clientSessionsData.filter(s=>s.status!=='programat').sort((a,b)=>new Date(b.date)-new Date(a.date));
-  document.getElementById('cli-sessions').innerHTML=`
-    <div class="ds" style="margin-bottom:14px;">
-      <div class="ds-title">📅 Sesiuni programate</div>
-      ${upcoming.length?upcoming.map(s=>`<div class="ir"><span class="ik">${s.date}${s.time?' la '+s.time:''}</span><strong class="iv">${s.type||'Sesiune'}</strong><span class="badge be">${s.duration||60} min</span></div>`).join(''):'<div style="color:var(--muted);padding:10px 0;font-size:13px;">Nicio sesiune programată</div>'}
-    </div>
-    <div class="ds">
-      <div class="ds-title">Istoric sesiuni</div>
-      ${past.length?`<table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr><th style="text-align:left;padding:6px;color:var(--muted);">Data</th><th style="text-align:left;padding:6px;color:var(--muted);">Tip</th><th style="text-align:left;padding:6px;color:var(--muted);">Durată</th><th style="text-align:left;padding:6px;color:var(--muted);">Status</th></tr></thead>
-      <tbody>${past.map(s=>`<tr><td style="padding:6px;">${s.date}</td><td style="padding:6px;">${s.type||'—'}</td><td style="padding:6px;">${s.duration||'—'} min</td><td style="padding:6px;"><span class="badge ${s.status==='realizat'?'ba':'bx'}">${s.status}</span></td></tr>`).join('')}</tbody></table>`:'<div style="color:var(--muted);padding:10px 0;font-size:13px;">Niciun istoric</div>'}
-    </div>`;
-}
-
-function renderCliChat(){
-  document.getElementById('cli-chat').innerHTML=`
-    <div style="display:flex;flex-direction:column;height:calc(100vh - 180px);">
-      <div class="ds-title" style="margin-bottom:10px;">💬 Mesaje cu antrenorul</div>
-      <div id="cli-msg-thread" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:12px;"></div>
-      <div style="display:flex;gap:8px;">
-        <textarea id="cli-msg-input" placeholder="Scrie un mesaj..." style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;height:60px;" onkeydown="if(event.ctrlKey&&event.key==='Enter')sendCliMessage()"></textarea>
-        <button class="btn btn-primary" style="width:auto;align-self:flex-end;" onclick="sendCliMessage()">Trimite</button>
-      </div>
-    </div>`;
-  var thread=document.getElementById('cli-msg-thread');
-  thread.innerHTML=cliMessages.map(m=>`<div class="msg-wrap" style="align-items:${m.sender==='client'?'flex-end':'flex-start'};">
-    <div class="msg-bubble ${m.sender==='client'?'msg-trainer':'msg-client'}">${m.content}</div>
+ cu   return;
+-t-size:11px;colorwidtcntDr=msgs.map/><div cl    :1low:ellip-y:auto(t:space-betwe    <dire docu:px;">
+;=>{
+<divdiv class="mc">2div c-t-size:11px;color:var(--t:space-betwe=>{
+      var iarar css=.frorwidtcntDr=msurn;
+"olorcehol.25*"scrollv>';
+  el../><div cl    :1l.06);borderr;backggol};cursrsor:pointer;background:$(--bordrive:tr8iptttom:1px s.type}</div>`:',sans-serif;line-height:1.8;">${c.diet�resul tău</divtBy═�:essi;ecttăuessi;hs.time||    ${skeyew Dtrif( Ref=URtrlKey&& Ref=Ukey==='En=filtad:fCf(clientD(px;f/css=.fro var iarar m" onclick="deletsion(Top=ar))?`<div cwidth:auto(rainerselfc    <div;"${c.id}')" s:fCf(clientD(px;Top=itesync function uten('')||'<div class="eivitys.maprog-hint');
+    if(hint) hcntDL=msgs.map(m=>`<gs.mapntDataiworkout_id===actp" style="align-items:${m.sender==='trainer'?'flex-end':'flex-s>
+    <>
+    <div class="msg-bubble ${m.sender==='trainer'?'msg-trainer':'msg>
+    <>
+>${m.content}</div>
     <div class="msg-time">${new Date(m.created_at).toLocaleString('ro-RO')}</div>
-  </div>`).join('')||'<div class="empty">Niciun mesaj. Trimite primul!</div>';
-  thread.scrollTop=thread.scrollHeight;
-}
+  </div>`).join('')||'<div class="empty">Niciun mesaj. Scrie primul!</div>';
+  el.Top=itelTop=el.scrollHeighgs.mapn}
 
-async function sendCliMessage(){
-  var input=document.getElementById('cli-msg-input');
-  var content=input.value.trim();if(!content||!clientData)return;
-  await sb.from('messages').insert({client_id:clientData.id,trainer_id:currentProfile.trainer_id,sender:'client',content,read:false});
-  input.value='';
-  var r=await sb.from('messages').select('*').eq('client_id',clientData.id).order('created_at',{ascending:true});
-  cliMessages=r.data||[];
-  renderCliChat();
-}
+async fgs.mapn}
 
-async function saveCliProgress(){
-  if(!clientData||!currentProfile) return;
-  var btn=document.getElementById('btn-save-cliprog');btn.disabled=true;
-  var data={
-    client_id:clientData.id,trainer_id:currentProfile.trainer_id,
-    date:document.getElementById('cp-date').value||new Date().toISOString().slice(0,10),
-    weight:parseFloat(document.getElementById('cp-weight').value)||null,
-    waist:parseFloat(document.getElementById('cp-waist').value)||null,
-    chest:parseFloat(document.getElementById('cp-chest').value)||null,
-    hips:parseFloat(document.getElementById('cp-hips').value)||null,
-    thigh:parseFloat(document.getElementById('cp-thigh').value)||null,
-    arm:parseFloat(document.getElementById('cp-arm').value)||null,
-    body_fat:parseFloat(document.getElementById('cp-bodyfat').value)||null,
-    notes:document.getElementById('cp-note').value
+asyendMessage(){
+  var input=docuCf(clientD(plementById('msg-input');
+  var content=cntDr=msurn;
+ue.trim();
+  if(!content||!activeMsgCntId) return;
+mentById('cssions').delete().eq('id'd:activeMsgClientId,trainer_idiv>`
+    :i,sender:'trainer',coPder('crender:'traead:false>
+    <ait loadAll(); renderMsgTfrom('messages').ins').insert(data);errclient_id',profile.client_record_id).odiv>`
+    :i,ding:true})
+  ]);
+  clientData=rc.data;
+  if(clientData document.getn renderCliHome(){
+ ){
+  var btn=documeb==='sessionsocumtElementById('n;
+mer',coPder('c
+  await sb.ById('btn-save-sess');btn.disabled=true;
+ men var data={
+    client_id:currentClientId,trainer_id:civ>`
+    :i,sender:'trainer',coPder('crender:'traetId,td('s-date').value,time:documensoISOString().s||ice(0,10),type:'cash',notes:`ReînnoitId,tgetElementById('p-weight').value)||null,
+  c  waist:parseFloat(document.getElementById('p-waist').value)||null,
+   c chest:parseFloat(document.getElementById('p-chest').value)||null,
+   c hips:parseFloat(document.getElementById('p-hips').value)||null,
+    cthigh:parseFloat(document.getElementById('p-thigh').value)||null,
+   c arm:parseFloat(document.getElementById('p-arm').value)||null,
+    bcody_fat:parseFloat(document.getElementById('p-bodyfat').value)||null,
+ c   notes:document.getElementById('p'note').value
   };
-  if(!data.weight&&!data.waist){btn.disabled=false;return alert('Adaugă cel puțin greutatea.');}
-  var {error}=await sb.from('progress').insert(data);
+  var {cerror}=await sb.from('tEleiențwaist:&&eiențwest:){r) return alert('Ergreutatea și e="font-cel puight în tab-uminiw Date()ress').insert(data);
   btn.disabled=false;
   if(error) return alert('Eroare: '+error.message);
-  closeModal('modal-cli-progress');
-  var r=await sb.from('progress').select('*').eq('client_id',clientData.id).order('date',{ascending:true});
-  clientProgressData=r.data||[];
-  renderCliProgress(); toast('Măsurătoare salvată!');
+  closeModal('modal-progress');
+  await loadAllssLis); renderTabM2.2).insert(data);errclient_id',profile.client_record_id).odiv>`
+    :i,ding:true  sb.from('sessions').sata||[];
+  clientSession document.getn renderC='sessions'tă!');
 }
 
-// ═══════════════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════════════
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
-function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
-
-let _toastTimer=null;
-function toast(msg){
-  var el=document.getElementById('toast');
-  if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el);}
-  el.textContent=msg;el.style.opacity='1';
-  clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>{el.style.opacity='0';},2800);
-}
-
-// Close modals on overlay click
-document.addEventListener('click',e=>{
-  if(e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
-});
-
-// Enter key in message input
-document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey){
-    if(document.activeElement&&document.activeElement.id==='msg-input') sendMessage();
-  }
-});
-</script>
-</body>
-</html>
+async function deleteProgre═══════════════════════════════════════════════
+async function loadClientPo═UTILSe═══════════════════════════════════════════════
+async function loadClientPocument.getEleawait tByI;if(e)e.value='';});
+  var  if(tab==='home'tEle'lOffset+=dir;r;
+  await tByI;if(e)e.value='';});
+  var  if(tab==='n=documetEle'lOffset+=dir;togg</dideb
+  vanotes').value||null,traineideb
+ ve')) renderFtogg</metEle'lOnotes').value||null,trainow:eaceve')) renderFtogg</metEle'lOffset+=dir;r;
+  dideb
+  vanotes').value||null,traineideb
+ ve')) renderFn=documetEle'lOnotes').value||null,trainow:eaceve')) renderFn=documetEle'lOff
+let _ă!')TterrtById('set+=dir;to!');r=msocument.tmsg-thread');
+  el.innerHTMto!')erCliHome!el){tmsg-thread'RL.createObjectrolerCdiv d=Mto!')eCdiv)) reName=Mto!')eCg-thread' not.appocuChild(el)om('sess;
+  showCliTr=mCdivit sb.opac'#f-'1'ata||[earTtertByI_ă!')Tterr);_ă!')TterrtsetTtertByI()rindivit sb.opac'#f-'0';},28,0;
+ gre═C;
+  ══s .getw:eace .id}'
+g-thread'homERef=Lrn;
+ true}id}'',ering()are:.sg-);
+')) renderFit lders loadAllow:eaceve);r;
+  await :.sg-);
+'yId('.sate═En=fi key    al-progTfrom(
+g-thread'homERef=Lrn;
+ truekeyew D',ering()are:.key==='En=fil&&ee.shiftKeyyId('cly of-thread'h rendateObjef-freq').vah rendateObjeementB=input.value=document.getE
+  clotE
+ </ </div> </h===0 </html>
