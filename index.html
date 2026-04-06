@@ -548,7 +548,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
 // ═══════════════════════════════════════════════════════
 const SURL='https://vszywnvyyynfyhczmmgf.supabase.co';
 const SKEY='\x65\x79\x4a\x68\x62\x47\x63\x69\x4f\x69\x4a\x49\x55\x7a\x49\x31\x4e\x69\x49\x73\x49\x6e\x52\x35\x63\x43\x49\x36\x49\x6b\x70\x58\x56\x43\x4a\x39\x2e\x65\x79\x4a\x70\x63\x33\x4d\x69\x4f\x69\x4a\x7a\x64\x58\x42\x68\x59\x6d\x46\x7a\x5a\x53\x49\x73\x49\x6e\x4a\x6c\x5a\x69\x49\x36\x49\x6e\x5a\x7a\x65\x6e\x6c\x33\x62\x6e\x5a\x35\x65\x58\x6c\x75\x5a\x6e\x6c\x6f\x59\x33\x70\x74\x62\x57\x64\x6d\x49\x69\x77\x69\x63\x6d\x39\x73\x5a\x53\x49\x36\x49\x6d\x46\x75\x62\x32\x34\x69\x4c\x43\x4a\x70\x59\x58\x51\x69\x4f\x6a\x45\x33\x4e\x7a\x4d\x30\x4f\x44\x51\x7a\x4e\x6a\x59\x73\x49\x6d\x56\x34\x63\x43\x49\x36\x4d\x6a\x41\x34\x4f\x54\x41\x32\x4d\x44\x4d\x32\x4e\x6e\x30\x2e\x69\x66\x68\x43\x5f\x6f\x37\x4f\x6e\x52\x61\x57\x6b\x44\x36\x4d\x53\x4d\x45\x75\x67\x75\x36\x42\x4f\x65\x51\x37\x63\x54\x31\x75\x64\x36\x55\x64\x5a\x47\x31\x79\x4a\x41\x6b';
-const sb=window.supabase.createClient(SURL,SKEY);
+const sb=window.supabase.createClient(SURL,SKEY,{realtime:{enabled:false},global:{headers:{'apikey':SKEY}}});
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -569,7 +569,7 @@ sb.auth.onAuthStateChange(async(event,session)=>{
   document.getElementById('loading').style.display='none';
   if(session&&session.user){
     currentUser=session.user;
-    const prof=await getOrCreateProfile(session.user);
+    const prof=await getOrCreateProfile(session.user,session.access_token);
     currentProfile=prof;
     if(prof.role==='client'){
       document.getElementById('app').style.display='none';
@@ -593,20 +593,31 @@ sb.auth.onAuthStateChange(async(event,session)=>{
   }
 });
 
-async function getOrCreateProfile(user){
-  var r=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
-  if(r.data) return r.data;
-  var inv=await sb.from('client_invites').select('*').eq('client_email',user.email).eq('accepted',false).maybeSingle();
-  if(inv.data){
-    var prof={id:user.id,role:'client',trainer_id:inv.data.trainer_id,client_record_id:inv.data.client_id};
-    await sb.from('profiles').insert(prof);
-    await sb.from('client_invites').update({accepted:true}).eq('id',inv.data.id);
-    await sb.from('clients').update({client_user_id:user.id}).eq('id',inv.data.client_id);
+async function getOrCreateProfile(user,accessToken){
+  // Use direct REST fetch (Supabase JS SDK calls hang on cold starts)
+  const H={'apikey':SKEY,'Authorization':'Bearer '+(accessToken||SKEY),'Content-Type':'application/json','Prefer':'return=representation'};
+  try{
+    var r=await fetch(SURL+'/rest/v1/profiles?id=eq.'+user.id+'&select=*&limit=1',{headers:H});
+    var rows=await r.json();
+    if(rows&&rows.length>0) return rows[0];
+    // Check for client invite
+    var r2=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&accepted=eq.false&select=*&limit=1',{headers:H});
+    var invs=await r2.json();
+    if(invs&&invs.length>0){
+      var inv=invs[0];
+      var prof={id:user.id,role:'client',trainer_id:inv.trainer_id,client_record_id:inv.client_id};
+      await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:H,body:JSON.stringify(prof)});
+      await fetch(SURL+'/rest/v1/client_invites?id=eq.'+inv.id,{method:'PATCH',headers:H,body:JSON.stringify({accepted:true})});
+      await fetch(SURL+'/rest/v1/clients?id=eq.'+inv.client_id,{method:'PATCH',headers:H,body:JSON.stringify({client_user_id:user.id})});
+      return prof;
+    }
+    var prof={id:user.id,role:'trainer'};
+    await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:H,body:JSON.stringify(prof)});
     return prof;
+  }catch(e){
+    console.error('getOrCreateProfile error',e);
+    return {id:user.id,role:'trainer'};
   }
-  var prof={id:user.id,role:'trainer'};
-  await sb.from('profiles').insert(prof);
-  return prof;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -653,21 +664,28 @@ async function doLogout(){await sb.auth.signOut();}
 // ═══════════════════════════════════════════════════════
 // DATA LOAD
 // ═══════════════════════════════════════════════════════
+async function restGet(path){
+  var tok=(currentUser&&sb.auth._session)?sb.auth._session.access_token:SKEY;
+  try{
+    var r=await fetch(SURL+'/rest/v1/'+path,{headers:{'apikey':SKEY,'Authorization':'Bearer '+tok}});
+    var d=await r.json(); return Array.isArray(d)?d:[];
+  }catch(e){console.error('restGet',path,e);return [];}
+}
 async function loadAll(){
   if(!currentUser) return;
   var uid=currentUser.id;
   var [rc,rs,rp,rpay,rm]=await Promise.all([
-    sb.from('clients').select('*').eq('trainer_id',uid).order('name'),
-    sb.from('sessions').select('*').eq('trainer_id',uid).order('date',{ascending:false}),
-    sb.from('progress').select('*,clients(name)').eq('trainer_id',uid).order('date',{ascending:false}),
-    sb.from('payments').select('*,clients(name)').eq('trainer_id',uid).order('date',{ascending:false}),
-    sb.from('messages').select('*').eq('trainer_id',uid).order('created_at',{ascending:true})
+    restGet('clients?trainer_id=eq.'+uid+'&select=*&order=name'),
+    restGet('sessions?trainer_id=eq.'+uid+'&select=*&order=date.desc'),
+    restGet('progress?trainer_id=eq.'+uid+'&select=*,clients(name)&order=date.desc'),
+    restGet('payments?trainer_id=eq.'+uid+'&select=*,clients(name)&order=date.desc'),
+    restGet('messages?trainer_id=eq.'+uid+'&select=*&order=created_at.asc')
   ]);
-  allClients=rc.data||[];
-  allSessions=rs.data||[];
-  allProgress=rp.data||[];
-  allPayments=rpay.data||[];
-  allMessages=rm.data||[];
+  allClients=rc;
+  allSessions=rs;
+  allProgress=rp;
+  allPayments=rpay;
+  allMessages=rm;
   unreadCount=allMessages.filter(m=>m.sender==='client'&&!m.read).length;
   var badge=document.getElementById('badge-mesaje');
   if(badge){badge.textContent=unreadCount;badge.style.display=unreadCount>0?'inline-block':'none';}
@@ -1478,16 +1496,17 @@ async function loadClientPortal(profile){
     document.getElementById('cli-home').innerHTML='<div class="empty" style="padding:60px;"><div class="ei">⏳</div>Contul nu este asociat unui trainer. Contactează antrenorul tău.</div>';
     return;
   }
+  var cid=profile.client_record_id;
   var [rc,rp,rs,rm]=await Promise.all([
-    sb.from('clients').select('*').eq('id',profile.client_record_id).maybeSingle(),
-    sb.from('progress').select('*').eq('client_id',profile.client_record_id).order('date',{ascending:true}),
-    sb.from('sessions').select('*').eq('client_id',profile.client_record_id).order('date',{ascending:false}),
-    sb.from('messages').select('*').eq('client_id',profile.client_record_id).order('created_at',{ascending:true})
+    restGet('clients?id=eq.'+cid+'&select=*&limit=1'),
+    restGet('progress?client_id=eq.'+cid+'&select=*&order=date.asc'),
+    restGet('sessions?client_id=eq.'+cid+'&select=*&order=date.desc'),
+    restGet('messages?client_id=eq.'+cid+'&select=*&order=created_at.asc')
   ]);
-  clientData=rc.data;
-  clientProgressData=rp.data||[];
-  clientSessionsData=rs.data||[];
-  cliMessages=rm.data||[];
+  clientData=rc[0]||null;
+  clientProgressData=rp;
+  clientSessionsData=rs;
+  cliMessages=rm;
   if(clientData) document.getElementById('cli-username').textContent=clientData.name;
   showCliTab('home');
 }
