@@ -664,9 +664,24 @@ async function doLogout(){await sb.auth.signOut();}
 // ═══════════════════════════════════════════════════════
 // DATA LOAD
 // ═══════════════════════════════════════════════════════
-async function restGet(path){
-  var tok=(currentUser&&sb.auth._session)?sb.auth._session.access_token:SKEY;
+function getAccessToken(){
   try{
+    var raw=localStorage.getItem('sb-vszywnvyyynfyhczmmgf-auth-token');
+    if(raw){var s=JSON.parse(raw);return s.access_token||s?.session?.access_token||SKEY;}
+  }catch(e){}
+  return SKEY;
+}
+async function restFetch(method,path,body){
+  var tok=getAccessToken();
+  var opts={method:method||'GET',headers:{'apikey':SKEY,'Authorization':'Bearer '+tok,'Content-Type':'application/json','Prefer':'return=representation'}};
+  if(body) opts.body=JSON.stringify(body);
+  var r=await fetch(SURL+'/rest/v1/'+path,opts);
+  var d=await r.json();
+  return {data:Array.isArray(d)?d:(d&&d.id?[d]:d), error:(d&&d.code)?d:null};
+}
+async function restGet(path){
+  try{
+    var tok=getAccessToken();
     var r=await fetch(SURL+'/rest/v1/'+path,{headers:{'apikey':SKEY,'Authorization':'Bearer '+tok}});
     var d=await r.json(); return Array.isArray(d)?d:[];
   }catch(e){console.error('restGet',path,e);return [];}
@@ -890,10 +905,10 @@ async function saveClient(){
   };
   var err,insertedId=editClientId;
   if(editClientId){
-    var r=await sb.from('clients').update(data).eq('id',editClientId);err=r.error;
+    var r=await restFetch('PATCH','clients?id=eq.'+editClientId,data);err=r.error;
   } else {
-    var r=await sb.from('clients').insert(data).select().single();
-    err=r.error;if(r.data) insertedId=r.data.id;
+    var r=await restFetch('POST','clients',data);
+    err=r.error;if(r.data&&r.data[0]) insertedId=r.data[0].id;
   }
   if(!err&&!editClientId&&document.getElementById('f-send-invite').checked){
     var email=data.email;
@@ -907,7 +922,7 @@ async function saveClient(){
 
 async function doSendInvite(clientId,email,silent){
   if(!email){if(!silent)alert('Clientul nu are email.');return;}
-  await sb.from('client_invites').upsert({trainer_id:currentUser.id,client_id:clientId,client_email:email,accepted:false},{onConflict:'client_id'});
+  await restFetch('POST','client_invites?on_conflict=client_id',{trainer_id:currentUser.id,client_id:clientId,client_email:email,accepted:false});
   var tempSb=window.supabase.createClient(SURL,SKEY,{auth:{storage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},persistSession:false,autoRefreshToken:false,flowType:'implicit'}});
   var {error}=await tempSb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});
   if(error){if(!silent)alert('Eroare invitație: '+error.message);}
@@ -927,12 +942,12 @@ function deleteCurrentClient(){
   if(!currentClientId) return;
   if(!confirm('Ștergi clientul și toate datele? Aceasta nu poate fi anulată.')) return;
   (async()=>{
-    await sb.from('progress').delete().eq('client_id',currentClientId);
-    await sb.from('sessions').delete().eq('client_id',currentClientId);
-    await sb.from('payments').delete().eq('client_id',currentClientId);
-    await sb.from('messages').delete().eq('client_id',currentClientId);
-    await sb.from('client_invites').delete().eq('client_id',currentClientId);
-    await sb.from('clients').delete().eq('id',currentClientId);
+    await restFetch('DELETE','progress?client_id=eq.'+currentClientId);
+    await restFetch('DELETE','sessions?client_id=eq.'+currentClientId);
+    await restFetch('DELETE','payments?client_id=eq.'+currentClientId);
+    await restFetch('DELETE','messages?client_id=eq.'+currentClientId);
+    await restFetch('DELETE','client_invites?client_id=eq.'+currentClientId);
+    await restFetch('DELETE','clients?id=eq.'+currentClientId);
     await loadAll(); showPage('clients');
   })();
 }
@@ -1067,13 +1082,13 @@ function renderTabMesajeClient(){
   </div>`;
   var t=document.getElementById('client-msg-thread');if(t) t.scrollTop=t.scrollHeight;
   // Mark read
-  sb.from('messages').update({read:true}).eq('client_id',currentClientId).eq('sender','client');
+  restFetch('PATCH','messages?client_id=eq.'+currentClientId+'&sender=eq.client',{read:true});
 }
 
 async function sendDetailMessage(){
   var input=document.getElementById('detail-msg-input');
   var content=input.value.trim();if(!content||!currentClientId)return;
-  await sb.from('messages').insert({client_id:currentClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
+  await restFetch('POST','messages',{client_id:currentClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
   input.value='';
   await loadAll(); renderTabMesajeClient();
 }
@@ -1089,7 +1104,7 @@ function renderTabNote(){
 
 async function saveNotes(){
   var notes=document.getElementById('notes-textarea').value;
-  await sb.from('clients').update({notes}).eq('id',currentClientId);
+  await restFetch('PATCH','clients?id=eq.'+currentClientId,{notes});
   await loadAll(); toast('Note salvate!');
 }
 
@@ -1163,7 +1178,7 @@ async function savePayment(){
   var amount=parseFloat(document.getElementById('pay-amount').value);
   if(!amount||amount<=0) return alert('Sumă invalidă.');
   var btn=document.getElementById('btn-save-pay');btn.disabled=true;
-  var {error}=await sb.from('payments').insert({
+  var r=await restFetch('POST','payments',{
     client_id:document.getElementById('pay-client').value,amount,
     date:document.getElementById('pay-date').value,
     type:document.getElementById('pay-type').value,
@@ -1171,7 +1186,7 @@ async function savePayment(){
     trainer_id:currentUser.id
   });
   btn.disabled=false;
-  if(error) return alert('Eroare: '+error.message);
+  if(r.error) return alert('Eroare: '+r.error.message);
   closeModal('modal-payment');
   await loadAll();
   if(document.getElementById('page-financiar').classList.contains('active')) renderFinanciar();
@@ -1181,7 +1196,7 @@ async function savePayment(){
 
 async function deletePayment(id){
   if(!confirm('Ștergi plata?')) return;
-  await sb.from('payments').delete().eq('id',id);
+  await restFetch('DELETE','payments?id=eq.'+id);
   await loadAll();
   if(document.getElementById('page-financiar').classList.contains('active')) renderFinanciar();
   if(document.getElementById('page-detail').classList.contains('active')) renderTabPlati();
@@ -1205,10 +1220,10 @@ async function saveRenewal(){
   base.setDate(base.getDate()+dur);
   var newEnd=base.toISOString().slice(0,10);
   var btn=document.getElementById('btn-save-renewal');btn.disabled=true;
-  await sb.from('clients').update({subscription_end:newEnd}).eq('id',currentRenewalClientId);
+  await restFetch('PATCH','clients?id=eq.'+currentRenewalClientId,{subscription_end:newEnd});
   if(document.getElementById('renewal-pay').value==='1'){
     var amount=parseFloat(document.getElementById('renewal-amount').value);
-    if(amount>0) await sb.from('payments').insert({client_id:currentRenewalClientId,amount,date:new Date().toISOString().slice(0,10),type:'cash',notes:`Reînnoire ${dur} zile → ${newEnd}`,trainer_id:currentUser.id});
+    if(amount>0) await restFetch('POST','payments',{client_id:currentRenewalClientId,amount,date:new Date().toISOString().slice(0,10),type:'cash',notes:`Reînnoire ${dur} zile → ${newEnd}`,trainer_id:currentUser.id});
   }
   btn.disabled=false;
   closeModal('modal-renewal');
@@ -1249,16 +1264,16 @@ async function saveProgress(){
     body_fat:parseFloat(document.getElementById('p-bodyfat').value)||null,
     notes:document.getElementById('p-note').value
   };
-  var {error}=await sb.from('progress').insert(data);
+  var r=await restFetch('POST','progress',data);
   btn.disabled=false;
-  if(error) return alert('Eroare: '+error.message);
+  if(r.error) return alert('Eroare: '+r.error.message);
   closeModal('modal-progress');
   await loadAll(); renderTabMasuratori(); renderTabProgres(); toast('Măsurătoare salvată!');
 }
 
 async function deleteProgress(id){
   if(!confirm('Ștergi măsurătoarea?')) return;
-  await sb.from('progress').delete().eq('id',id);
+  await restFetch('DELETE','progress?id=eq.'+id);
   await loadAll(); renderTabMasuratori(); renderTabProgres();
 }
 
@@ -1349,8 +1364,8 @@ async function saveSession(){
   var btn=document.getElementById('btn-save-sess');btn.disabled=true;
   var data={client_id:document.getElementById('s-client').value,date:document.getElementById('s-date').value,time:document.getElementById('s-time').value||null,duration:parseInt(document.getElementById('s-duration').value)||60,type:document.getElementById('s-type').value||null,status:document.getElementById('s-status').value,notes:document.getElementById('s-notes').value||null,trainer_id:currentUser.id};
   var err;
-  if(editSessionId){var r=await sb.from('sessions').update(data).eq('id',editSessionId);err=r.error;}
-  else{var r=await sb.from('sessions').insert(data);err=r.error;}
+  if(editSessionId){var r=await restFetch('PATCH','sessions?id=eq.'+editSessionId,data);err=r.error;}
+  else{var r=await restFetch('POST','sessions',data);err=r.error;}
   btn.disabled=false;
   if(err) return alert('Eroare: '+err.message);
   closeModal('modal-session');
@@ -1359,7 +1374,7 @@ async function saveSession(){
 
 async function deleteSession(id){
   if(!confirm('Ștergi sesiunea?')) return;
-  await sb.from('sessions').delete().eq('id',id);
+  await restFetch('DELETE','sessions?id=eq.'+id);
   await loadAll(); renderCalendar();
 }
 
@@ -1389,7 +1404,7 @@ async function selectMsgClient(id){
   var c=allClients.find(x=>x.id===id);
   document.getElementById('msg-header').textContent=c?c.name:'Client';
   document.getElementById('msg-input-wrap').style.display='flex';
-  await sb.from('messages').update({read:true}).eq('client_id',id).eq('sender','client');
+  await restFetch('PATCH','messages?client_id=eq.'+id+'&sender=eq.client',{read:true});
   await loadAll();
   renderMesaje();
   renderMsgThread();
@@ -1410,7 +1425,7 @@ async function sendMessage(){
   var content=input.value.trim();
   if(!content||!activeMsgClientId) return;
   input.value='';
-  await sb.from('messages').insert({client_id:activeMsgClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
+  await restFetch('POST','messages',{client_id:activeMsgClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
   await loadAll(); renderMsgThread();
 }
 
@@ -1480,10 +1495,10 @@ async function handleImport(input){
     }
     var totalProgress=(data.progress||[]).concat(embeddedProgress);
     if(!confirm('Importul adaugă date noi (nu șterge existente). Continuă?'))return;
-    if(data.clients){for(var c of data.clients){c.trainer_id=currentUser.id;await sb.from('clients').upsert(c,{onConflict:'id'});}}
-    if(data.sessions){for(var s of data.sessions){s.trainer_id=currentUser.id;await sb.from('sessions').upsert(s,{onConflict:'id'});}}
-    if(totalProgress.length){for(var p of totalProgress){p.trainer_id=currentUser.id;await sb.from('progress').upsert(p,{onConflict:'id'});}}
-    if(data.payments){for(var py of data.payments){await sb.from('payments').upsert(py,{onConflict:'id'});}}
+    if(data.clients){for(var c of data.clients){c.trainer_id=currentUser.id;await restFetch('POST','clients?on_conflict=id',c);}}
+    if(data.sessions){for(var s of data.sessions){s.trainer_id=currentUser.id;await restFetch('POST','sessions?on_conflict=id',s);}}
+    if(totalProgress.length){for(var p of totalProgress){p.trainer_id=currentUser.id;await restFetch('POST','progress?on_conflict=id',p);}}
+    if(data.payments){for(var py of data.payments){await restFetch('POST','payments?on_conflict=id',py);}}
     await loadAll(); renderClients(); closeModal('modal-backup'); toast('Import finalizat! '+( data.clients?data.clients.length:0)+' clienți importați.');
   }catch(e){alert('Eroare la import: '+e.message);}
 }
@@ -1675,10 +1690,9 @@ function renderCliChat(){
 async function sendCliMessage(){
   var input=document.getElementById('cli-msg-input');
   var content=input.value.trim();if(!content||!clientData)return;
-  await sb.from('messages').insert({client_id:clientData.id,trainer_id:currentProfile.trainer_id,sender:'client',content,read:false});
+  await restFetch('POST','messages',{client_id:clientData.id,trainer_id:currentProfile.trainer_id,sender:'client',content,read:false});
   input.value='';
-  var r=await sb.from('messages').select('*').eq('client_id',clientData.id).order('created_at',{ascending:true});
-  cliMessages=r.data||[];
+  cliMessages=await restGet('messages?client_id=eq.'+clientData.id+'&order=created_at.asc');
   renderCliChat();
 }
 
@@ -1698,12 +1712,11 @@ async function saveCliProgress(){
     notes:document.getElementById('cp-note').value
   };
   if(!data.weight&&!data.waist){btn.disabled=false;return alert('Adaugă cel puțin greutatea.');}
-  var {error}=await sb.from('progress').insert(data);
+  var r=await restFetch('POST','progress',data);
   btn.disabled=false;
-  if(error) return alert('Eroare: '+error.message);
+  if(r.error) return alert('Eroare: '+r.error.message);
   closeModal('modal-cli-progress');
-  var r=await sb.from('progress').select('*').eq('client_id',clientData.id).order('date',{ascending:true});
-  clientProgressData=r.data||[];
+  clientProgressData=await restGet('progress?client_id=eq.'+clientData.id+'&order=date.asc');
   renderCliProgress(); toast('Măsurătoare salvată!');
 }
 
