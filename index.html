@@ -978,8 +978,7 @@ async function saveClient(){
 async function doSendInvite(clientId,email,silent){
   if(!email){if(!silent)alert('Clientul nu are email.');return;}
   await restFetch('POST','client_invites?on_conflict=client_id',{trainer_id:currentUser.id,client_id:clientId,client_email:email,accepted:false});
-  var tempSb=window.supabase.createClient(SURL,SKEY,{auth:{storage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},persistSession:false,autoRefreshToken:false,flowType:'implicit'}});
-  var {error}=await tempSb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});
+  var {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});
   if(error){if(!silent)alert('Eroare invitație: '+error.message);}
   else{if(!silent){toast('Invitație trimisă la '+email+'!');await loadAll();renderClients();}}
 }
