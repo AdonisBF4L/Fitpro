@@ -591,6 +591,15 @@ sb.auth.onAuthStateChange(async(event,session)=>{
     currentUser=session.user;
     const prof=await getOrCreateProfile(session.user,session.access_token);
     currentProfile=prof;
+    if(prof.role==='error'){
+      await sb.auth.signOut();
+      document.getElementById('app').style.display='none';
+      document.getElementById('client-app').style.display='none';
+      document.getElementById('auth-screen').style.display='flex';
+      switchAuthTab('login');
+      authErr('Eroare la autentificare. Te rugăm să încerci din nou: '+(prof.errorMsg||''));
+      return;
+    }
     if(prof.role==='client'){
       document.getElementById('app').style.display='none';
       document.getElementById('auth-screen').style.display='none';
@@ -636,7 +645,7 @@ async function getOrCreateProfile(user,accessToken){
     return prof;
   }catch(e){
     console.error('getOrCreateProfile error',e);
-    return {id:user.id,role:'trainer'};
+    return {id:user.id,role:'error',errorMsg:e.message||'Eroare necunoscuta'};
   }
 }
 
@@ -977,7 +986,7 @@ async function saveClient(){
 
 async function doSendInvite(clientId,email,silent){
   if(!email){if(!silent)alert('Clientul nu are email.');return;}
-  await restFetch('POST','client_invites?on_conflict=client_id',{trainer_id:currentUser.id,client_id:clientId,client_email:email,accepted:false});
+  await restFetch('POST','client_invites?on_conflict=client_id&ignoreDuplicates=true',{trainer_id:currentUser.id,client_id:clientId,client_email:email,accepted:false});
   var {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});
   if(error){if(!silent)alert('Eroare invitație: '+error.message);}
   else{if(!silent){toast('Invitație trimisă la '+email+'!');await loadAll();renderClients();}}
