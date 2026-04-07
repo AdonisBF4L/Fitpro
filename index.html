@@ -189,7 +189,12 @@ tr:hover td{background:rgba(200,241,53,.02);}
       <div class="fg"><label>Email</label><input id="login-email" type="email" placeholder="email@example.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <div class="fg"><label>Parolă</label><input id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <button class="btn btn-primary" onclick="doLogin()" id="btn-login">Intră în cont</button>
+      <div style="text-align:center;margin-top:12px;"><span style="font-size:12px;color:var(--muted);cursor:pointer;" onclick="showResetForm()">Ai uitat parola?</span></div>
     </div>
+    <div id="reset-form" style="display:none;">
+      <div class="fg"><label>Email</label><input id="reset-email" type="email" placeholder="email@example.com"></div>
+      <button class="btn btn-primary" onclick="doResetPassword()" id="btn-reset">Trimite link de resetare</button>
+      <div style="text-align:center;margin-top:12px;"><span style="font-size:12px;color:var(--muted);cursor:pointer;" onclick="switchAuthTab('login')">← Înapoi la autentificare</span></div>
     <div id="reg-form" style="display:none;">
       <div class="fg"><label>Numele tău</label><input id="reg-name" placeholder="Ion Popescu"></div>
       <div class="fg"><label>Email</label><input id="reg-email" type="email" placeholder="email@example.com"></div>
@@ -661,6 +666,22 @@ async function doRegister(){
 
 async function doLogout(){await sb.auth.signOut();}
 
+function showResetForm(){
+  document.getElementById('login-form').style.display='none';
+  document.getElementById('reset-form').style.display='block';
+  document.getElementById('auth-err').style.display='none';
+  document.getElementById('auth-ok').style.display='none';
+}
+async function doResetPassword(){
+  var email=document.getElementById('reset-email').value.trim();
+  if(!email) return authErr('Introdu adresa de email.');
+  var btn=document.getElementById('btn-reset');btn.disabled=true;btn.textContent='Se trimite...';
+  var {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
+  btn.disabled=false;btn.textContent='Trimite link de resetare';
+  if(error) authErr(error.message);
+  else authOk('Email trimis! Verifică inbox-ul pentru link-ul de resetare.');
+}
+
 // ═══════════════════════════════════════════════════════
 // DATA LOAD
 // ═══════════════════════════════════════════════════════
@@ -823,6 +844,7 @@ function openEditClient(id){
   document.getElementById('f-gender').value=c.gender||'';
   document.getElementById('f-goal').value=c.goal||'';
   document.getElementById('f-start').value=c.subscription_start||'';
+  if(c.subscription_start&&c.subscription_end){var _dd=Math.round((new Date(c.subscription_end)-new Date(c.subscription_start))/86400000);var _dur=_dd<=45?30:_dd<=75?60:_dd<=135?90:_dd<=270?180:365;document.getElementById('f-duration').value=String(_dur);}else{document.getElementById('f-duration').value='30';}
   document.getElementById('f-level').value=c.level||'';
   document.getElementById('f-freq').value=c.frequency||'';
   document.getElementById('f-price').value=c.price||'';
@@ -880,7 +902,7 @@ async function saveClient(){
     age:parseInt(document.getElementById('f-age').value)||null,
     gender:document.getElementById('f-gender').value||null,
     goal:document.getElementById('f-goal').value||null,
-    subscription_start:start||null,subscription_end:subEnd,
+    subscription_start:start||null,
     level:document.getElementById('f-level').value||null,
     frequency:document.getElementById('f-freq').value||null,
     price:parseFloat(document.getElementById('f-price').value)||null,
@@ -903,6 +925,13 @@ async function saveClient(){
     body_fat:parseFloat(document.getElementById('f-bodyfat').value)||null,
     trainer_id:currentUser.id
   };
+  // For new clients always set subscription_end; for edits only if start date changed
+  if(!editClientId){
+    data.subscription_end=subEnd;
+  }else{
+    var _origC=allClients.find(x=>x.id===editClientId);
+    if(!_origC||(start||'')!==(_origC.subscription_start||'')){data.subscription_end=subEnd;}
+  }
   var err,insertedId=editClientId;
   if(editClientId){
     var r=await restFetch('PATCH','clients?id=eq.'+editClientId,data);err=r.error;
@@ -1498,7 +1527,7 @@ async function handleImport(input){
     if(data.clients){for(var c of data.clients){c.trainer_id=currentUser.id;await restFetch('POST','clients?on_conflict=id',c);}}
     if(data.sessions){for(var s of data.sessions){s.trainer_id=currentUser.id;await restFetch('POST','sessions?on_conflict=id',s);}}
     if(totalProgress.length){for(var p of totalProgress){p.trainer_id=currentUser.id;await restFetch('POST','progress?on_conflict=id',p);}}
-    if(data.payments){for(var py of data.payments){await restFetch('POST','payments?on_conflict=id',py);}}
+    if(data.payments){for(var py of data.payments){py.trainer_id=currentUser.id;await restFetch('POST','payments?on_conflict=id',py);}}
     await loadAll(); renderClients(); closeModal('modal-backup'); toast('Import finalizat! '+( data.clients?data.clients.length:0)+' clienți importați.');
   }catch(e){alert('Eroare la import: '+e.message);}
 }
