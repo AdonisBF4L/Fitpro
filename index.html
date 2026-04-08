@@ -227,6 +227,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
         <div class="nav-item" onclick="showPage('financiar');closeSidebar()"><span>💰</span> Financiar</div>
         <div class="nav-item" onclick="showPage('calendar');closeSidebar()"><span>📅</span> Calendar</div>
         <div class="nav-item" onclick="showPage('mesaje');closeSidebar()" id="nav-mesaje"><span>💬</span> Mesaje<span class="nav-badge" id="badge-mesaje" style="display:none;">0</span></div>
+        <div class="nav-item" onclick="showPage('setari');closeSidebar()"><span>⚙️</span> Setări</div>
       </nav>
       <div class="sidebar-bottom">
         <button class="btn-sec" onclick="openModal('modal-backup')">💾 Backup</button>
@@ -312,6 +313,75 @@ tr:hover td{background:rgba(200,241,53,.02);}
               <textarea id="msg-input" placeholder="Scrie un mesaj..." style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;height:60px;"></textarea>
               <button class="btn btn-primary" style="width:auto;align-self:flex-end;" onclick="sendMessage()">Trimite</button>
             </div>
+          </div>
+        </div>
+      </div>
+      <!-- SETARI -->
+      <div id="page-setari" class="page">
+        <div class="ph"><div class="pt">⚙️ SETĂRI</div></div>
+        <!-- Email Config -->
+        <div class="tw" style="margin-bottom:16px;">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">📧 Configurare Email Invitații</div>
+          <div style="padding:20px;">
+            <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">
+              Configurează contul de email care trimite invitațiile clienților.<br>
+              <strong style="color:var(--text);">Gmail recomandat</strong> — necesită <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:var(--accent);">Parolă de aplicație</a> (nu parola contului).
+            </p>
+            <!-- Preseturi -->
+            <div style="display:flex;gap:8px;margin-bottom:20px;">
+              <button class="btn-sec btn-sm" onclick="setSmtpPreset('gmail')">📧 Gmail</button>
+              <button class="btn-sec btn-sm" onclick="setSmtpPreset('yahoo')">📮 Yahoo</button>
+              <button class="btn-sec btn-sm" onclick="setSmtpPreset('outlook')">📬 Outlook</button>
+              <button class="btn-sec btn-sm" onclick="setSmtpPreset('custom')">⚙️ Personalizat</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+              <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Adresă Email (De la)</label>
+                <input id="set-smtp-email" class="input" placeholder="adresa@gmail.com" type="email" oninput="if(!document.getElementById('set-smtp-user').value)document.getElementById('set-smtp-user').value=this.value">
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Parolă Aplicație</label>
+                <input id="set-smtp-pass" class="input" placeholder="xxxx xxxx xxxx xxxx" type="password">
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Nume Afișat (Expeditor)</label>
+                <input id="set-smtp-name" class="input" placeholder="FitPro" value="FitPro">
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Username SMTP</label>
+                <input id="set-smtp-user" class="input" placeholder="(se completează automat din email)">
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">SMTP Host</label>
+                <input id="set-smtp-host" class="input" placeholder="smtp.gmail.com" value="smtp.gmail.com">
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;">Port</label>
+                <input id="set-smtp-port" class="input" placeholder="587" value="587">
+              </div>
+            </div>
+            <!-- PAT -->
+            <div style="background:rgba(200,241,53,.05);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px;">
+              <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">🔑 Supabase Access Token <span style="color:#ff6b6b;">(necesar o singură dată)</span></label>
+              <input id="set-supabase-pat" class="input" placeholder="sbp_..." type="password" style="margin-bottom:8px;">
+              <p style="font-size:11px;color:var(--muted);margin:0;line-height:1.5;">
+                Mergi la <a href="https://supabase.com/dashboard/account/tokens" target="_blank" style="color:var(--accent);">supabase.com → Account → Access Tokens</a> → „Generate new token" → selectează <strong style="color:var(--text);">„Never expires"</strong> → copiază și lipești aici. Necesar o singură dată pentru a aplica setările SMTP.
+              </p>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-primary" style="width:auto;" onclick="saveAndApplySettings()">💾 Salvează & Aplică</button>
+              <button class="btn-sec" style="width:auto;" onclick="testSettingsEmail()">📤 Test Email</button>
+            </div>
+            <div id="settings-status" style="margin-top:14px;font-size:13px;line-height:1.6;"></div>
+          </div>
+        </div>
+        <!-- App info -->
+        <div class="tw">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">ℹ️ Informații</div>
+          <div style="padding:20px;font-size:13px;color:var(--muted);line-height:1.8;">
+            <div>Cont trainer: <strong style="color:var(--text);" id="set-trainer-email">—</strong></div>
+            <div>Supabase Project: vszywnvyyynfyhczmmgf</div>
+            <div>FitPro v1.0</div>
           </div>
         </div>
       </div>
@@ -611,6 +681,7 @@ sb.auth.onAuthStateChange(async(event,session)=>{
       document.getElementById('app').style.display='block';
       document.getElementById('user-email').textContent=currentUser.email;
       await loadAll();
+      loadSettings();
       showPage('dashboard');
     }
   } else {
@@ -982,6 +1053,101 @@ async function saveClient(){
   if(err) return alert('Eroare: '+err.message);
   closeModal('modal-client');
   await loadAll(); renderClients(); toast('Client salvat!');
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════
+let trainerSettings={};
+const SMTP_PRESETS={
+  gmail:{host:'smtp.gmail.com',port:'587'},
+  yahoo:{host:'smtp.mail.yahoo.com',port:'587'},
+  outlook:{host:'smtp-mail.outlook.com',port:'587'},
+  custom:{host:'',port:'587'}
+};
+function setSmtpPreset(type){
+  var p=SMTP_PRESETS[type];if(!p)return;
+  document.getElementById('set-smtp-host').value=p.host;
+  document.getElementById('set-smtp-port').value=p.port;
+}
+async function loadSettings(){
+  if(!currentUser)return;
+  try{
+    var data=await restFetch('GET','trainer_settings?trainer_id=eq.'+currentUser.id+'&select=*');
+    if(data&&data.length>0){
+      trainerSettings=data[0];
+      document.getElementById('set-smtp-email').value=trainerSettings.smtp_sender_email||'';
+      document.getElementById('set-smtp-pass').value=trainerSettings.smtp_pass||'';
+      document.getElementById('set-smtp-name').value=trainerSettings.smtp_sender_name||'FitPro';
+      document.getElementById('set-smtp-host').value=trainerSettings.smtp_host||'smtp.gmail.com';
+      document.getElementById('set-smtp-port').value=trainerSettings.smtp_port||'587';
+      document.getElementById('set-smtp-user').value=trainerSettings.smtp_user||'';
+      document.getElementById('set-supabase-pat').value=trainerSettings.supabase_pat||'';
+    }
+  }catch(e){console.warn('loadSettings error',e);}
+  var el=document.getElementById('set-trainer-email');
+  if(el)el.textContent=currentUser.email;
+}
+async function saveAndApplySettings(){
+  var statusEl=document.getElementById('settings-status');
+  statusEl.innerHTML='<span style="color:var(--muted);">⏳ Se salvează...</span>';
+  var senderEmail=document.getElementById('set-smtp-email').value.trim();
+  var smtpUser=document.getElementById('set-smtp-user').value.trim()||senderEmail;
+  var settings={
+    trainer_id:currentUser.id,
+    smtp_sender_email:senderEmail,
+    smtp_pass:document.getElementById('set-smtp-pass').value,
+    smtp_sender_name:document.getElementById('set-smtp-name').value.trim()||'FitPro',
+    smtp_host:document.getElementById('set-smtp-host').value.trim(),
+    smtp_port:document.getElementById('set-smtp-port').value.trim()||'587',
+    smtp_user:smtpUser,
+    supabase_pat:document.getElementById('set-supabase-pat').value.trim(),
+    updated_at:new Date().toISOString()
+  };
+  if(!senderEmail||!settings.smtp_pass||!settings.smtp_host){
+    statusEl.innerHTML='<span style="color:#ff6b6b;">❌ Completează adresa email, parola și SMTP host.</span>';return;
+  }
+  // Save to DB
+  try{
+    await restFetch('POST','trainer_settings?on_conflict=trainer_id',settings);
+    trainerSettings=settings;
+  }catch(e){
+    statusEl.innerHTML='<span style="color:#ff6b6b;">❌ Eroare salvare: '+e.message+'</span>';return;
+  }
+  // Apply to Supabase via Management API
+  if(!settings.supabase_pat){
+    statusEl.innerHTML='<span style="color:#fbbf24;">✅ Salvat în baza de date.<br>⚠️ Fără Access Token — setările NU sunt aplicate încă la Supabase. Adaugă token-ul și apasă din nou.</span>';return;
+  }
+  statusEl.innerHTML='<span style="color:var(--muted);">⏳ Se aplică la Supabase...</span>';
+  try{
+    var r=await fetch('https://api.supabase.com/v1/projects/vszywnvyyynfyhczmmgf/config/auth',{
+      method:'PATCH',
+      headers:{'Authorization':'Bearer '+settings.supabase_pat,'Content-Type':'application/json'},
+      body:JSON.stringify({
+        smtp_host:settings.smtp_host,
+        smtp_port:settings.smtp_port,
+        smtp_user:settings.smtp_user,
+        smtp_pass:settings.smtp_pass,
+        smtp_sender_name:settings.smtp_sender_name,
+        smtp_admin_email:settings.smtp_sender_email
+      })
+    });
+    var result=await r.json();
+    if(r.ok){
+      statusEl.innerHTML='<span style="color:#4ade80;">✅ Setările SMTP au fost salvate și aplicate cu succes!<br>Invitațiile vor fi trimise acum de la <strong>'+senderEmail+'</strong>.</span>';
+    }else{
+      statusEl.innerHTML='<span style="color:#ff6b6b;">✅ Salvat în DB, dar eroare Management API: '+(result.message||JSON.stringify(result))+'</span>';
+    }
+  }catch(e){
+    statusEl.innerHTML='<span style="color:#ff6b6b;">✅ Salvat în DB, eroare rețea: '+e.message+'</span>';
+  }
+}
+async function testSettingsEmail(){
+  var statusEl=document.getElementById('settings-status');
+  statusEl.innerHTML='<span style="color:var(--muted);">📤 Se trimite email de test la '+currentUser.email+'...</span>';
+  var {error}=await sb.auth.signInWithOtp({email:currentUser.email,options:{shouldCreateUser:false}});
+  if(error){statusEl.innerHTML='<span style="color:#ff6b6b;">❌ Eroare: '+error.message+'</span>';}
+  else{statusEl.innerHTML='<span style="color:#4ade80;">✅ Email de test trimis la <strong>'+currentUser.email+'</strong>! Verifică inbox-ul (sau spam).</span>';}
 }
 
 async function doSendInvite(clientId,email,silent){
