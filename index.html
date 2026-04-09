@@ -1298,7 +1298,7 @@ function renderTabProfil(){
         <div class="ir"><span class="ik">Expirare</span><span class="iv ${exp&&exp<new Date()?'dbd':days&&days<=7?'dwn':'dok'}">${c.subscription_end||'—'}</span></div>
         <div class="ir"><span class="ik">Zile rămase</span><span class="iv">${days!==null?days<0?'<span class="dbd">Expirat</span>':`<span class="${days<=7?'dwn':'dok'}">${days} zile</span>`:'—'}</span></div>
         <div class="ir"><span class="ik">Preț</span><span class="iv">${c.price?c.price+' RON':'—'}</span></div>
-        <div class="ir"><span class="ik">Portal client</span><span class="iv">${c.client_user_id?'<span class="badge ba">✅ Activ</span>':'<span class="badge be">Neinvitat</span>'}</span></div>
+        <div class="ir"><span class="ik">Portal client</span><span class="iv">${c.client_user_id?'<span class="badge ba">✅ Activ</span>':c.email?`<button class="btn-sec btn-sm" onclick="doSendInvite('${c.id}','${c.email}')">📧 Trimite invitație</button>`:'<span class="badge be">Fără email</span>'}</span></div>
       </div>
       <div class="ds"><div class="ds-title">Măsurători inițiale</div>
         <div class="mg4">
