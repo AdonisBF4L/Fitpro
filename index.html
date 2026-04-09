@@ -2478,10 +2478,8 @@ ${'═'.repeat(40)}
 `;
   result+=`Obiectiv: ${goal} | Nivel: ${level} | ${freq}x/săptămână
 `;
-  if(intensNote) result+=intensNote+'
-';
-  result+='
-';
+  if(intensNote) result+=intensNote+'\n';
+  result+='\n';
 
   Object.keys(splits).forEach(di=>{
     var splitName=splits[di];
@@ -2491,8 +2489,7 @@ ${'─'.repeat(30)}
 `;
     exercises.forEach((ex,i)=>{result+=`${i+1}. ${ex.e}: ${ex.s} serii × ${ex.r} rep | Pauză: ${ex.p}
 `;});
-    result+='
-';
+    result+='\n';
   });
 
   result+=`${'─'.repeat(40)}
@@ -2502,10 +2499,8 @@ NOTE:
 • Progresează 2.5-5kg la fiecare exercițiu când completezi toate seriile
 • Hidratare: 500ml apă/oră de antrenament
 `;
-  if(goal==='Slăbit') result+='• Adaugă 20 min cardio ușor post-antrenament (mers, bicicletă)
-';
-  result+='
-⚠️ Planul este orientativ. Adaptează în funcție de echipament și senzații.';
+  if(goal==='Slăbit') result+='• Adaugă 20 min cardio ușor post-antrenament (mers, bicicletă)\n';
+  result+='\n⚠️ Planul este orientativ. Adaptează în funcție de echipament și senzații.';
   return result;
 }
 
