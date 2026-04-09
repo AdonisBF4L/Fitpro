@@ -1120,12 +1120,11 @@ async function saveAndApplySettings(){
   }
   statusEl.innerHTML='<span style="color:var(--muted);">⏳ Se aplică la Supabase...</span>';
   try{
-    // Folosim Edge Function via fetch direct (cu JWT din localStorage)
-    var accessToken=getAccessToken();
+    // Folosim Edge Function via fetch direct (cu anon key - HS256, compatibil cu legacy JWT)
     var fnResp=await fetch(SURL+'/functions/v1/apply-smtp-settings',{
       method:'POST',
       headers:{
-        'Authorization':'Bearer '+accessToken,
+        'Authorization':'Bearer '+SKEY,
         'apikey':SKEY,
         'Content-Type':'application/json'
       },
