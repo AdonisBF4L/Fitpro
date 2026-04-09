@@ -1073,7 +1073,7 @@ function setSmtpPreset(type){
 async function loadSettings(){
   if(!currentUser)return;
   try{
-    var data=await restFetch('GET','trainer_settings?trainer_id=eq.'+currentUser.id+'&select=*');
+    var data=await restGet('trainer_settings?trainer_id=eq.'+currentUser.id+'&select=*');
     if(data&&data.length>0){
       trainerSettings=data[0];
       document.getElementById('set-smtp-email').value=trainerSettings.smtp_sender_email||'';
