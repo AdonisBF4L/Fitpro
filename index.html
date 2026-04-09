@@ -1120,9 +1120,16 @@ async function saveAndApplySettings(){
   }
   statusEl.innerHTML='<span style="color:var(--muted);">⏳ Se aplică la Supabase...</span>';
   try{
-    // Folosim Edge Function (server-side, fara CORS)
-    var {data:fnData,error:fnErr}=await sb.functions.invoke('apply-smtp-settings',{
-      body:{
+    // Folosim Edge Function via fetch direct (cu JWT din localStorage)
+    var accessToken=getAccessToken();
+    var fnResp=await fetch(SURL+'/functions/v1/apply-smtp-settings',{
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+accessToken,
+        'apikey':SKEY,
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
         smtp_host:settings.smtp_host,
         smtp_port:settings.smtp_port,
         smtp_user:settings.smtp_user,
@@ -1130,10 +1137,11 @@ async function saveAndApplySettings(){
         smtp_sender_name:settings.smtp_sender_name,
         smtp_admin_email:settings.smtp_sender_email,
         pat:settings.supabase_pat
-      }
+      })
     });
-    if(fnErr){
-      statusEl.innerHTML='<span style="color:#ff6b6b;">✅ Salvat în DB, eroare Edge Function: '+fnErr.message+'</span>';
+    var fnData=await fnResp.json();
+    if(!fnResp.ok){
+      statusEl.innerHTML='<span style="color:#ff6b6b;">✅ Salvat în DB, eroare Edge Function ('+fnResp.status+'): '+JSON.stringify(fnData)+'</span>';
     }else if(fnData && fnData.status && fnData.status!==200){
       statusEl.innerHTML='<span style="color:#fbbf24;">✅ Salvat în DB. Răspuns Supabase: '+fnData.status+' — verifică PAT-ul dacă e greșit.</span>';
     }else{
