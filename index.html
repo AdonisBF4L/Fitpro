@@ -1120,18 +1120,22 @@ async function saveAndApplySettings(){
   }
   statusEl.innerHTML='<span style="color:var(--muted);">⏳ Se aplică la Supabase...</span>';
   try{
-    // Folosim RPC cu pg_net (server-side, fara CORS)
-    var {data:rpcData,error:rpcErr}=await sb.rpc('apply_smtp_settings_rpc',{
-      p_smtp_host:settings.smtp_host,
-      p_smtp_port:settings.smtp_port,
-      p_smtp_user:settings.smtp_user,
-      p_smtp_pass:settings.smtp_pass,
-      p_smtp_sender_name:settings.smtp_sender_name,
-      p_smtp_admin_email:settings.smtp_sender_email,
-      p_pat:settings.supabase_pat
+    // Folosim Edge Function (server-side, fara CORS)
+    var {data:fnData,error:fnErr}=await sb.functions.invoke('apply-smtp-settings',{
+      body:{
+        smtp_host:settings.smtp_host,
+        smtp_port:settings.smtp_port,
+        smtp_user:settings.smtp_user,
+        smtp_pass:settings.smtp_pass,
+        smtp_sender_name:settings.smtp_sender_name,
+        smtp_admin_email:settings.smtp_sender_email,
+        pat:settings.supabase_pat
+      }
     });
-    if(rpcErr){
-      statusEl.innerHTML='<span style="color:#ff6b6b;">✅ Salvat în DB, eroare RPC: '+rpcErr.message+'</span>';
+    if(fnErr){
+      statusEl.innerHTML='<span style="color:#ff6b6b;">✅ Salvat în DB, eroare Edge Function: '+fnErr.message+'</span>';
+    }else if(fnData && fnData.status && fnData.status!==200){
+      statusEl.innerHTML='<span style="color:#fbbf24;">✅ Salvat în DB. Răspuns Supabase: '+fnData.status+' — verifică PAT-ul dacă e greșit.</span>';
     }else{
       statusEl.innerHTML='<span style="color:#4ade80;">✅ Setările SMTP au fost salvate și aplicate cu succes!<br>📧 Invitațiile vor fi trimise de la <strong>'+senderEmail+'</strong>.</span>';
     }
