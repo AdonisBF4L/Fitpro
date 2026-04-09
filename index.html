@@ -1120,26 +1120,23 @@ async function saveAndApplySettings(){
   }
   statusEl.innerHTML='<span style="color:var(--muted);">⏳ Se aplică la Supabase...</span>';
   try{
-    var r=await fetch('https://api.supabase.com/v1/projects/vszywnvyyynfyhczmmgf/config/auth',{
-      method:'PATCH',
-      headers:{'Authorization':'Bearer '+settings.supabase_pat,'Content-Type':'application/json'},
-      body:JSON.stringify({
-        smtp_host:settings.smtp_host,
-        smtp_port:settings.smtp_port,
-        smtp_user:settings.smtp_user,
-        smtp_pass:settings.smtp_pass,
-        smtp_sender_name:settings.smtp_sender_name,
-        smtp_admin_email:settings.smtp_sender_email
-      })
+    // Folosim RPC cu pg_net (server-side, fara CORS)
+    var {data:rpcData,error:rpcErr}=await sb.rpc('apply_smtp_settings_rpc',{
+      p_smtp_host:settings.smtp_host,
+      p_smtp_port:settings.smtp_port,
+      p_smtp_user:settings.smtp_user,
+      p_smtp_pass:settings.smtp_pass,
+      p_smtp_sender_name:settings.smtp_sender_name,
+      p_smtp_admin_email:settings.smtp_sender_email,
+      p_pat:settings.supabase_pat
     });
-    var result=await r.json();
-    if(r.ok){
-      statusEl.innerHTML='<span style="color:#4ade80;">✅ Setările SMTP au fost salvate și aplicate cu succes!<br>Invitațiile vor fi trimise acum de la <strong>'+senderEmail+'</strong>.</span>';
+    if(rpcErr){
+      statusEl.innerHTML='<span style="color:#ff6b6b;">✅ Salvat în DB, eroare RPC: '+rpcErr.message+'</span>';
     }else{
-      statusEl.innerHTML='<span style="color:#ff6b6b;">✅ Salvat în DB, dar eroare Management API: '+(result.message||JSON.stringify(result))+'</span>';
+      statusEl.innerHTML='<span style="color:#4ade80;">✅ Setările SMTP au fost salvate și aplicate cu succes!<br>📧 Invitațiile vor fi trimise de la <strong>'+senderEmail+'</strong>.</span>';
     }
   }catch(e){
-    statusEl.innerHTML='<span style="color:#ff6b6b;">✅ Salvat în DB, eroare rețea: '+e.message+'</span>';
+    statusEl.innerHTML='<span style="color:#ff6b6b;">✅ Salvat în DB, eroare: '+e.message+'</span>';
   }
 }
 async function testSettingsEmail(){
