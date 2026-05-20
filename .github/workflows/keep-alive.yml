@@ -1,0 +1,16 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    - cron: '0 8 * * 1,4,0'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: >
+          curl -s -o /dev/null
+          https://vszywnvyyynfyhczmmgf.supabase.co/auth/v1/health
+          && echo Ping OK!
