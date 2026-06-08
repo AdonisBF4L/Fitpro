@@ -1,16 +1,28 @@
-name: Keep Supabase Alive
+name: Supabase Keep-Alive
 
 on:
   schedule:
-    - cron: '0 8 * * 1,4,0'
-  workflow_dispatch:
+    # Runs every 5 days at 08:00 UTC (to prevent Supabase free tier pause after 7 days)
+    - cron: '0 8 */5 * *'
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
-  ping:
+  ping-supabase:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase
-        run: >
-          curl -s -o /dev/null
-          https://vszywnvyyynfyhczmmgf.supabase.co/auth/v1/health
-          && echo Ping OK!
+      - name: Ping Supabase to keep project active
+        run: |
+          echo "Pinging Supabase project vszywnvyyynfyhczmmgf..."
+          
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://vszywnvyyynfyhczmmgf.supabase.co/rest/v1/" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzenl3bnZ5eXluZnloenptbWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0ODQzNjYsImV4cCI6MjA1OTA2MDM2Nn0.ifhC_o7OnRaWkD6MSMEuguu6BOeQ7cT1ud6UdZG1yJAk" \
+            --max-time 30)
+          
+          echo "Response status: $HTTP_STATUS"
+          
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 500 ]; then
+            echo "✅ Supabase is active and responding!"
+          else
+            echo "⚠️ Unexpected status: $HTTP_STATUS"
+          fi
