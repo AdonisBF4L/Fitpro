@@ -1000,6 +1000,7 @@ async function loadAll(){
   if(badge){badge.textContent=unreadCount;badge.style.display=unreadCount>0?'inline-block':'none';}
   var dc=document.getElementById('dash-msg-count');
   if(dc) dc.textContent=unreadCount>0?`(${unreadCount})`:'';
+  if(typeof syncMsgBadge==='function') syncMsgBadge();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3136,12 +3137,7 @@ function syncMsgBadge(){
   const bnBadge=document.getElementById('bn-badge-mesaje');
   if(bnBadge){bnBadge.textContent=count;bnBadge.style.display=show?'inline-block':'none';}
 }
-// Patch loadAll to also sync bottom nav badge
-const _origLoadAll=loadAll;
-async function loadAll(){
-  await _origLoadAll.apply(this,arguments);
-  syncMsgBadge();
-}
+// syncMsgBadge is called at end of original loadAll (see above)
 
 // ═══════════════════════════════════════════════════════
 // PUSH NOTIFICATIONS
