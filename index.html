@@ -862,19 +862,46 @@ sb.auth.onAuthStateChange(async(event,session)=>{
 async function getOrCreateProfile(user,accessToken){
   // Use direct REST fetch (Supabase JS SDK calls hang on cold starts)
   const H={'apikey':SKEY,'Authorization':'Bearer '+(accessToken||SKEY),'Content-Type':'application/json','Prefer':'return=representation'};
+  // Anon headers for reading invites (user token may not have RLS access to client_invites)
+  const HA={'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=representation'};
   try{
     var r=await fetch(SURL+'/rest/v1/profiles?id=eq.'+user.id+'&select=*&limit=1',{headers:H});
     var rows=await r.json();
-    if(rows&&rows.length>0) return rows[0];
-    // Check for client invite
-    var r2=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&accepted=eq.false&select=*&limit=1',{headers:H});
+    if(rows&&rows.length>0){
+      var existing=rows[0];
+      // If profile says trainer but user has an accepted invite, fix the role
+      if(existing.role==='trainer'){
+        var rCheck=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&select=*&limit=1',{headers:HA});
+        var checkInvs=await rCheck.json();
+        if(Array.isArray(checkInvs)&&checkInvs.length>0){
+          var ci=checkInvs[0];
+          var fixedProf={...existing,role:'client',trainer_id:ci.trainer_id,client_record_id:ci.client_id};
+          await fetch(SURL+'/rest/v1/profiles?id=eq.'+user.id,{method:'PATCH',headers:H,body:JSON.stringify({role:'client',trainer_id:ci.trainer_id,client_record_id:ci.client_id})});
+          if(!ci.accepted) await fetch(SURL+'/rest/v1/client_invites?id=eq.'+ci.id,{method:'PATCH',headers:HA,body:JSON.stringify({accepted:true})});
+          return fixedProf;
+        }
+      }
+      return existing;
+    }
+    // Check for client invite — use anon key so RLS doesn't block the new user
+    var r2=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&select=*&limit=1',{headers:HA});
     var invs=await r2.json();
     if(invs&&invs.length>0){
       var inv=invs[0];
       var prof={id:user.id,role:'client',trainer_id:inv.trainer_id,client_record_id:inv.client_id};
-      await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:H,body:JSON.stringify(prof)});
-      await fetch(SURL+'/rest/v1/client_invites?id=eq.'+inv.id,{method:'PATCH',headers:H,body:JSON.stringify({accepted:true})});
-      await fetch(SURL+'/rest/v1/clients?id=eq.'+inv.client_id,{method:'PATCH',headers:H,body:JSON.stringify({client_user_id:user.id})});
+      // Insert profile — use upsert so retries don't fail
+      await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:{...H,'Prefer':'return=representation,resolution=merge-duplicates'},body:JSON.stringify(prof)});
+      await fetch(SURL+'/rest/v1/client_invites?id=eq.'+inv.id,{method:'PATCH',headers:HA,body:JSON.stringify({accepted:true})});
+      await fetch(SURL+'/rest/v1/clients?id=eq.'+inv.client_id,{method:'PATCH',headers:HA,body:JSON.stringify({client_user_id:user.id})});
+      return prof;
+    }
+    // No invite found — check if there's an accepted invite (retry after failed profile insert)
+    var r3=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&accepted=eq.true&select=*&limit=1',{headers:HA});
+    var acceptedInvs=await r3.json();
+    if(acceptedInvs&&acceptedInvs.length>0){
+      var inv2=acceptedInvs[0];
+      var prof={id:user.id,role:'client',trainer_id:inv2.trainer_id,client_record_id:inv2.client_id};
+      await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:{...H,'Prefer':'return=representation,resolution=merge-duplicates'},body:JSON.stringify(prof)});
       return prof;
     }
     var prof={id:user.id,role:'trainer'};
