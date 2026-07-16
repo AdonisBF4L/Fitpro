@@ -1,5 +1,5 @@
-// FitPro Service Worker v1.0
-const CACHE_NAME = 'fitpro-v1';
+// FitPro Service Worker v2.0
+const CACHE_NAME = 'fitpro-v2';
 const OFFLINE_URL = '/Fitpro/';
 
 // Assets to cache on install (app shell)
