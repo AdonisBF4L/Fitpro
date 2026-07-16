@@ -346,7 +346,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
           <div class="ds" style="display:flex;flex-direction:column;">
             <div id="msg-header" style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:14px;color:var(--muted);">Selectează un client</div>
             <div id="msg-thread" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:14px;padding-bottom:4px;"></div>
-            <div id="msg-input-wrap" style="display:none;gap:8px;display:none;">
+            <div id="msg-input-wrap" style="display:none;gap:8px;">
               <textarea id="msg-input" placeholder="Scrie un mesaj..." style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;height:60px;"></textarea>
               <button class="btn btn-primary" style="width:auto;align-self:flex-end;" onclick="sendMessage()">Trimite</button>
             </div>
@@ -1430,9 +1430,11 @@ function renderTabMesajeClient(){
 async function sendDetailMessage(){
   var input=document.getElementById('detail-msg-input');
   var content=input.value.trim();if(!content||!currentClientId)return;
-  await restFetch('POST','messages',{client_id:currentClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
   input.value='';
-  await loadAll(); renderTabMesajeClient();
+  var r=await restFetch('POST','messages',{client_id:currentClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
+  if(!r.error&&r.data&&r.data[0]) allMessages.push(r.data[0]);
+  else await loadAll();
+  renderTabMesajeClient();
 }
 
 function renderTabNote(){
@@ -1725,8 +1727,11 @@ async function deleteSession(id){
 // ═══════════════════════════════════════════════════════
 function renderMesaje(){
   var list=document.getElementById('msg-client-list');
+  if(!allClients.length){list.innerHTML='<div class="empty">Niciun client</div>';return;}
+  // Restore input visibility if client was previously selected
+  if(activeMsgClientId) document.getElementById('msg-input-wrap').style.display='flex';
   list.innerHTML=allClients.map(c=>{
-    var msgs=allMessages.filter(m=>m.client_id===c.id);
+    var msgs=allMessages.filter(m=>m.client_id===c.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
     var unr=msgs.filter(m=>m.sender==='client'&&!m.read).length;
     var last=msgs[msgs.length-1];
     return`<div onclick="selectMsgClient('${c.id}')" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;background:${activeMsgClientId===c.id?'rgba(200,241,53,.06)':'transparent'};transition:.2s;">
@@ -1736,9 +1741,8 @@ function renderMesaje(){
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${last?last.content.slice(0,36)+'…':'Niciun mesaj'}</div>
     </div>`;
-  }).join('')||'<div class="empty">Niciun client</div>';
-  if(!activeMsgClientId&&allClients.length>0) selectMsgClient(allClients[0].id);
-  else if(activeMsgClientId) renderMsgThread();
+  }).join('');
+  if(activeMsgClientId) renderMsgThread();
 }
 
 async function selectMsgClient(id){
@@ -1746,10 +1750,16 @@ async function selectMsgClient(id){
   var c=allClients.find(x=>x.id===id);
   document.getElementById('msg-header').textContent=c?c.name:'Client';
   document.getElementById('msg-input-wrap').style.display='flex';
-  await restFetch('PATCH','messages?client_id=eq.'+id+'&sender=eq.client',{read:true});
-  await loadAll();
+  // Optimistic: mark as read in local state immediately
+  allMessages.forEach(m=>{if(m.client_id===id&&m.sender==='client')m.read=true;});
+  // Update unread badge
+  unreadCount=allMessages.filter(m=>m.sender==='client'&&!m.read).length;
+  var badge=document.getElementById('badge-mesaje');
+  if(badge){badge.textContent=unreadCount;badge.style.display=unreadCount>0?'inline-block':'none';}
   renderMesaje();
   renderMsgThread();
+  // Persist read status in background without blocking UI
+  restFetch('PATCH','messages?client_id=eq.'+id+'&sender=eq.client',{read:true});
 }
 
 function renderMsgThread(){
@@ -1767,8 +1777,11 @@ async function sendMessage(){
   var content=input.value.trim();
   if(!content||!activeMsgClientId) return;
   input.value='';
-  await restFetch('POST','messages',{client_id:activeMsgClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
-  await loadAll(); renderMsgThread();
+  var r=await restFetch('POST','messages',{client_id:activeMsgClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
+  // Add to local state optimistically if POST succeeded
+  if(!r.error&&r.data&&r.data[0]) allMessages.push(r.data[0]);
+  else await loadAll();
+  renderMsgThread();
 }
 
 // ═══════════════════════════════════════════════════════
