@@ -871,37 +871,39 @@ async function getOrCreateProfile(user,accessToken){
       var existing=rows[0];
       // If profile says trainer but user has an accepted invite, fix the role
       if(existing.role==='trainer'){
-        var rCheck=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&select=*&limit=1',{headers:HA});
+        var rCheck=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&select=*&limit=1',{headers:H});
         var checkInvs=await rCheck.json();
         if(Array.isArray(checkInvs)&&checkInvs.length>0){
           var ci=checkInvs[0];
           var fixedProf={...existing,role:'client',trainer_id:ci.trainer_id,client_record_id:ci.client_id};
           await fetch(SURL+'/rest/v1/profiles?id=eq.'+user.id,{method:'PATCH',headers:H,body:JSON.stringify({role:'client',trainer_id:ci.trainer_id,client_record_id:ci.client_id})});
-          if(!ci.accepted) await fetch(SURL+'/rest/v1/client_invites?id=eq.'+ci.id,{method:'PATCH',headers:HA,body:JSON.stringify({accepted:true})});
+          if(!ci.accepted) await fetch(SURL+'/rest/v1/client_invites?id=eq.'+ci.id,{method:'PATCH',headers:H,body:JSON.stringify({accepted:true})});
+          await fetch(SURL+'/rest/v1/clients?id=eq.'+ci.client_id,{method:'PATCH',headers:H,body:JSON.stringify({client_user_id:user.id})});
           return fixedProf;
         }
       }
       return existing;
     }
-    // Check for client invite — use anon key so RLS doesn't block the new user
-    var r2=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&select=*&limit=1',{headers:HA});
+    // Use user token (H) — RLS "Client read own invite": client_email = auth.email()
+    var r2=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&select=*&limit=1',{headers:H});
     var invs=await r2.json();
     if(invs&&invs.length>0){
       var inv=invs[0];
       var prof={id:user.id,role:'client',trainer_id:inv.trainer_id,client_record_id:inv.client_id};
       // Insert profile — use upsert so retries don't fail
       await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:{...H,'Prefer':'return=representation,resolution=merge-duplicates'},body:JSON.stringify(prof)});
-      await fetch(SURL+'/rest/v1/client_invites?id=eq.'+inv.id,{method:'PATCH',headers:HA,body:JSON.stringify({accepted:true})});
-      await fetch(SURL+'/rest/v1/clients?id=eq.'+inv.client_id,{method:'PATCH',headers:HA,body:JSON.stringify({client_user_id:user.id})});
+      await fetch(SURL+'/rest/v1/client_invites?id=eq.'+inv.id,{method:'PATCH',headers:H,body:JSON.stringify({accepted:true})});
+      await fetch(SURL+'/rest/v1/clients?id=eq.'+inv.client_id,{method:'PATCH',headers:H,body:JSON.stringify({client_user_id:user.id})});
       return prof;
     }
-    // No invite found — check if there's an accepted invite (retry after failed profile insert)
-    var r3=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&accepted=eq.true&select=*&limit=1',{headers:HA});
+    // Fallback: already-accepted invite (retry after partial failure)
+    var r3=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&accepted=eq.true&select=*&limit=1',{headers:H});
     var acceptedInvs=await r3.json();
     if(acceptedInvs&&acceptedInvs.length>0){
       var inv2=acceptedInvs[0];
       var prof={id:user.id,role:'client',trainer_id:inv2.trainer_id,client_record_id:inv2.client_id};
       await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:{...H,'Prefer':'return=representation,resolution=merge-duplicates'},body:JSON.stringify(prof)});
+      await fetch(SURL+'/rest/v1/clients?id=eq.'+inv2.client_id,{method:'PATCH',headers:H,body:JSON.stringify({client_user_id:user.id})});
       return prof;
     }
     var prof={id:user.id,role:'trainer'};
@@ -1973,23 +1975,29 @@ async function handleImport(input){
 // CLIENT PORTAL
 // ═══════════════════════════════════════════════════════
 async function loadClientPortal(profile){
-  if(!profile.client_record_id){
-    document.getElementById('cli-home').innerHTML='<div class="empty" style="padding:60px;"><div class="ei">⏳</div>Contul nu este asociat unui trainer. Contactează antrenorul tău.</div>';
-    return;
+  try{
+    if(!profile.client_record_id){
+      document.getElementById('cli-home').innerHTML='<div class="empty" style="padding:60px;"><div class="ei">⏳</div>Contul nu este asociat unui trainer. Contactează antrenorul tău.</div>';
+      showCliTab('home');return;
+    }
+    var cid=profile.client_record_id;
+    var [rc,rp,rs,rm]=await Promise.all([
+      restGet('clients?id=eq.'+cid+'&select=*&limit=1'),
+      restGet('progress?client_id=eq.'+cid+'&select=*&order=date.asc'),
+      restGet('sessions?client_id=eq.'+cid+'&select=*&order=date.desc'),
+      restGet('messages?client_id=eq.'+cid+'&select=*&order=created_at.asc')
+    ]);
+    clientData=rc[0]||null;
+    clientProgressData=rp||[];
+    clientSessionsData=rs||[];
+    cliMessages=rm||[];
+    if(clientData) document.getElementById('cli-username').textContent=clientData.name;
+    showCliTab('home');
+  }catch(e){
+    console.error('loadClientPortal error',e);
+    document.getElementById('cli-home').innerHTML='<div class="empty" style="padding:60px;color:var(--accent3);"><div class="ei">⚠️</div>Eroare la încărcare. Reîncarcă pagina.<br><small style="color:var(--muted);font-size:11px;">'+e.message+'</small></div>';
+    document.getElementById('cli-home').style.display='block';
   }
-  var cid=profile.client_record_id;
-  var [rc,rp,rs,rm]=await Promise.all([
-    restGet('clients?id=eq.'+cid+'&select=*&limit=1'),
-    restGet('progress?client_id=eq.'+cid+'&select=*&order=date.asc'),
-    restGet('sessions?client_id=eq.'+cid+'&select=*&order=date.desc'),
-    restGet('messages?client_id=eq.'+cid+'&select=*&order=created_at.asc')
-  ]);
-  clientData=rc[0]||null;
-  clientProgressData=rp;
-  clientSessionsData=rs;
-  cliMessages=rm;
-  if(clientData) document.getElementById('cli-username').textContent=clientData.name;
-  showCliTab('home');
 }
 
 function showCliTab(tab){
