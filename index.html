@@ -2,20 +2,8 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FitPro</title>
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#c8f135">
-<meta name="mobile-web-app-capable" content="yes">
-<!-- iOS PWA -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FitPro">
-<link rel="apple-touch-icon" href="icons/icon-152.png">
-<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
-<!-- Description for share/search -->
-<meta name="description" content="Dashboard complet pentru antrenori personali — clienți, sesiuni, plăți, mesaje.">
 <script>document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"><\/script>');</script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -218,79 +206,10 @@ tr:hover td{background:rgba(200,241,53,.02);}
 .photo-thumb:hover{border-color:var(--accent);}
 /* ── NOTIF CARDS ── */
 .notif-expiry{background:rgba(241,165,53,.07);border:1px solid rgba(241,165,53,.25);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:13px;}
-/* ── OFFLINE BANNER ── */
-#offline-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#f1a535;color:#0a0a0f;text-align:center;padding:8px 16px;font-size:13px;font-weight:600;}
-#offline-banner.show{display:block;}
-/* ── PUSH PERMISSION PROMPT ── */
-#push-prompt{display:none;position:fixed;bottom:80px;right:16px;z-index:9998;background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:16px 18px;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.5);}
-#push-prompt.show{display:block;}
-#push-prompt .pp-title{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent);margin-bottom:6px;}
-#push-prompt .pp-text{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;}
-#push-prompt .pp-btns{display:flex;gap:8px;}
-/* ── MOBILE BOTTOM NAV ── */
-#bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--surface);border-top:1px solid var(--border);padding:0 4px;padding-bottom:env(safe-area-inset-bottom);}
-#bottom-nav .bn-items{display:flex;justify-content:space-around;align-items:stretch;}
-#bottom-nav .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;cursor:pointer;color:var(--muted);font-size:10px;gap:3px;border:none;background:none;font-family:'DM Sans',sans-serif;transition:color .2s;position:relative;min-height:56px;}
-#bottom-nav .bn-item.active{color:var(--accent);}
-#bottom-nav .bn-item .bn-icon{font-size:20px;line-height:1;}
-#bottom-nav .bn-item .bn-badge{position:absolute;top:6px;right:calc(50% - 16px);background:var(--accent3);color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center;}
-/* ── RESPONSIVE ── */
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%);transition:transform .25s ease;}
-  .sidebar.open{transform:translateX(0);}
-  .main{margin-left:0;padding:16px;padding-bottom:80px;}
-  #bottom-nav{display:block;}
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .form-grid{grid-template-columns:1fr;}
-  .client-header{flex-direction:column;align-items:flex-start;gap:8px;}
-  #page-mesaje > div{grid-template-columns:1fr!important;height:auto!important;}
-  #msg-client-list-wrap{border-radius:12px;overflow:hidden;margin-bottom:12px;}
-  .tw{overflow-x:auto;}
-  .ph{flex-wrap:wrap;gap:8px;}
-  table{font-size:12px;}
-  th,td{padding:8px 10px;}
-  .modal{padding:18px;}
-  .modal-title{font-size:22px;}
-}
-@media(max-width:480px){
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .pt{font-size:26px;}
-}
+
 </style>
 </head>
 <body>
-<!-- Offline banner -->
-<div id="offline-banner">📡 Ești offline — datele afișate pot fi vechi. Reconectare...</div>
-<!-- Push permission prompt -->
-<div id="push-prompt">
-  <div class="pp-title">🔔 Notificări</div>
-  <div class="pp-text">Primește notificări când clienții îți trimit mesaje, chiar și cu aplicația închisă.</div>
-  <div class="pp-btns">
-    <button class="btn btn-primary" style="flex:1;padding:8px;" onclick="requestPushPermission()">Activează</button>
-    <button class="btn-sec" style="padding:8px 12px;" onclick="dismissPushPrompt()">Nu acum</button>
-  </div>
-</div>
-<!-- Mobile bottom navigation -->
-<nav id="bottom-nav" aria-label="Navigare principală">
-  <div class="bn-items">
-    <button class="bn-item active" id="bn-dashboard" onclick="showPage('dashboard');setBnActive('dashboard')">
-      <span class="bn-icon">📊</span><span>Dashboard</span>
-    </button>
-    <button class="bn-item" id="bn-clients" onclick="showPage('clients');setBnActive('clients')">
-      <span class="bn-icon">👥</span><span>Clienți</span>
-    </button>
-    <button class="bn-item" id="bn-calendar" onclick="showPage('calendar');setBnActive('calendar')">
-      <span class="bn-icon">📅</span><span>Calendar</span>
-    </button>
-    <button class="bn-item" id="bn-mesaje" onclick="showPage('mesaje');setBnActive('mesaje')">
-      <span class="bn-icon">💬</span><span>Mesaje</span>
-      <span class="bn-badge" id="bn-badge-mesaje" style="display:none;">0</span>
-    </button>
-    <button class="bn-item" id="bn-more" onclick="toggleSidebar()">
-      <span class="bn-icon">☰</span><span>Meniu</span>
-    </button>
-  </div>
-</nav>
 <div id="loading"><div class="loading-logo">FITPRO</div><div class="spinner"></div></div>
 <div id="auth-screen" style="display:none;">
   <div class="auth-box">
@@ -347,7 +266,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
         <div class="nav-item" onclick="showPage('setari');closeSidebar()"><span>⚙️</span> Setări</div>
       </nav>
       <div class="sidebar-bottom">
-        <button class="btn-sec" onclick="openBackup()">💾 Backup</button>
+        <button class="btn-sec" onclick="openModal('modal-backup')">💾 Backup</button>
         <button class="btn-danger" onclick="doLogout()">🚪 Deconectare</button>
       </div>
     </aside>
@@ -357,13 +276,12 @@ tr:hover td{background:rgba(200,241,53,.02);}
         <div class="ph"><div class="pt">BUNĂ ZIUA, <span>TRAINER</span> 💪</div></div>
         <div id="notif-zone"></div>
         <div class="stats-grid" id="dash-stats"></div>
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;">
-          <div class="ds"><div class="ds-title">📈 Venituri pe luni</div><canvas id="chart-revenue" height="120"></canvas></div>
+        <div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;">
           <div class="ds"><div class="ds-title">⚡ Acțiuni rapide</div>
             <div style="display:flex;flex-direction:column;gap:8px;">
               <button class="btn-sec" onclick="openAddClient()">➕ Adaugă client nou</button>
               <button class="btn-sec" onclick="openAddSession(null)">📅 Programează sesiune</button>
-              <button class="btn-sec" onclick="openAddPayment(null)">💰 Înregistrează plată</button>
+              <button class="btn-sec" onclick="openModal('modal-payment');document.getElementById('pay-client').value=''">💰 Înregistrează plată</button>
               <button class="btn-sec" onclick="openNotifCenter()">📬 Notificări abonamente</button>
               <button class="btn-sec" onclick="showPage('mesaje')">💬 Vezi mesaje <span id="dash-msg-count" style="color:var(--accent3);font-weight:700;"></span></button>
             </div>
@@ -391,7 +309,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
       </div>
       <!-- FINANCIAR -->
       <div id="page-financiar" class="page">
-        <div class="ph"><div class="pt">💰 <span>FINANCIAR</span></div><button class="btn btn-primary" style="width:auto;" onclick="openAddPayment(null)">+ Adaugă plată</button></div>
+        <div class="ph"><div class="pt">💰 <span>FINANCIAR</span></div><button class="btn btn-primary" style="width:auto;" onclick="openModal('modal-payment');document.getElementById('pay-client').value=''">+ Adaugă plată</button></div>
         <div class="stats-grid" id="fin-stats"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
           <div class="ds"><div class="ds-title">📊 Venituri lunare</div><canvas id="chart-fin" height="160"></canvas></div>
@@ -427,7 +345,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
           <div class="ds" style="display:flex;flex-direction:column;">
             <div id="msg-header" style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:14px;color:var(--muted);">Selectează un client</div>
             <div id="msg-thread" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:14px;padding-bottom:4px;"></div>
-            <div id="msg-input-wrap" style="display:none;gap:8px;">
+            <div id="msg-input-wrap" style="display:none;gap:8px;display:none;">
               <textarea id="msg-input" placeholder="Scrie un mesaj..." style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;height:60px;"></textarea>
               <button class="btn btn-primary" style="width:auto;align-self:flex-end;" onclick="sendMessage()">Trimite</button>
             </div>
@@ -533,8 +451,6 @@ tr:hover td{background:rgba(200,241,53,.02);}
           <div class="pt" id="detail-name">CLIENT</div>
           <div style="display:flex;gap:8px;">
             <button class="btn-sec btn-sm" onclick="openWorkoutBuilder()">🏗️ Builder</button>
-            <button class="btn-sec btn-sm" onclick="openBF4Builder()" style="border-color:#38bdf8;color:#38bdf8;">⚡ BF4 Workout</button>
-            <button class="btn-sec btn-sm" onclick="openMealBuilder()" style="border-color:#22c55e;color:#22c55e;">🥗 Meal Plan</button>
             <button class="btn-sec btn-sm" onclick="openAIGenerator()">🤖 AI Plan</button>
             <button class="btn-sec btn-sm" onclick="openRenewal(currentClientId)">🔄 Reînnoire</button>
             <button class="btn-sec btn-sm" onclick="openAddPayment(currentClientId)">💰 Plată</button>
@@ -726,7 +642,6 @@ tr:hover td{background:rgba(200,241,53,.02);}
       <div class="form-group"><label>Șolduri (cm)</label><input id="cp-hips" type="number" step="0.1"></div>
       <div class="form-group"><label>Coapsă (cm)</label><input id="cp-thigh" type="number" step="0.1"></div>
       <div class="form-group"><label>Braț (cm)</label><input id="cp-arm" type="number" step="0.1"></div>
-      <div class="form-group"><label>% Grăsime</label><input id="cp-bodyfat" type="number" step="0.1"></div>
       <div class="form-group full"><label>Notă</label><textarea id="cp-note"></textarea></div>
       <div class="form-group full"><label>📸 Foto URL (opțional)</label><input id="cp-photo" type="url" placeholder="https://..."></div>
     </div>
@@ -783,7 +698,7 @@ const sb=window.supabase.createClient(SURL,SKEY,{realtime:{enabled:false},global
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
-let currentUser=null,currentProfile=null,_accessToken=null;
+let currentUser=null,currentProfile=null;
 let allClients=[],allSessions=[],allProgress=[],allPayments=[],allMessages=[];
 let currentClientId=null,currentRenewalClientId=null,editSessionId=null,editClientId=null;
 let clientData=null,clientProgressData=[],clientSessionsData=[],cliMessages=[];
@@ -802,17 +717,6 @@ let trainerSettings=null;
 // ═══════════════════════════════════════════════════════
 sb.auth.onAuthStateChange(async(event,session)=>{
   document.getElementById('loading').style.display='none';
-  // Always update access token from session
-  if(session&&session.access_token) _accessToken=session.access_token;
-  else if(!session) _accessToken=null;
-  // TOKEN_REFRESHED: just update token silently, no re-render
-  if(event==='TOKEN_REFRESHED'){
-    if(session&&session.user) currentUser=session.user;
-    return;
-  }
-  if(event==='USER_UPDATED' && currentUser){
-    return; // ignore silent user metadata updates
-  }
   if(event==='PASSWORD_RECOVERY'){
     document.getElementById('app').style.display='none';
     document.getElementById('client-app').style.display='none';
@@ -846,9 +750,8 @@ sb.auth.onAuthStateChange(async(event,session)=>{
       document.getElementById('app').style.display='block';
       document.getElementById('user-email').textContent=currentUser.email;
       await loadAll();
-      await loadSettings();
+      loadSettings();
       showPage('dashboard');
-      showPushPromptIfNeeded();
     }
   } else {
     currentUser=null; currentProfile=null;
@@ -862,48 +765,19 @@ sb.auth.onAuthStateChange(async(event,session)=>{
 async function getOrCreateProfile(user,accessToken){
   // Use direct REST fetch (Supabase JS SDK calls hang on cold starts)
   const H={'apikey':SKEY,'Authorization':'Bearer '+(accessToken||SKEY),'Content-Type':'application/json','Prefer':'return=representation'};
-  // Anon headers for reading invites (user token may not have RLS access to client_invites)
-  const HA={'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=representation'};
   try{
     var r=await fetch(SURL+'/rest/v1/profiles?id=eq.'+user.id+'&select=*&limit=1',{headers:H});
     var rows=await r.json();
-    if(rows&&rows.length>0){
-      var existing=rows[0];
-      // If profile says trainer but user has an accepted invite, fix the role
-      if(existing.role==='trainer'){
-        var rCheck=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&select=*&limit=1',{headers:H});
-        var checkInvs=await rCheck.json();
-        if(Array.isArray(checkInvs)&&checkInvs.length>0){
-          var ci=checkInvs[0];
-          var fixedProf={...existing,role:'client',trainer_id:ci.trainer_id,client_record_id:ci.client_id};
-          await fetch(SURL+'/rest/v1/profiles?id=eq.'+user.id,{method:'PATCH',headers:H,body:JSON.stringify({role:'client',trainer_id:ci.trainer_id,client_record_id:ci.client_id})});
-          if(!ci.accepted) await fetch(SURL+'/rest/v1/client_invites?id=eq.'+ci.id,{method:'PATCH',headers:H,body:JSON.stringify({accepted:true})});
-          await fetch(SURL+'/rest/v1/clients?id=eq.'+ci.client_id,{method:'PATCH',headers:H,body:JSON.stringify({client_user_id:user.id})});
-          return fixedProf;
-        }
-      }
-      return existing;
-    }
-    // Use user token (H) — RLS "Client read own invite": client_email = auth.email()
-    var r2=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&select=*&limit=1',{headers:H});
+    if(rows&&rows.length>0) return rows[0];
+    // Check for client invite
+    var r2=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&accepted=eq.false&select=*&limit=1',{headers:H});
     var invs=await r2.json();
     if(invs&&invs.length>0){
       var inv=invs[0];
       var prof={id:user.id,role:'client',trainer_id:inv.trainer_id,client_record_id:inv.client_id};
-      // Insert profile — use upsert so retries don't fail
-      await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:{...H,'Prefer':'return=representation,resolution=merge-duplicates'},body:JSON.stringify(prof)});
+      await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:H,body:JSON.stringify(prof)});
       await fetch(SURL+'/rest/v1/client_invites?id=eq.'+inv.id,{method:'PATCH',headers:H,body:JSON.stringify({accepted:true})});
       await fetch(SURL+'/rest/v1/clients?id=eq.'+inv.client_id,{method:'PATCH',headers:H,body:JSON.stringify({client_user_id:user.id})});
-      return prof;
-    }
-    // Fallback: already-accepted invite (retry after partial failure)
-    var r3=await fetch(SURL+'/rest/v1/client_invites?client_email=eq.'+encodeURIComponent(user.email)+'&accepted=eq.true&select=*&limit=1',{headers:H});
-    var acceptedInvs=await r3.json();
-    if(acceptedInvs&&acceptedInvs.length>0){
-      var inv2=acceptedInvs[0];
-      var prof={id:user.id,role:'client',trainer_id:inv2.trainer_id,client_record_id:inv2.client_id};
-      await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:{...H,'Prefer':'return=representation,resolution=merge-duplicates'},body:JSON.stringify(prof)});
-      await fetch(SURL+'/rest/v1/clients?id=eq.'+inv2.client_id,{method:'PATCH',headers:H,body:JSON.stringify({client_user_id:user.id})});
       return prof;
     }
     var prof={id:user.id,role:'trainer'};
@@ -987,7 +861,6 @@ async function doSetNewPassword(){
 // DATA LOAD
 // ═══════════════════════════════════════════════════════
 function getAccessToken(){
-  if(_accessToken) return _accessToken;
   try{
     var raw=localStorage.getItem('sb-vszywnvyyynfyhczmmgf-auth-token');
     if(raw){var s=JSON.parse(raw);return s.access_token||s?.session?.access_token||SKEY;}
@@ -1029,7 +902,6 @@ async function loadAll(){
   if(badge){badge.textContent=unreadCount;badge.style.display=unreadCount>0?'inline-block':'none';}
   var dc=document.getElementById('dash-msg-count');
   if(dc) dc.textContent=unreadCount>0?`(${unreadCount})`:'';
-  if(typeof syncMsgBadge==='function') syncMsgBadge();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1065,16 +937,6 @@ function renderDashboard(){
     <div class="stat-card c2"><div class="stat-label">Sesiuni luna asta</div><div class="stat-value">${monthSess}</div><div class="stat-sub">din ${allSessions.length} total</div></div>
     <div class="stat-card cw"><div class="stat-label">Venituri luna asta</div><div class="stat-value" style="font-size:22px;">${monthRev.toLocaleString('ro-RO')}</div><div class="stat-sub">RON</div></div>
     <div class="stat-card cp"><div class="stat-label">Total venituri</div><div class="stat-value" style="font-size:22px;">${totalRev.toLocaleString('ro-RO')}</div><div class="stat-sub">RON</div></div>`;
-  // Revenue chart
-  var labels=[],data=[];
-  for(var i=5;i>=0;i--){
-    var d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    var e=new Date(now.getFullYear(),now.getMonth()-i+1,1);
-    labels.push(d.toLocaleString('ro-RO',{month:'short'}));
-    data.push(allPayments.filter(p=>{var pd=new Date(p.date);return pd>=d&&pd<e;}).reduce((a,p)=>a+(p.amount||0),0));
-  }
-  var cvs=document.getElementById('chart-revenue');
-  if(cvs){if(_revChart){_revChart.destroy();}_revChart=new Chart(cvs,{type:'bar',data:{labels,datasets:[{label:'RON',data,backgroundColor:'rgba(200,241,53,.7)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888'},grid:{display:false}},y:{ticks:{color:'#888'},grid:{color:'#252535'}}}}});}
   // Expiring
   var exp14=allClients.filter(c=>{if(!c.subscription_end)return false;var d=new Date(c.subscription_end);return d>=now&&d<=new Date(now.getTime()+14*86400000);}).sort((a,b)=>new Date(a.subscription_end)-new Date(b.subscription_end));
   var expEl=document.getElementById('d-expiring');
@@ -1167,7 +1029,7 @@ function openEditClient(id){
   document.getElementById('f-hips').value=c.hips||'';
   document.getElementById('f-thigh').value=c.thigh||'';
   document.getElementById('f-arm').value=c.arm||'';
-  document.getElementById('f-bodyfat').value=c.body_fat||'';
+  document.getElementById('f-bodyfat').value=c.bodyfat||'';
   if(c.email) document.getElementById('invite-opt').style.display='block';
   switchMTab('info');
   openModal('modal-client');
@@ -1255,6 +1117,7 @@ async function saveClient(){
 // ═══════════════════════════════════════════════════════
 // SETTINGS
 // ═══════════════════════════════════════════════════════
+let trainerSettings={};
 const SMTP_PRESETS={
   gmail:{host:'smtp.gmail.com',port:'587'},
   yahoo:{host:'smtp.mail.yahoo.com',port:'587'},
@@ -1387,7 +1250,7 @@ function deleteCurrentClient(){
 
 function switchTab(t){
   document.querySelectorAll('#page-detail .tab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('#page-detail .tab-content').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
   var btn=document.querySelector(`#page-detail .tab[onclick*="'${t}'"]`);
   if(btn) btn.classList.add('active');
   var tc=document.getElementById('tab-'+t);
@@ -1424,7 +1287,7 @@ function renderTabProfil(){
         <div class="ir"><span class="ik">Expirare</span><span class="iv ${exp&&exp<new Date()?'dbd':days&&days<=7?'dwn':'dok'}">${c.subscription_end||'—'}</span></div>
         <div class="ir"><span class="ik">Zile rămase</span><span class="iv">${days!==null?days<0?'<span class="dbd">Expirat</span>':`<span class="${days<=7?'dwn':'dok'}">${days} zile</span>`:'—'}</span></div>
         <div class="ir"><span class="ik">Preț</span><span class="iv">${c.price?c.price+' RON':'—'}</span></div>
-        <div class="ir"><span class="ik">Portal client</span><span class="iv">${c.client_user_id?'<span class="badge ba">✅ Activ</span>':c.email?`<button class="btn-sec btn-sm" onclick="doSendInvite('${c.id}','${c.email}')">📧 Trimite invitație</button>`:'<span class="badge be">Fără email</span>'}</span></div>
+        <div class="ir"><span class="ik">Portal client</span><span class="iv">${c.client_user_id?'<span class="badge ba">✅ Activ</span>':'<span class="badge be">Neinvitat</span>'}</span></div>
       </div>
       <div class="ds"><div class="ds-title">Măsurători inițiale</div>
         <div class="mg4">
@@ -1487,7 +1350,7 @@ function renderTabMasuratori(){
   document.getElementById('tab-masuratori').innerHTML=photoHtml+`
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn btn-primary" style="width:auto;" onclick="openAddProgress('${currentClientId}')">+ Adaugă măsurătoare</button></div>
     <div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>Abdomen</th><th>Piept</th><th>Șolduri</th><th>Braț</th><th>% Grăsime</th><th>Foto</th><th>Notă</th><th></th></tr></thead>
-    <tbody>${prog.map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.waist||'—'} cm</td><td>${p.chest||'—'} cm</td><td>${p.hips||'—'} cm</td><td>${p.arm||'—'} cm</td><td>${p.body_fat||'—'}%</td><td>${p.photo_url?`<a href="${p.photo_url}" target="_blank" style="color:var(--accent);font-size:11px;">📸 Vezi</a>`:'—'}</td><td>${p.notes||'—'}</td><td><button class="btn-sec btn-sm" onclick="deleteProgress('${p.id}')">🗑️</button></td></tr>`).join('')}
+    <tbody>${prog.map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.waist||'—'} cm</td><td>${p.chest||'—'} cm</td><td>${p.hips||'—'} cm</td><td>${p.arm||'—'} cm</td><td>${p.bodyfat||'—'}%</td><td>${p.photo_url?`<a href="${p.photo_url}" target="_blank" style="color:var(--accent);font-size:11px;">📸 Vezi</a>`:'—'}</td><td>${p.notes||'—'}</td><td><button class="btn-sec btn-sm" onclick="deleteProgress('${p.id}')">🗑️</button></td></tr>`).join('')}
     </tbody></table>${prog.length===0?'<div class="empty">Nicio măsurătoare</div>':''}</div>`;
 }
 
@@ -1497,12 +1360,12 @@ function renderTabProgres(){
   if(!prog.length){el.innerHTML='<div class="empty"><div class="ei">📈</div>Nu există date de progres</div>';return;}
   el.innerHTML=`<div class="ds" style="margin-bottom:14px;"><canvas id="chart-progress" height="200"></canvas></div>
     <div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>% Grăsime</th><th>Abdomen</th></tr></thead>
-    <tbody>${[...prog].reverse().map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.body_fat||'—'}%</td><td>${p.waist||'—'} cm</td></tr>`).join('')}</tbody></table></div>`;
+    <tbody>${[...prog].reverse().map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.bodyfat||'—'}%</td><td>${p.waist||'—'} cm</td></tr>`).join('')}</tbody></table></div>`;
   setTimeout(()=>{
     var ctx=document.getElementById('chart-progress');if(!ctx)return;
     var datasets=[];
     if(prog.some(p=>p.weight)) datasets.push({label:'Greutate (kg)',data:prog.map(p=>p.weight),borderColor:'#c8f135',tension:.4,yAxisID:'y',pointBackgroundColor:'#c8f135'});
-    if(prog.some(p=>p.body_fat)) datasets.push({label:'% Grăsime',data:prog.map(p=>p.body_fat),borderColor:'#f13565',tension:.4,yAxisID:'y2',pointBackgroundColor:'#f13565'});
+    if(prog.some(p=>p.bodyfat)) datasets.push({label:'% Grăsime',data:prog.map(p=>p.bodyfat),borderColor:'#f13565',tension:.4,yAxisID:'y2',pointBackgroundColor:'#f13565'});
     new Chart(ctx,{type:'line',data:{labels:prog.map(p=>p.date),datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#ccc'}}},scales:{y:{ticks:{color:'#888'},grid:{color:'#252535'}},y2:{position:'right',ticks:{color:'#888'},grid:{display:false}}}}});
   },100);
 }
@@ -1542,11 +1405,9 @@ function renderTabMesajeClient(){
 async function sendDetailMessage(){
   var input=document.getElementById('detail-msg-input');
   var content=input.value.trim();if(!content||!currentClientId)return;
+  await restFetch('POST','messages',{client_id:currentClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
   input.value='';
-  var r=await restFetch('POST','messages',{client_id:currentClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
-  if(!r.error&&r.data&&r.data[0]) allMessages.push(r.data[0]);
-  else await loadAll();
-  renderTabMesajeClient();
+  await loadAll(); renderTabMesajeClient();
 }
 
 function renderTabNote(){
@@ -1717,9 +1578,8 @@ async function saveProgress(){
     hips:parseFloat(document.getElementById('p-hips').value)||null,
     thigh:parseFloat(document.getElementById('p-thigh').value)||null,
     arm:parseFloat(document.getElementById('p-arm').value)||null,
-    body_fat:parseFloat(document.getElementById('p-bodyfat').value)||null,
-    notes:document.getElementById('p-note').value,
-    photo_url:document.getElementById('p-photo')?.value||null
+    bodyfat:parseFloat(document.getElementById('p-bodyfat').value)||null,
+    notes:document.getElementById('p-note').value
   };
   var r=await restFetch('POST','progress',data);
   btn.disabled=false;
@@ -1840,11 +1700,8 @@ async function deleteSession(id){
 // ═══════════════════════════════════════════════════════
 function renderMesaje(){
   var list=document.getElementById('msg-client-list');
-  if(!allClients.length){list.innerHTML='<div class="empty">Niciun client</div>';return;}
-  // Restore input visibility if client was previously selected
-  if(activeMsgClientId) document.getElementById('msg-input-wrap').style.display='flex';
   list.innerHTML=allClients.map(c=>{
-    var msgs=allMessages.filter(m=>m.client_id===c.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+    var msgs=allMessages.filter(m=>m.client_id===c.id);
     var unr=msgs.filter(m=>m.sender==='client'&&!m.read).length;
     var last=msgs[msgs.length-1];
     return`<div onclick="selectMsgClient('${c.id}')" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;background:${activeMsgClientId===c.id?'rgba(200,241,53,.06)':'transparent'};transition:.2s;">
@@ -1854,8 +1711,9 @@ function renderMesaje(){
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${last?last.content.slice(0,36)+'…':'Niciun mesaj'}</div>
     </div>`;
-  }).join('');
-  if(activeMsgClientId) renderMsgThread();
+  }).join('')||'<div class="empty">Niciun client</div>';
+  if(!activeMsgClientId&&allClients.length>0) selectMsgClient(allClients[0].id);
+  else if(activeMsgClientId) renderMsgThread();
 }
 
 async function selectMsgClient(id){
@@ -1863,16 +1721,10 @@ async function selectMsgClient(id){
   var c=allClients.find(x=>x.id===id);
   document.getElementById('msg-header').textContent=c?c.name:'Client';
   document.getElementById('msg-input-wrap').style.display='flex';
-  // Optimistic: mark as read in local state immediately
-  allMessages.forEach(m=>{if(m.client_id===id&&m.sender==='client')m.read=true;});
-  // Update unread badge
-  unreadCount=allMessages.filter(m=>m.sender==='client'&&!m.read).length;
-  var badge=document.getElementById('badge-mesaje');
-  if(badge){badge.textContent=unreadCount;badge.style.display=unreadCount>0?'inline-block':'none';}
+  await restFetch('PATCH','messages?client_id=eq.'+id+'&sender=eq.client',{read:true});
+  await loadAll();
   renderMesaje();
   renderMsgThread();
-  // Persist read status in background without blocking UI
-  restFetch('PATCH','messages?client_id=eq.'+id+'&sender=eq.client',{read:true});
 }
 
 function renderMsgThread(){
@@ -1890,11 +1742,8 @@ async function sendMessage(){
   var content=input.value.trim();
   if(!content||!activeMsgClientId) return;
   input.value='';
-  var r=await restFetch('POST','messages',{client_id:activeMsgClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
-  // Add to local state optimistically if POST succeeded
-  if(!r.error&&r.data&&r.data[0]) allMessages.push(r.data[0]);
-  else await loadAll();
-  renderMsgThread();
+  await restFetch('POST','messages',{client_id:activeMsgClientId,trainer_id:currentUser.id,sender:'trainer',content,read:false});
+  await loadAll(); renderMsgThread();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1975,29 +1824,23 @@ async function handleImport(input){
 // CLIENT PORTAL
 // ═══════════════════════════════════════════════════════
 async function loadClientPortal(profile){
-  try{
-    if(!profile.client_record_id){
-      document.getElementById('cli-home').innerHTML='<div class="empty" style="padding:60px;"><div class="ei">⏳</div>Contul nu este asociat unui trainer. Contactează antrenorul tău.</div>';
-      showCliTab('home');return;
-    }
-    var cid=profile.client_record_id;
-    var [rc,rp,rs,rm]=await Promise.all([
-      restGet('clients?id=eq.'+cid+'&select=*&limit=1'),
-      restGet('progress?client_id=eq.'+cid+'&select=*&order=date.asc'),
-      restGet('sessions?client_id=eq.'+cid+'&select=*&order=date.desc'),
-      restGet('messages?client_id=eq.'+cid+'&select=*&order=created_at.asc')
-    ]);
-    clientData=rc[0]||null;
-    clientProgressData=rp||[];
-    clientSessionsData=rs||[];
-    cliMessages=rm||[];
-    if(clientData) document.getElementById('cli-username').textContent=clientData.name;
-    showCliTab('home');
-  }catch(e){
-    console.error('loadClientPortal error',e);
-    document.getElementById('cli-home').innerHTML='<div class="empty" style="padding:60px;color:var(--accent3);"><div class="ei">⚠️</div>Eroare la încărcare. Reîncarcă pagina.<br><small style="color:var(--muted);font-size:11px;">'+e.message+'</small></div>';
-    document.getElementById('cli-home').style.display='block';
+  if(!profile.client_record_id){
+    document.getElementById('cli-home').innerHTML='<div class="empty" style="padding:60px;"><div class="ei">⏳</div>Contul nu este asociat unui trainer. Contactează antrenorul tău.</div>';
+    return;
   }
+  var cid=profile.client_record_id;
+  var [rc,rp,rs,rm]=await Promise.all([
+    restGet('clients?id=eq.'+cid+'&select=*&limit=1'),
+    restGet('progress?client_id=eq.'+cid+'&select=*&order=date.asc'),
+    restGet('sessions?client_id=eq.'+cid+'&select=*&order=date.desc'),
+    restGet('messages?client_id=eq.'+cid+'&select=*&order=created_at.asc')
+  ]);
+  clientData=rc[0]||null;
+  clientProgressData=rp;
+  clientSessionsData=rs;
+  cliMessages=rm;
+  if(clientData) document.getElementById('cli-username').textContent=clientData.name;
+  showCliTab('home');
 }
 
 function showCliTab(tab){
@@ -2158,8 +2001,8 @@ function renderCliProgress(){
     </div>
     ${prog.length>1?`<div class="ds" style="margin-bottom:14px;"><canvas id="cli-chart-prog" height="200"></canvas></div>`:''}
     ${prog.filter(p=>p.photo_url).length?`<div class="ds" style="margin-bottom:14px;"><div class="ds-title">📸 Fotografii progres</div><div class="photo-grid">${prog.filter(p=>p.photo_url).map(p=>`<div style="text-align:center;"><img class="photo-thumb" src="${p.photo_url}" onclick="window.open('${p.photo_url}','_blank')" onerror="this.style.display='none'"><div style="font-size:10px;color:var(--muted);margin-top:3px;">${p.date}</div></div>`).join('')}</div></div>`:''}
-    <div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>Abdomen</th><th>% Grăsime</th><th>Foto</th><th>Notă</th></tr></thead>
-    <tbody>${[...prog].reverse().map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.waist||'—'} cm</td><td>${p.body_fat||'—'}%</td><td>${p.photo_url?`<a href="${p.photo_url}" target="_blank" style="color:var(--accent);font-size:11px;">📸</a>`:'—'}</td><td>${p.notes||'—'}</td></tr>`).join('')}
+    <div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>Abdomen</th><th>Foto</th><th>Notă</th></tr></thead>
+    <tbody>${[...prog].reverse().map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.waist||'—'} cm</td><td>${p.photo_url?`<a href="${p.photo_url}" target="_blank" style="color:var(--accent);font-size:11px;">📸</a>`:'—'}</td><td>${p.notes||'—'}</td></tr>`).join('')}
     </tbody></table>${prog.length===0?'<div class="empty">Nu ai adăugat nicio măsurătoare</div>':''}</div>`;
   if(prog.length>1){
     setTimeout(()=>{
@@ -2224,7 +2067,6 @@ async function saveCliProgress(){
     hips:parseFloat(document.getElementById('cp-hips').value)||null,
     thigh:parseFloat(document.getElementById('cp-thigh').value)||null,
     arm:parseFloat(document.getElementById('cp-arm').value)||null,
-    body_fat:parseFloat(document.getElementById('cp-bodyfat').value)||null,
     notes:document.getElementById('cp-note').value,
     photo_url:document.getElementById('cp-photo').value||null
   };
@@ -2460,7 +2302,7 @@ async function callAIAPI(client,type){
   if(aiProvider==='claude'){
     var r=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',headers:{'x-api-key':aiApiKey,'anthropic-version':'2023-06-01','Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:2000,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})
     });
     var d=await r.json();
     if(d.error) throw new Error(d.error.message);
@@ -2624,8 +2466,10 @@ ${'═'.repeat(40)}
 `;
   result+=`Obiectiv: ${goal} | Nivel: ${level} | ${freq}x/săptămână
 `;
-  if(intensNote) result+=intensNote+'\n';
-  result+='\n';
+  if(intensNote) result+=intensNote+'
+';
+  result+='
+';
 
   Object.keys(splits).forEach(di=>{
     var splitName=splits[di];
@@ -2635,7 +2479,8 @@ ${'─'.repeat(30)}
 `;
     exercises.forEach((ex,i)=>{result+=`${i+1}. ${ex.e}: ${ex.s} serii × ${ex.r} rep | Pauză: ${ex.p}
 `;});
-    result+='\n';
+    result+='
+';
   });
 
   result+=`${'─'.repeat(40)}
@@ -2645,8 +2490,10 @@ NOTE:
 • Progresează 2.5-5kg la fiecare exercițiu când completezi toate seriile
 • Hidratare: 500ml apă/oră de antrenament
 `;
-  if(goal==='Slăbit') result+='• Adaugă 20 min cardio ușor post-antrenament (mers, bicicletă)\n';
-  result+='\n⚠️ Planul este orientativ. Adaptează în funcție de echipament și senzații.';
+  if(goal==='Slăbit') result+='• Adaugă 20 min cardio ușor post-antrenament (mers, bicicletă)
+';
+  result+='
+⚠️ Planul este orientativ. Adaptează în funcție de echipament și senzații.';
   return result;
 }
 
@@ -2781,455 +2628,12 @@ document.addEventListener('click',e=>{
   if(e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
 });
 
-// ═══════════════════════════════════════════════════════
-// BF4LIFE INTEGRATION — Workout Generator
-// ═══════════════════════════════════════════════════════
-var BF4 = {
-  obj: 'hipertrofie',
-  P: {
-    rezistenta:{rm:"25-45%",s:3,sT:"3-5",rM:"20-40",rm2:"15-25",pauza:"45-90 sec",c:"#22c55e"},
-    tonifiere: {rm:"50-60%",s:3,sT:"2-3",rM:"15-25",rm2:"13-18",pauza:"13-25 sec",c:"#fb923c"},
-    hipertrofie:{rm:"60-85%",s:4,sT:"4",rM:"8-12", rm2:"6-10", pauza:"90 sec",   c:"#38bdf8"},
-    forta:     {rm:"85-100%",s:4,sT:"3-5",rM:"1-5", rm2:"3-5",  pauza:"3-5 min", c:"#f87171"}
-  },
-  OL:{rezistenta:"Rezistență",tonifiere:"Tonifiere",hipertrofie:"Hipertrofie",forta:"Forță"},
-  ZILE:["Luni","Marți","Miercuri","Joi","Vineri","Sâmbătă","Duminică"],
-  EX:{sala:{
-    piept:[
-      ["Impins cu bara la piept","Impins cu gantere pe banca plata","Impins cu gantere inclinat 30","Fluturari cu gantere","Crossover la cablu","Impins la masina Smith"],
-      ["Impins cu gantere pe banca plata","Impins inclinat cu bara","Crossover la cablu","Fluturari cu gantere declinat","Impins la masina","Pec Deck"]
-    ],
-    spate:[
-      ["Tractiuni la bara priza larga","Helcometru priza larga","Ramat cu gantere pe banca","Ramat la cablu sezut","Pull-Over cu gantera"],
-      ["Helcometru priza ingusta","Tractiuni la bara priza ingusta","Ramat la cablu priza larga","Ramat cu gantera unilateral","Face Pull la cablu"]
-    ],
-    umeri:[
-      ["Impins cu gantere","Presa Arnold","Ridicari laterale cu gantere","Ridicari fata cu gantere","Presa la masina umeri"],
-      ["Presa Arnold","Ridicari laterale la cablu","Ridicari fata cu bara","Shrugs cu gantere","Impins cu gantere unilateral"]
-    ],
-    biceps:[
-      ["Flexii cu bara EZ","Flexii cu gantere alternativ","Flexii la cablu cu bara","Flexii concentrice","Flexii hammer cu gantere"],
-      ["Flexii cu bara dreapta","Flexii cu gantere simultan","Flexii la cablu cu bara EZ","Flexii spider cu bara","Flexii hammer alternativ"]
-    ],
-    triceps:[
-      ["Extensii la cablu cu franghie","Extensii la cablu priza inversa","Skull Crushers cu bara EZ","French Press cu gantere","Kickback cu gantera"],
-      ["French Press cu bara EZ","Extensii cu gantera deasupra capului","Extensii la cablu cu bara","Dips la paralele","Impins ingust cu bara"]
-    ],
-    cvadriceps:[
-      ["Extensii cvadriceps la aparat","Presa picioarelor 45","Bulgarian Split Squat cu gantere","Genuflexiuni cu bara","Hack Squat","Lunge cu gantere"],
-      ["Presa picioarelor unghi mare","Bulgarian Split Squat","Extensii cvadriceps unilateral","Step-up cu gantere","Lunge lateral cu gantere","Genuflexiuni sumo cu gantera"]
-    ],
-    femural:[
-      ["Flexii femural la aparat culcat","Flexii femural la aparat sezut","Indreptari romanesti cu gantere","Sumo squat cu gantera","Nordic Curl"],
-      ["Flexii femural unilateral","Indreptari cu gantere","Sumo deadlift cu gantera","Leg Curl la cablu","Romanian Deadlift cu bara"]
-    ],
-    fesieri:[
-      ["Hip Thrust la aparat","Hip Thrust cu bara pe banca","Abductie la aparat","Kickback la cablu","Glute Bridge"],
-      ["Hip Thrust unilateral","Abductie cu banda elastica","Kickback la aparat","Sumo squat puls","Glute Bridge cu gantera"]
-    ],
-    gambe:[
-      ["Ridicari pe varfuri la aparat","Ridicari pe varfuri la presa","Ridicari pe varfuri sezut","Calf Raise la Smith"],
-      ["Ridicari pe varfuri unilateral","Calf Raise pe treapta","Ridicari pe varfuri cu gantera","Seated Calf Raise"]
-    ],
-    core:[
-      ["Plansa (Plank) 45-60 sec","Abdomene la aparat","Crunch pe minge","Rotatii cu cablu","Abdomene la helcometru","Leg Raise la bara"],
-      ["Plansa laterala 30 sec","Russian Twist cu disc","Abdomene bicicleta","Hollow Hold","Ab Wheel","Dragon Flag"]
-    ]
-  }},
-  SPLITS:{
-    rezistenta:{
-      "3":[{name:"Full Body A",g:["piept","spate","cvadriceps","core"]},{name:"Full Body B",g:["umeri","femural","fesieri","gambe"]},{name:"Full Body C",g:["piept","spate","cvadriceps","core"]}],
-      "4":[{name:"Full Body A",g:["piept","spate","cvadriceps","core"]},{name:"Full Body B",g:["umeri","femural","fesieri","gambe"]},{name:"Full Body C",g:["piept","spate","cvadriceps","core"]},{name:"Full Body D",g:["umeri","femural","fesieri","gambe"]}],
-      "5":[{name:"Full Body A",g:["piept","spate","cvadriceps","core"]},{name:"Full Body B",g:["umeri","femural","fesieri","gambe"]},{name:"Full Body C",g:["piept","spate","cvadriceps","core"]},{name:"Full Body D",g:["umeri","femural","fesieri","gambe"]},{name:"Full Body E",g:["piept","spate","core"]}],
-      "6":[{name:"Full Body A",g:["piept","spate","cvadriceps","core"]},{name:"Full Body B",g:["umeri","femural","fesieri","gambe"]},{name:"Full Body C",g:["piept","spate","cvadriceps","core"]},{name:"Full Body D",g:["umeri","femural","fesieri","gambe"]},{name:"Full Body E",g:["piept","spate","cvadriceps"]},{name:"Full Body F",g:["umeri","femural","gambe"]}]
-    },
-    tonifiere:{
-      "3":[{name:"Upper",g:["piept","spate","umeri"]},{name:"Lower",g:["cvadriceps","femural","fesieri","gambe"]},{name:"Full Body",g:["piept","spate","cvadriceps","core"]}],
-      "4":[{name:"Upper A",g:["piept","spate","umeri"]},{name:"Lower A",g:["cvadriceps","femural","fesieri","gambe"]},{name:"Upper B",g:["piept","spate","biceps","triceps"]},{name:"Lower B",g:["cvadriceps","femural","fesieri","core"]}],
-      "5":[{name:"Upper A",g:["piept","spate","umeri"]},{name:"Lower A",g:["cvadriceps","femural","fesieri","gambe"]},{name:"Upper B",g:["piept","spate","biceps","triceps"]},{name:"Lower B",g:["cvadriceps","femural","fesieri","core"]},{name:"Full Body",g:["piept","spate","cvadriceps","core"]}],
-      "6":[{name:"Upper A",g:["piept","spate","umeri"]},{name:"Lower A",g:["cvadriceps","femural","fesieri","gambe"]},{name:"Upper B",g:["piept","spate","biceps","triceps"]},{name:"Lower B",g:["cvadriceps","femural","fesieri","core"]},{name:"Upper C",g:["umeri","piept","spate"]},{name:"Lower C",g:["cvadriceps","femural","gambe"]}]
-    },
-    forta:{
-      "3":[{name:"Push — Piept + Umeri + Triceps",g:["piept","umeri","triceps"]},{name:"Pull — Spate + Biceps",g:["spate","biceps"]},{name:"Legs — Picioare",g:["cvadriceps","femural","fesieri"]}],
-      "4":[{name:"Push A",g:["piept","umeri","triceps"]},{name:"Pull A",g:["spate","biceps"]},{name:"Legs",g:["cvadriceps","femural","fesieri"]},{name:"Push B",g:["piept","umeri","triceps"]}],
-      "5":[{name:"Push A",g:["piept","umeri","triceps"]},{name:"Pull A",g:["spate","biceps"]},{name:"Legs A",g:["cvadriceps","femural","fesieri"]},{name:"Push B",g:["piept","umeri","triceps"]},{name:"Pull B",g:["spate","biceps"]}],
-      "6":[{name:"Push A",g:["piept","umeri","triceps"]},{name:"Pull A",g:["spate","biceps"]},{name:"Legs A",g:["cvadriceps","femural","fesieri"]},{name:"Push B",g:["piept","umeri","triceps"]},{name:"Pull B",g:["spate","biceps"]},{name:"Legs B",g:["cvadriceps","femural","fesieri"]}]
-    }
-  },
-  pickEx:function(ec,grupa,idx,weekIdx){
-    var db=(BF4.EX[ec]||BF4.EX.sala)[grupa]||BF4.EX.sala[grupa]||[["Exercitiu"]];
-    var variant=weekIdx%db.length;
-    var list=db[variant];
-    return list[idx%list.length];
-  },
-  getReps:function(obj,grupa){
-    var mici=["biceps","triceps","gambe","core","umeri"];
-    return mici.indexOf(grupa)>=0?BF4.P[obj].rm2:BF4.P[obj].rM;
-  },
-  getHiperDays:function(zi){
-    var pA=[["piept","spate"],["piept","spate"],["piept","spate"]];
-    var pB=[["biceps","triceps"],["umeri","core"]];
-    var pL=[["cvadriceps","femural"],["fesieri","gambe"]];
-    var UA={name:"Upper A — Piept + Spate",perechi:pA};
-    var UB={name:"Upper B — Brațe + Umeri",perechi:pB};
-    var LA={name:"Lower A",perechi:pL};
-    var LB={name:"Lower B",perechi:pL};
-    var maps={"3":[UA,LA,UB],"4":[UA,LA,UB,LB],"5":[UA,LA,UB,LB,UA],"6":[UA,LA,UB,LB,UA,LA]};
-    return maps[zi]||maps["4"];
-  },
-  selObj:function(obj){
-    BF4.obj=obj;
-    var cols={rezistenta:"#22c55e",tonifiere:"#fb923c",hipertrofie:"#38bdf8",forta:"#f87171"};
-    var labels={rezistenta:"Rezistență",tonifiere:"Tonifiere",hipertrofie:"Hipertrofie",forta:"Forță"};
-    ['rezistenta','tonifiere','hipertrofie','forta'].forEach(function(o){
-      var btn=document.getElementById('bf4-obj-'+o);
-      if(!btn)return;
-      if(o===obj){btn.style.borderColor=cols[o];btn.style.color=cols[o];btn.style.background=cols[o]+'15';}
-      else{btn.style.borderColor='var(--border)';btn.style.color='var(--muted)';btn.style.background='transparent';}
-    });
-    var p=BF4.P[obj];
-    var info=document.getElementById('bf4-obj-info');
-    if(info) info.textContent=labels[obj]+' — '+p.sT+' seturi × '+p.rM+' reps · Pauza: '+p.pauza;
-  },
-  generate:function(){
-    var c=allClients.find(function(x){return x.id===currentClientId;});
-    if(!c)return;
-    var zi=document.getElementById('bf4-days').value||String(c.frequency||3);
-    var ec=document.getElementById('bf4-equip').value||'sala';
-    var obj=BF4.obj;
-    var p=BF4.P[obj];
-    var sets=p.s;
-    workoutBuilderData=[];
-    if(obj==='hipertrofie'){
-      var hiperDays=BF4.getHiperDays(zi);
-      hiperDays.forEach(function(day,di){
-        var exList=[];
-        day.perechi.forEach(function(per,pi){
-          var cod=String.fromCharCode(65+pi);
-          var g1=per[0],g2=per[1];
-          var ex1=BF4.pickEx(ec,g1,di*4+pi*2,0);
-          var ex2=BF4.pickEx(ec,g2,di*4+pi*2+1,0);
-          var r1=BF4.getReps(obj,g1),r2=BF4.getReps(obj,g2);
-          exList.push({name:ex1,sets:sets,reps:r1,rest:'0-15s',notes:'Superset '+cod+'1 → du-te imediat la '+cod+'2'});
-          exList.push({name:ex2,sets:sets,reps:r2,rest:p.pauza,notes:'Superset '+cod+'2 → pauza '+p.pauza+' apoi reiei '+cod+'1'});
-        });
-        workoutBuilderData.push({day:BF4.ZILE[di]+' — '+day.name,exercises:exList});
-      });
-    }else{
-      var splits=BF4.SPLITS[obj]||BF4.SPLITS.rezistenta;
-      var days=splits[zi]||splits["3"];
-      days.forEach(function(day,di){
-        var exList=[];
-        day.g.forEach(function(grupa,gi){
-          var ex=BF4.pickEx(ec,grupa,di+gi,0);
-          var reps=BF4.getReps(obj,grupa);
-          exList.push({name:ex,sets:sets,reps:reps,rest:p.pauza,notes:''});
-        });
-        workoutBuilderData.push({day:BF4.ZILE[di]+' — '+day.name,exercises:exList});
-      });
-    }
-    renderWorkoutBuilder();
-    closeModal('modal-bf4');
-    openModal('modal-wb');
-    toast('✅ Program BF4Life generat! Editează și salvează.');
-  }
-};
-// Echipamente alternative — copiem sala ca baza
-BF4.EX.gantere_bare=BF4.EX.sala;
-BF4.EX.gantere=BF4.EX.sala;
-BF4.EX.acasa=JSON.parse(JSON.stringify(BF4.EX.sala));
-BF4.EX.acasa.piept=[["Flotari clasice","Flotari cu picioarele ridicate","Flotari priza ingusta","Dips intre scaune","Diamond Push-Up"],["Flotari explosive","Flotari cu priza larga","Pike Push-Up","Decline Push-Up","Hindu Push-Up"]];
-BF4.EX.acasa.spate=[["Tractiuni la bara","Superman pe covor","Renegade Row cu gantere","Inverted Row"],["Tractiuni cu priza ingusta","Good Morning fara greutate","Renegade Row unilateral","Chin-Up"]];
-BF4.EX.acasa.cvadriceps=[["Genuflexiuni libere","Bulgarian Split Squat","Lunge","Step-up pe scaun","Jump Squat"],["Squat cu saritura","Lunge lateral","Wall Sit","Lunge posterior","Sumo squat"]];
-BF4.EX.acasa.fesieri=[["Hip Thrust fara greutate","Glute Bridge","Donkey Kick","Fire Hydrant"],["Hip Thrust unilateral","Glute Bridge cu piciorul ridicat","Kickback","Step-up lateral"]];
-BF4.EX.acasa.core=[["Plansa","Mountain Climbers","Bicycle Crunch","Russian Twist","Crunch"],["Plansa laterala","Leg Raise","Hollow Hold","Dead Bug","Flutter Kicks"]];
-
-function openBF4Builder(){
-  var c=allClients.find(function(x){return x.id===currentClientId;});
-  if(!c)return;
-  var lvl=document.getElementById('bf4-level');
-  var days=document.getElementById('bf4-days');
-  if(lvl) lvl.value=c.level||'intermediar';
-  if(days) days.value=String(c.frequency||3);
-  BF4.selObj('hipertrofie');
-  openModal('modal-bf4');
-}
-
-// ═══════════════════════════════════════════════════════
-// BF4LIFE INTEGRATION — Meal Plan Generator
-// ═══════════════════════════════════════════════════════
-var MEAL={
-  obj:'cut',
-  activity:1.375,
-  _plan:null,
-  _macros:null,
-  foodDB:{
-    prot:{
-      pui:{name:'Piept de pui',cal100:165,p:31,c:0,f:3.6},
-      curcan:{name:'Piept de curcan',cal100:135,p:30,c:0,f:1},
-      vita:{name:'Carne de vită slabă',cal100:170,p:26,c:0,f:7},
-      somon:{name:'Somon',cal100:208,p:20,c:0,f:13},
-      ton:{name:'Ton (conservă apă)',cal100:116,p:26,c:0,f:1},
-      oua:{name:'Ouă întregi (buc)',cal100:143,p:13,c:1,f:10},
-      branza_vaci:{name:'Brânză de vaci 0%',cal100:58,p:11,c:3,f:0.5},
-      iaurt_gr:{name:'Iaurt grecesc 0%',cal100:59,p:10,c:4,f:0}
-    },
-    carb:{
-      orez_alb:{name:'Orez alb fiert',cal100:130,p:2.7,c:28,f:0.3},
-      orez_br:{name:'Orez brun fiert',cal100:111,p:2.6,c:23,f:0.9},
-      ovaz:{name:'Fulgi de ovăz',cal100:389,p:17,c:66,f:7},
-      cart_dulci:{name:'Cartofi dulci',cal100:86,p:1.6,c:20,f:0.1},
-      cartofi:{name:'Cartofi fierți',cal100:77,p:2,c:17,f:0.1},
-      quinoa:{name:'Quinoa fiartã',cal100:120,p:4.4,c:22,f:1.9}
-    },
-    veggie:{
-      broccoli:{name:'Broccoli',cal100:34,p:2.8,c:7,f:0.4},
-      spanac:{name:'Spanac',cal100:23,p:2.9,c:3.6,f:0.4},
-      fasole_verde:{name:'Fasole verde',cal100:31,p:1.8,c:7,f:0.1},
-      ardei:{name:'Ardei gras',cal100:31,p:1,c:6,f:0.3},
-      ciuperci:{name:'Ciuperci',cal100:22,p:3.1,c:3.3,f:0.3}
-    },
-    fat:{
-      avocado:{name:'Avocado',cal100:160,p:2,c:9,f:15},
-      ulei_masline:{name:'Ulei de măsline',cal100:884,p:0,c:0,f:100},
-      nuci:{name:'Nuci',cal100:654,p:15,c:14,f:65},
-      migdale:{name:'Migdale',cal100:579,p:21,c:22,f:50}
-    }
-  },
-  calcTDEE:function(age,weight,height,sex,act){
-    var bmr=sex==='m'?10*weight+6.25*height-5*age+5:10*weight+6.25*height-5*age-161;
-    return Math.round(bmr*act);
-  },
-  getMacros:function(totalCal,weight,carbPct){
-    var protein=Math.round(weight*2);
-    var protCal=protein*4;
-    var carbCal=totalCal*(carbPct/100);
-    var carbs=Math.round(carbCal/4);
-    var fatCal=Math.max(0,totalCal-protCal-carbCal);
-    var fat=Math.round(fatCal/9);
-    return {calories:totalCal,protein:protein,carbs:carbs,fat:fat};
-  },
-  selObj:function(obj){
-    MEAL.obj=obj;
-    ['cut','maintain','bulk'].forEach(function(o){
-      var btn=document.getElementById('meal-obj-'+o);
-      if(!btn)return;
-      if(o===obj){btn.style.borderColor='var(--accent)';btn.style.color='var(--accent)';btn.style.background='rgba(200,241,53,.07)';}
-      else{btn.style.borderColor='var(--border)';btn.style.color='var(--muted)';btn.style.background='transparent';}
-    });
-  },
-  generate:function(){
-    var age=parseInt(document.getElementById('mb-age').value)||30;
-    var weight=parseFloat(document.getElementById('mb-weight').value)||75;
-    var height=parseFloat(document.getElementById('mb-height').value)||175;
-    var sex=document.getElementById('mb-sex').value||'m';
-    var meals=parseInt(document.getElementById('mb-meals').value)||4;
-    var obj=MEAL.obj;
-    var tdee=MEAL.calcTDEE(age,weight,height,sex,MEAL.activity);
-    var cal,carbPct;
-    if(obj==='cut'){cal=Math.round(tdee*0.85);carbPct=35;}
-    else if(obj==='bulk'){cal=Math.round(tdee*1.1);carbPct=50;}
-    else{cal=tdee;carbPct=45;}
-    var macros=MEAL.getMacros(cal,weight,carbPct);
-    var protPerMeal=Math.round(macros.protein/meals);
-    var carbPerMeal=Math.round(macros.carbs/meals);
-    var fatPerMeal=Math.round(macros.fat/meals);
-    var protKeys=Object.keys(MEAL.foodDB.prot);
-    var carbKeys=Object.keys(MEAL.foodDB.carb);
-    var veggieKeys=Object.keys(MEAL.foodDB.veggie);
-    var fatKeys=Object.keys(MEAL.foodDB.fat);
-    var mealNames=['Mic dejun','Prânz','Cină','Gustare 1','Gustare 2','Masă 6'];
-    var objLabel=obj==='cut'?'Slăbit':obj==='bulk'?'Masă musculară':'Menținere';
-    var planText='═══════════════════════════════════\n';
-    planText+='PLAN ALIMENTAR BF4LIFE\n';
-    planText+='TDEE: '+tdee+' kcal  |  Obiectiv: '+objLabel+'\n';
-    planText+='═══════════════════════════════════\n\n';
-    planText+='🎯 MACRONUTRIENȚI ZILNICI:\n';
-    planText+='Calorii: '+macros.calories+' kcal\n';
-    planText+='Proteină: '+macros.protein+'g  |  Carbo: '+macros.carbs+'g  |  Grăsimi: '+macros.fat+'g\n\n';
-    var startHour=7*60;
-    var interval=meals>1?Math.round((13*60)/(meals-1)):0;
-    for(var i=0;i<meals;i++){
-      var protFood=MEAL.foodDB.prot[protKeys[i%protKeys.length]];
-      var carbFood=MEAL.foodDB.carb[carbKeys[i%carbKeys.length]];
-      var veggieFood=MEAL.foodDB.veggie[veggieKeys[i%veggieKeys.length]];
-      var fatFood=MEAL.foodDB.fat[fatKeys[i%fatKeys.length]];
-      var protAmt=Math.round((protPerMeal/protFood.p)*100);
-      var carbAmt=carbPerMeal>3?Math.round((carbPerMeal/carbFood.c)*100):0;
-      var fatAmt=fatPerMeal>2?Math.min(Math.round((fatPerMeal/fatFood.f)*100),30):0;
-      var mealMin=startHour+i*interval;
-      var mealH=Math.floor(mealMin/60).toString().padStart(2,'0');
-      var mealM=(mealMin%60).toString().padStart(2,'0');
-      var mealTime=mealH+':'+mealM;
-      var mealCal=Math.round(protAmt*protFood.cal100/100+carbAmt*carbFood.cal100/100+100*veggieFood.cal100/100+(fatAmt?fatAmt*fatFood.cal100/100:0));
-      planText+='─────────────────────────────────\n';
-      planText+=(mealNames[i]||('Masa '+(i+1)))+' — '+mealTime+'\n';
-      planText+='~'+mealCal+' kcal  |  P:'+protPerMeal+'g  C:'+carbPerMeal+'g  F:'+fatPerMeal+'g\n';
-      planText+='• '+protAmt+'g '+protFood.name+'\n';
-      if(carbAmt>0) planText+='• '+carbAmt+'g '+carbFood.name+'\n';
-      planText+='• 100g '+veggieFood.name+'\n';
-      if(fatAmt>0) planText+='• '+fatAmt+'g '+fatFood.name+'\n';
-      planText+='\n';
-    }
-    planText+='═══════════════════════════════════\n';
-    planText+='💧 HIDRATARE: minimum 2.5L apă/zi\n';
-    if(interval>0) planText+='⏱️ Mănâncă la intervale de ~'+Math.round(interval/60)+'h\n';
-    planText+='🔁 Variază proteinele de la masă la masă\n';
-    var prev=document.getElementById('meal-preview');
-    var prevWrap=document.getElementById('meal-preview-wrap');
-    var saveBtn=document.getElementById('meal-save-btn');
-    if(prev) prev.innerHTML='<pre style="white-space:pre-wrap;color:var(--text);font-family:\'DM Sans\',sans-serif;font-size:13px;line-height:1.8;">'+planText+'</pre>';
-    if(prevWrap) prevWrap.style.display='block';
-    if(saveBtn) saveBtn.style.display='block';
-    MEAL._plan=planText;
-    MEAL._macros=macros;
-  },
-  saveToClient:async function(){
-    if(!MEAL._plan||!MEAL._macros||!currentClientId)return;
-    var patch={diet:MEAL._plan,calories:MEAL._macros.calories,protein:MEAL._macros.protein,carbs:MEAL._macros.carbs,fats:MEAL._macros.fat};
-    var r=await restFetch('PATCH','clients?id=eq.'+currentClientId,patch);
-    if(r&&r.error){alert('Eroare: '+(r.error.message||JSON.stringify(r.error)));return;}
-    await loadAll();
-    closeModal('modal-meal');
-    switchTab('dieta');
-    toast('🥗 Plan alimentar salvat la client!');
-  }
-};
-
-function openMealBuilder(){
-  var c=allClients.find(function(x){return x.id===currentClientId;});
-  if(!c)return;
-  var fw=document.getElementById('mb-weight');
-  var fh=document.getElementById('mb-height');
-  var fa=document.getElementById('mb-age');
-  var fs=document.getElementById('mb-sex');
-  if(fw) fw.value=c.weight||'';
-  if(fh) fh.value=c.height||'';
-  if(fa) fa.value=c.age||'';
-  if(fs) fs.value=(c.gender&&c.gender.toLowerCase().indexOf('femi')>=0)?'f':'m';
-  MEAL.selObj('cut');
-  MEAL._plan=null;MEAL._macros=null;
-  var prevWrap=document.getElementById('meal-preview-wrap');
-  var saveBtn=document.getElementById('meal-save-btn');
-  if(prevWrap) prevWrap.style.display='none';
-  if(saveBtn) saveBtn.style.display='none';
-  openModal('modal-meal');
-}
-
 // Enter key in message input
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&!e.shiftKey){
     if(document.activeElement&&document.activeElement.id==='msg-input') sendMessage();
   }
 });
-
-// ═══════════════════════════════════════════════════════
-// PWA — SERVICE WORKER REGISTRATION
-// ═══════════════════════════════════════════════════════
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/Fitpro/sw.js',{scope:'/Fitpro/'})
-      .then(reg=>{
-        console.log('SW registered, scope:', reg.scope);
-        // Listen for messages from SW (navigation requests)
-        navigator.serviceWorker.addEventListener('message', event=>{
-          if(event.data?.type==='NAVIGATE'){
-            const hash=event.data.url?.split('#')[1];
-            if(hash) showPage(hash);
-          }
-        });
-      })
-      .catch(err=>console.warn('SW registration failed:', err));
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// OFFLINE DETECTION
-// ═══════════════════════════════════════════════════════
-function updateOnlineStatus(){
-  const banner=document.getElementById('offline-banner');
-  if(!navigator.onLine){
-    banner?.classList.add('show');
-  } else {
-    banner?.classList.remove('show');
-  }
-}
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-updateOnlineStatus();
-
-// ═══════════════════════════════════════════════════════
-// MOBILE BOTTOM NAV
-// ═══════════════════════════════════════════════════════
-function setBnActive(page){
-  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
-  const btn=document.getElementById('bn-'+page);
-  if(btn) btn.classList.add('active');
-}
-// Sync bottom nav badge with sidebar badge
-function syncMsgBadge(){
-  const count=document.getElementById('badge-mesaje')?.textContent||'0';
-  const show=document.getElementById('badge-mesaje')?.style.display!=='none';
-  const bnBadge=document.getElementById('bn-badge-mesaje');
-  if(bnBadge){bnBadge.textContent=count;bnBadge.style.display=show?'inline-block':'none';}
-}
-// syncMsgBadge is called at end of original loadAll (see above)
-
-// ═══════════════════════════════════════════════════════
-// PUSH NOTIFICATIONS
-// ═══════════════════════════════════════════════════════
-const VAPID_PUBLIC_KEY='BL8nS1x9dKue3qvcHXcYsU18gJipL1DUAmeh50ZcegibOR46HFkTPVr6Caji26wUvVO46GpvSqch87P895LRhKQ';
-
-function urlBase64ToUint8Array(base64String){
-  const padding='='.repeat((4-base64String.length%4)%4);
-  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
-  const raw=atob(base64);
-  return new Uint8Array([...raw].map(c=>c.charCodeAt(0)));
-}
-
-async function requestPushPermission(){
-  dismissPushPrompt();
-  if(!('Notification' in window)||!('serviceWorker' in navigator)){
-    toast('Browserul tău nu suportă notificări push.');
-    return;
-  }
-  const permission=await Notification.requestPermission();
-  if(permission!=='granted'){
-    toast('Notificările au fost refuzate.');
-    return;
-  }
-  try{
-    const reg=await navigator.serviceWorker.ready;
-    const sub=await reg.pushManager.subscribe({
-      userVisibleOnly:true,
-      applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
-    // Save subscription to Supabase
-    await restFetch('POST','push_subscriptions',{
-      trainer_id:currentUser.id,
-      subscription:JSON.stringify(sub),
-      created_at:new Date().toISOString()
-    });
-    localStorage.setItem('push_subscribed','1');
-    toast('✅ Notificări activate! Vei fi anunțat când clienții îți scriu.');
-  } catch(e){
-    console.error('Push subscription error:',e);
-    toast('Eroare la activarea notificărilor: '+e.message);
-  }
-}
-
-function dismissPushPrompt(){
-  document.getElementById('push-prompt')?.classList.remove('show');
-  localStorage.setItem('push_dismissed','1');
-}
-
-function showPushPromptIfNeeded(){
-  const dismissed=localStorage.getItem('push_dismissed');
-  const subscribed=localStorage.getItem('push_subscribed');
-  if(!dismissed&&!subscribed&&'Notification' in window&&Notification.permission==='default'){
-    setTimeout(()=>document.getElementById('push-prompt')?.classList.add('show'), 3000);
-  }
-}
 </script>
 
 <!-- WORKOUT BUILDER MODAL -->
@@ -3268,105 +2672,6 @@ function showPushPromptIfNeeded(){
       <button class="btn btn-primary" onclick="generateAIPlan()" id="btn-ai-gen">⚡ Generează plan</button>
     </div>
     <div id="ai-status" style="margin-top:12px;font-size:13px;color:var(--muted);"></div>
-  </div>
-</div>
-<!-- BF4LIFE WORKOUT BUILDER MODAL -->
-<div class="modal-overlay" id="modal-bf4">
-  <div class="modal" style="max-width:600px;">
-    <button class="modal-close" onclick="closeModal('modal-bf4')">✕</button>
-    <div class="modal-title">⚡ BF4LIFE — GENERATOR PROGRAM</div>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:18px;">Generează automat un program personalizat. Vei putea edita și ajusta în builder înainte de salvare.</p>
-    <div class="form-grid" style="margin-bottom:14px;">
-      <div class="form-group">
-        <label>Nivel client</label>
-        <select id="bf4-level">
-          <option value="incepator">Începător</option>
-          <option value="intermediar" selected>Intermediar</option>
-          <option value="avansat">Avansat</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Zile / săptămână</label>
-        <select id="bf4-days">
-          <option value="3">3 zile</option>
-          <option value="4">4 zile</option>
-          <option value="5">5 zile</option>
-          <option value="6">6 zile</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Echipament</label>
-        <select id="bf4-equip">
-          <option value="sala">Sală completă</option>
-          <option value="gantere_bare">Gantere + bare</option>
-          <option value="gantere">Gantere</option>
-          <option value="acasa">Acasă</option>
-        </select>
-      </div>
-    </div>
-    <div style="margin-bottom:16px;">
-      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:8px;">Obiectiv principal</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
-        <button id="bf4-obj-rezistenta" onclick="BF4.selObj('rezistenta')" style="padding:10px 6px;border-radius:8px;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;font-family:inherit;">🏃 Rezistență</button>
-        <button id="bf4-obj-tonifiere" onclick="BF4.selObj('tonifiere')" style="padding:10px 6px;border-radius:8px;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;font-family:inherit;">💪 Tonifiere</button>
-        <button id="bf4-obj-hipertrofie" onclick="BF4.selObj('hipertrofie')" style="padding:10px 6px;border-radius:8px;border:2px solid #38bdf8;background:#38bdf815;color:#38bdf8;cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;font-family:inherit;">🏋️ Hipertrofie</button>
-        <button id="bf4-obj-forta" onclick="BF4.selObj('forta')" style="padding:10px 6px;border-radius:8px;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;font-family:inherit;">⚡ Forță</button>
-      </div>
-      <div id="bf4-obj-info" style="margin-top:8px;font-size:12px;color:var(--muted);padding:8px 12px;background:var(--bg);border-radius:6px;">Hipertrofie — 4 seturi × 8-12 reps · Pauza: 90 sec</div>
-    </div>
-    <button class="btn btn-primary" onclick="BF4.generate()">⚡ Generează & Deschide Builder</button>
-  </div>
-</div>
-<!-- MEAL PLAN BUILDER MODAL -->
-<div class="modal-overlay" id="modal-meal">
-  <div class="modal" style="max-width:580px;">
-    <button class="modal-close" onclick="closeModal('modal-meal')">✕</button>
-    <div class="modal-title">🥗 BF4LIFE — PLAN ALIMENTAR</div>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">Generează un plan alimentar complet cu macro-distribuție și alimente specifice.</p>
-    <div class="form-grid" style="margin-bottom:14px;">
-      <div class="form-group">
-        <label>Greutate (kg)</label>
-        <input id="mb-weight" type="number" placeholder="75">
-      </div>
-      <div class="form-group">
-        <label>Înălțime (cm)</label>
-        <input id="mb-height" type="number" placeholder="175">
-      </div>
-      <div class="form-group">
-        <label>Vârstă</label>
-        <input id="mb-age" type="number" placeholder="30">
-      </div>
-      <div class="form-group">
-        <label>Sex</label>
-        <select id="mb-sex">
-          <option value="m">Masculin</option>
-          <option value="f">Feminin</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Mese / zi</label>
-        <select id="mb-meals">
-          <option value="3">3 mese</option>
-          <option value="4" selected>4 mese</option>
-          <option value="5">5 mese</option>
-          <option value="6">6 mese</option>
-        </select>
-      </div>
-    </div>
-    <div style="margin-bottom:16px;">
-      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:8px;">Obiectiv</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-        <button id="meal-obj-cut" onclick="MEAL.selObj('cut')" style="padding:10px;border-radius:8px;border:2px solid var(--accent);background:rgba(200,241,53,.07);color:var(--accent);cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;">🔥 Slăbit</button>
-        <button id="meal-obj-maintain" onclick="MEAL.selObj('maintain')" style="padding:10px;border-radius:8px;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;">⚖️ Menținere</button>
-        <button id="meal-obj-bulk" onclick="MEAL.selObj('bulk')" style="padding:10px;border-radius:8px;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;">💪 Masă</button>
-      </div>
-    </div>
-    <button class="btn btn-primary" style="margin-bottom:14px;" onclick="MEAL.generate()">🥗 Generează Plan Alimentar</button>
-    <div id="meal-preview-wrap" style="display:none;">
-      <div class="ds-title" style="margin-bottom:8px;">Plan generat — preview:</div>
-      <div id="meal-preview" style="max-height:340px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;"></div>
-    </div>
-    <button id="meal-save-btn" class="btn btn-primary" style="display:none;margin-top:12px;" onclick="MEAL.saveToClient()">💾 Salvează la Client</button>
   </div>
 </div>
 <!-- NOTIFICATION CENTER MODAL -->
