@@ -311,8 +311,7 @@ tr:hover td{background:rgba(200,241,53,.02);}
       <div id="page-financiar" class="page">
         <div class="ph"><div class="pt">💰 <span>FINANCIAR</span></div><button class="btn btn-primary" style="width:auto;" onclick="openModal('modal-payment');document.getElementById('pay-client').value=''">+ Adaugă plată</button></div>
         <div class="stats-grid" id="fin-stats"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
-          <div class="ds"><div class="ds-title">📊 Venituri lunare</div><canvas id="chart-fin" height="160"></canvas></div>
+        <div style="margin-bottom:20px;">
           <div class="ds"><div class="ds-title">🏆 Top clienți</div><div id="fin-top"></div></div>
         </div>
         <div class="tw">
@@ -1460,16 +1459,6 @@ function renderFinanciar(){
     <div class="stat-card c2"><div class="stat-label">Venituri an curent</div><div class="stat-value" style="font-size:24px;">${yr.toLocaleString('ro-RO')}</div><div class="stat-sub">RON</div></div>
     <div class="stat-card cw"><div class="stat-label">Total venituri</div><div class="stat-value" style="font-size:24px;">${tr.toLocaleString('ro-RO')}</div><div class="stat-sub">RON</div></div>
     <div class="stat-card cp"><div class="stat-label">Medie / client</div><div class="stat-value" style="font-size:24px;">${avg.toLocaleString('ro-RO')}</div><div class="stat-sub">RON / lună</div></div>`;
-  // Chart
-  var labels=[],data=[];
-  for(var i=11;i>=0;i--){
-    var d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    var e=new Date(now.getFullYear(),now.getMonth()-i+1,1);
-    labels.push(d.toLocaleString('ro-RO',{month:'short',year:'2-digit'}));
-    data.push(allPayments.filter(p=>{var pd=new Date(p.date);return pd>=d&&pd<e;}).reduce((a,p)=>a+(p.amount||0),0));
-  }
-  var cvs=document.getElementById('chart-fin');
-  if(cvs){if(_finChart){_finChart.destroy();}_finChart=new Chart(cvs,{type:'bar',data:{labels,datasets:[{label:'RON',data,backgroundColor:'rgba(200,241,53,.7)',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888',maxRotation:45},grid:{display:false}},y:{ticks:{color:'#888'},grid:{color:'#252535'}}}}});}
   // Top clienți
   var topC=allClients.map(c=>({name:c.name,id:c.id,rev:allPayments.filter(p=>p.client_id===c.id).reduce((a,p)=>a+(p.amount||0),0)})).sort((a,b)=>b.rev-a.rev).slice(0,6);
   document.getElementById('fin-top').innerHTML=topC.map((c,i)=>`<div class="ir"><span class="ik" style="font-size:13px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'  '} ${c.name}</span><span class="iv dok">${c.rev.toLocaleString('ro-RO')} RON</span></div>`).join('')||'<div class="empty">Nu există date</div>';
