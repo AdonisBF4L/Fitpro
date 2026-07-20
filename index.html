@@ -207,6 +207,18 @@ tr:hover td{background:rgba(200,241,53,.02);}
 /* ── NOTIF CARDS ── */
 .notif-expiry{background:rgba(241,165,53,.07);border:1px solid rgba(241,165,53,.25);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:13px;}
 
+/* ── ONBOARDING ── */
+#onboarding-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.ob-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px 36px;max-width:480px;width:100%;position:relative;}
+.ob-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);letter-spacing:3px;margin-bottom:6px;}
+.ob-step-ind{display:flex;gap:8px;margin-bottom:28px;}
+.ob-dot{width:32px;height:4px;border-radius:2px;background:var(--border);transition:background .3s;}
+.ob-dot.active{background:var(--accent);}
+.ob-dot.done{background:rgba(200,241,53,.4);}
+.ob-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:8px;}
+.ob-sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:28px;}
+.ob-skip{position:absolute;top:20px;right:24px;font-size:12px;color:var(--muted);cursor:pointer;background:none;border:none;}
+.ob-skip:hover{color:var(--text);}
 </style>
 </head>
 <body>
@@ -751,6 +763,7 @@ sb.auth.onAuthStateChange(async(event,session)=>{
       await loadAll();
       loadSettings();
       showPage('dashboard');
+      checkOnboarding();
     }
   } else {
     currentUser=null; currentProfile=null;
@@ -2609,6 +2622,71 @@ document.addEventListener('keydown',e=>{
     if(document.activeElement&&document.activeElement.id==='msg-input') sendMessage();
   }
 });
+
+/* ── ONBOARDING ── */
+function checkOnboarding(){
+  var key='fitpro_ob_done_'+currentUser.id;
+  if(localStorage.getItem(key)) return;
+  if(allClients.length===0){
+    document.getElementById('onboarding-overlay').style.display='flex';
+  }
+}
+function obSetDots(step){
+  [1,2,3].forEach(i=>{
+    var d=document.getElementById('ob-dot-'+i);
+    d.className='ob-dot'+(i<step?' done':i===step?' active':'');
+  });
+}
+function obNext(step){
+  if(step===1){
+    var name=document.getElementById('ob-name').value.trim();
+    if(!name){alert('Introdu numele tău.');return;}
+    // Save name to profile
+    restFetch('PATCH','profiles?id=eq.'+currentUser.id,{full_name:name});
+    document.getElementById('ob-step-1').style.display='none';
+    document.getElementById('ob-step-2').style.display='block';
+    obSetDots(2);
+  } else if(step===2){
+    var cname=document.getElementById('ob-cname').value.trim();
+    if(!cname){alert('Introdu numele clientului.');return;}
+    var cemail=document.getElementById('ob-cemail').value.trim();
+    var cphone=document.getElementById('ob-cphone').value.trim();
+    var cgoal=document.getElementById('ob-cgoal').value;
+    var now=new Date();
+    var expiry=new Date(now); expiry.setDate(expiry.getDate()+30);
+    restFetch('POST','clients',{
+      trainer_id:currentUser.id,name:cname,email:cemail||null,
+      phone:cphone||null,goal:cgoal,status:'Activ',
+      start_date:now.toISOString().slice(0,10),
+      expiry_date:expiry.toISOString().slice(0,10)
+    }).then(()=>loadAll());
+    document.getElementById('ob-step-2').style.display='none';
+    document.getElementById('ob-step-3').style.display='block';
+    obSetDots(3);
+  }
+}
+function obBack(step){
+  if(step===2){
+    document.getElementById('ob-step-2').style.display='none';
+    document.getElementById('ob-step-1').style.display='block';
+    obSetDots(1);
+  }
+}
+function obSkipStep2(){
+  document.getElementById('ob-check-client').textContent='⏭️ Client adăugat mai târziu';
+  document.getElementById('ob-step-2').style.display='none';
+  document.getElementById('ob-step-3').style.display='block';
+  obSetDots(3);
+}
+function finishOnboarding(){
+  localStorage.setItem('fitpro_ob_done_'+currentUser.id,'1');
+  document.getElementById('onboarding-overlay').style.display='none';
+  renderDashboard();
+}
+function skipOnboarding(){
+  localStorage.setItem('fitpro_ob_done_'+currentUser.id,'1');
+  document.getElementById('onboarding-overlay').style.display='none';
+}
 </script>
 
 <!-- WORKOUT BUILDER MODAL -->
@@ -2658,6 +2736,59 @@ document.addEventListener('keydown',e=>{
     <div id="notif-center-list"></div>
     <button class="btn btn-primary" style="margin-top:14px;" onclick="sendAllReminders()" id="btn-send-all">📤 Trimite tuturor</button>
     <div id="notif-center-status" style="margin-top:12px;font-size:12px;"></div>
+  </div>
+</div>
+
+<!-- ONBOARDING OVERLAY -->
+<div id="onboarding-overlay" style="display:none;">
+  <div class="ob-box">
+    <button class="ob-skip" onclick="skipOnboarding()">Sari peste ✕</button>
+    <div class="ob-logo">FITPRO</div>
+    <div class="ob-step-ind">
+      <div class="ob-dot active" id="ob-dot-1"></div>
+      <div class="ob-dot" id="ob-dot-2"></div>
+      <div class="ob-dot" id="ob-dot-3"></div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="ob-step-1">
+      <div class="ob-title">Bun venit! 👋</div>
+      <div class="ob-sub">Ești la un pas de a-ți gestiona clienții profesional. Hai să configurăm contul tău în 2 minute.</div>
+      <div class="fg"><label>Cum te numești?</label><input id="ob-name" placeholder="ex: Andrei Pop" style="width:100%;"></div>
+      <div class="fg" style="margin-top:12px;"><label>Număr de telefon (opțional)</label><input id="ob-phone" placeholder="07xx xxx xxx" style="width:100%;"></div>
+      <button class="btn btn-primary" style="margin-top:20px;" onclick="obNext(1)">Continuă →</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="ob-step-2" style="display:none;">
+      <div class="ob-title">Adaugă primul client 💪</div>
+      <div class="ob-sub">Introdu datele primului tău client. Poți adăuga mai mulți mai târziu.</div>
+      <div class="fg"><label>Nume client *</label><input id="ob-cname" placeholder="ex: Ion Popescu" style="width:100%;"></div>
+      <div class="fg" style="margin-top:12px;"><label>Email client (pentru invitație)</label><input id="ob-cemail" type="email" placeholder="ion@email.com" style="width:100%;"></div>
+      <div class="fg" style="margin-top:12px;"><label>Telefon</label><input id="ob-cphone" placeholder="07xx xxx xxx" style="width:100%;"></div>
+      <div class="fg" style="margin-top:12px;"><label>Obiectiv</label>
+        <select id="ob-cgoal" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;">
+          <option>Slăbit</option><option>Masă musculară</option><option>Tonifiere</option><option>Sănătate generală</option><option>Performanță</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn-sec" onclick="obBack(2)" style="flex:0 0 auto;">← Înapoi</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="obNext(2)">Adaugă client →</button>
+      </div>
+      <div style="text-align:center;margin-top:12px;"><span style="font-size:12px;color:var(--muted);cursor:pointer;" onclick="obSkipStep2()">Adaug mai târziu</span></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="ob-step-3" style="display:none;">
+      <div class="ob-title">Ești gata! 🚀</div>
+      <div class="ob-sub" id="ob-done-msg">Contul tău e configurat. Explorează aplicația și adaugă clienții tăi.</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(200,241,53,.06);border:1px solid rgba(200,241,53,.15);border-radius:10px;font-size:13px;">✅ Cont creat</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(200,241,53,.06);border:1px solid rgba(200,241,53,.15);border-radius:10px;font-size:13px;" id="ob-check-client">✅ Primul client adăugat</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(53,241,200,.06);border:1px solid rgba(53,241,200,.15);border-radius:10px;font-size:13px;">💡 Mergi la Setări → configurează email pentru invitații</div>
+      </div>
+      <button class="btn btn-primary" onclick="finishOnboarding()">Intră în aplicație →</button>
+    </div>
   </div>
 </div>
 
