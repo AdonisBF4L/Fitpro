@@ -1384,7 +1384,7 @@ function renderTabMasuratori(){
   document.getElementById('tab-masuratori').innerHTML=photoHtml+`
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn btn-primary" style="width:auto;" onclick="openAddProgress('${currentClientId}')">+ Adaugă măsurătoare</button></div>
     <div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>Abdomen</th><th>Piept</th><th>Șolduri</th><th>Braț</th><th>% Grăsime</th><th>Foto</th><th>Notă</th><th></th></tr></thead>
-    <tbody>${prog.map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.waist||'—'} cm</td><td>${p.chest||'—'} cm</td><td>${p.hips||'—'} cm</td><td>${p.arm||'—'} cm</td><td>${p.bodyfat||'—'}%</td><td>${p.photo_url?`<a href="${p.photo_url}" target="_blank" style="color:var(--accent);font-size:11px;">📸 Vezi</a>`:'—'}</td><td>${p.notes||'—'}</td><td><button class="btn-sec btn-sm" onclick="deleteProgress('${p.id}')">🗑️</button></td></tr>`).join('')}
+    <tbody>${prog.map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.waist||'—'} cm</td><td>${p.chest||'—'} cm</td><td>${p.hips||'—'} cm</td><td>${p.arm||'—'} cm</td><td>${p.bodyfat||'—'}%</td><td>${p.photo_url?`<a href="${p.photo_url}" target="_blank" style="color:var(--accent);font-size:11px;">📸 Vezi</a>`:'—'}</td><td>${p.note||'—'}</td><td><button class="btn-sec btn-sm" onclick="deleteProgress('${p.id}')">🗑️</button></td></tr>`).join('')}
     </tbody></table>${prog.length===0?'<div class="empty">Nicio măsurătoare</div>':''}</div>`;
 }
 
@@ -1603,7 +1603,7 @@ async function saveProgress(){
     thigh:parseFloat(document.getElementById('p-thigh').value)||null,
     arm:parseFloat(document.getElementById('p-arm').value)||null,
     bodyfat:parseFloat(document.getElementById('p-bodyfat').value)||null,
-    notes:document.getElementById('p-note').value
+    note:document.getElementById('p-note').value||null
   };
   var r=await restFetch('POST','progress',data);
   btn.disabled=false;
@@ -2057,7 +2057,7 @@ function renderCliProgress(){
     ${prog.length>1?`<div class="ds" style="margin-bottom:14px;"><canvas id="cli-chart-prog" height="200"></canvas></div>`:''}
     ${prog.filter(p=>p.photo_url).length?`<div class="ds" style="margin-bottom:14px;"><div class="ds-title">📸 Fotografii progres</div><div class="photo-grid">${prog.filter(p=>p.photo_url).map(p=>`<div style="text-align:center;"><img class="photo-thumb" src="${p.photo_url}" onclick="window.open('${p.photo_url}','_blank')" onerror="this.style.display='none'"><div style="font-size:10px;color:var(--muted);margin-top:3px;">${p.date}</div></div>`).join('')}</div></div>`:''}
     <div class="tw"><table><thead><tr><th>Data</th><th>Greutate</th><th>Abdomen</th><th>Foto</th><th>Notă</th></tr></thead>
-    <tbody>${[...prog].reverse().map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.waist||'—'} cm</td><td>${p.photo_url?`<a href="${p.photo_url}" target="_blank" style="color:var(--accent);font-size:11px;">📸</a>`:'—'}</td><td>${p.notes||'—'}</td></tr>`).join('')}
+    <tbody>${[...prog].reverse().map(p=>`<tr><td>${p.date}</td><td>${p.weight||'—'} kg</td><td>${p.waist||'—'} cm</td><td>${p.photo_url?`<a href="${p.photo_url}" target="_blank" style="color:var(--accent);font-size:11px;">📸</a>`:'—'}</td><td>${p.note||'—'}</td></tr>`).join('')}
     </tbody></table>${prog.length===0?'<div class="empty">Nu ai adăugat nicio măsurătoare</div>':''}</div>`;
   if(prog.length>1){
     setTimeout(()=>{
@@ -2122,7 +2122,7 @@ async function saveCliProgress(){
     hips:parseFloat(document.getElementById('cp-hips').value)||null,
     thigh:parseFloat(document.getElementById('cp-thigh').value)||null,
     arm:parseFloat(document.getElementById('cp-arm').value)||null,
-    notes:document.getElementById('cp-note').value,
+    note:document.getElementById('cp-note').value||null,
     photo_url:document.getElementById('cp-photo').value||null
   };
   if(!data.weight&&!data.waist){btn.disabled=false;return alert('Adaugă cel puțin greutatea.');}
