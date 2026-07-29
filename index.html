@@ -793,6 +793,16 @@ async function getOrCreateProfile(user,accessToken){
       await fetch(SURL+'/rest/v1/clients?id=eq.'+inv.client_id,{method:'PATCH',headers:H,body:JSON.stringify({client_user_id:user.id})});
       return prof;
     }
+    // Fallback: match by email against existing client records (invite may not have arrived)
+    var r3=await fetch(SURL+'/rest/v1/clients?email=eq.'+encodeURIComponent(user.email)+'&client_user_id=is.null&select=*&limit=1',{headers:H});
+    var cli=await r3.json();
+    if(cli&&cli.length>0){
+      var c=cli[0];
+      var prof={id:user.id,role:'client',trainer_id:c.trainer_id,client_record_id:c.id};
+      await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:H,body:JSON.stringify(prof)});
+      await fetch(SURL+'/rest/v1/clients?id=eq.'+c.id,{method:'PATCH',headers:H,body:JSON.stringify({client_user_id:user.id})});
+      return prof;
+    }
     var prof={id:user.id,role:'trainer'};
     await fetch(SURL+'/rest/v1/profiles',{method:'POST',headers:H,body:JSON.stringify(prof)});
     return prof;
@@ -1869,11 +1879,31 @@ function renderCliHome(){
   var days=exp?Math.ceil((exp-now)/86400000):null;
   var lastW=clientProgressData.length?clientProgressData[clientProgressData.length-1].weight:null;
   var diff=(lastW&&c.weight)?+(lastW-c.weight).toFixed(1):null;
+  var nextS=clientSessionsData.filter(s=>s.status==='programat'&&new Date(s.date+'T'+(s.time||'00:00'))>=now).sort((a,b)=>new Date(a.date+'T'+(a.time||'00:00'))-new Date(b.date+'T'+(b.time||'00:00')))[0];
+  var nextCard='';
+  if(nextS){
+    var sd=new Date(nextS.date+'T'+(nextS.time||'00:00'));
+    var zile=['Duminică','Luni','Marți','Miercuri','Joi','Vineri','Sâmbătă'];
+    var luni=['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','noi','dec'];
+    var diffDays=Math.ceil((new Date(nextS.date)-new Date(now.toISOString().slice(0,10)))/86400000);
+    var cand=diffDays===0?'Azi':diffDays===1?'Mâine':zile[sd.getDay()]+', '+sd.getDate()+' '+luni[sd.getMonth()];
+    nextCard=`<div class="ds" style="margin-bottom:14px;background:linear-gradient(135deg,rgba(200,241,53,.08),rgba(53,241,200,.04));border-color:rgba(200,241,53,.3);">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:34px;">📅</div>
+        <div style="flex:1;">
+          <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Următoarea sesiune</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text);margin-top:2px;">${cand} · ${nextS.time||''}</div>
+          <div style="font-size:12px;color:var(--accent);margin-top:2px;">${nextS.type||'Antrenament'} · ${nextS.duration||60} min</div>
+        </div>
+      </div>
+    </div>`;
+  }
   document.getElementById('cli-home').innerHTML=`
     <div class="cli-hero">
       <div class="cli-greeting">Bună, <span>${c.name.split(' ')[0]}</span>! 💪</div>
       <div style="color:var(--muted);font-size:13px;">Iată progresul tău</div>
     </div>
+    ${nextCard}
     <div class="cli-grid-2">
       <div class="ds" style="text-align:center;">
         <div class="stat-label">Greutate curentă</div>
