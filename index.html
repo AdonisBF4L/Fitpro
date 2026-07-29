@@ -709,7 +709,7 @@ const sb=window.supabase.createClient(SURL,SKEY,{realtime:{enabled:false},global
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
-let currentUser=null,currentProfile=null;
+let currentUser=null,currentProfile=null,currentAccessToken=null;
 let allClients=[],allSessions=[],allProgress=[],allPayments=[],allMessages=[];
 let currentClientId=null,currentRenewalClientId=null,editSessionId=null,editClientId=null;
 let clientData=null,clientProgressData=[],clientSessionsData=[],cliMessages=[];
@@ -739,6 +739,7 @@ sb.auth.onAuthStateChange(async(event,session)=>{
   }
   if(session&&session.user){
     currentUser=session.user;
+    currentAccessToken=session.access_token;
     const prof=await getOrCreateProfile(session.user,session.access_token);
     currentProfile=prof;
     if(prof.role==='error'){
@@ -873,6 +874,7 @@ async function doSetNewPassword(){
 // DATA LOAD
 // ═══════════════════════════════════════════════════════
 function getAccessToken(){
+  if(currentAccessToken) return currentAccessToken;
   try{
     var raw=localStorage.getItem('sb-vszywnvyyynfyhczmmgf-auth-token');
     if(raw){var s=JSON.parse(raw);return s.access_token||s?.session?.access_token||SKEY;}
